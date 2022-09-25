@@ -1,0 +1,27 @@
+{
+    "name": "reproanalysis",
+    "version": "0.0.1",
+    "date": "Sep 2022",
+   	"manuscriptRef": "coming. coming. coming",
+    "manuscriptURL": "http:\/\/doi.org",
+    "url": "http:\/\/reproanalysis.github.io",
+    "wiki": "https:\/\/github.com\/reprostat\/reproanalysis\/wiki",
+
+    "creators": [
+        {
+            "affiliation": "University of Surrey",
+            "name": "Auer, Tibor",
+            "orcid": "0000-0001-5153-1424"
+        }
+    ],
+    "keywords": [
+        "neuroimaging",
+        "multimodal",
+        "MATLAB",
+        "workflow",
+        "pipeline"
+    ],
+    "license": "MIT",
+    "upload_type": "software",
+    "access_right": "open"
+}
