@@ -1,5 +1,5 @@
 function reproa = reproaSetup()
-% Reproducible Analysis - adds paths for reproa commands to path list
+% Reproducible Analysis - wrapper around reproaClass to ensure clean start with toolboxes in path
 
     global reproa
 
