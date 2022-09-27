@@ -4,12 +4,10 @@ function reproa = reproaSetup()
     global reproa
 
     if isobject(reproa)
-        try rap = evalin('base','rap');
-        catch, rap = []; end
-        logging.warning(rap,false,'Previous execution of aa was not closed!')
-        logging.warning(rap,false,'Killing jobs and restoring path settings for both linux and MATLAB...!')
+        logging.warning('Previous execution of aa was not closed!')
+        logging.warning('Killing jobs and restoring path settings for both linux and MATLAB...!')
         reproa.close('restorepath',true,'restorewarnings',true,'killjobs',true);
-        logging.warning(rap,false,'Done!')
+        logging.warning('Done!')
     else
         addpath(fullfile(fileparts([mfilename('fullpath') '.m']),'external','toolboxes'));
         reproa = reproaClass();
