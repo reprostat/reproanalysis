@@ -3,7 +3,7 @@ function reproa = reproaSetup()
 
     global reproa
 
-    if isobject(reproa)
+    if isobject(reproa) && strcmp(reproa.status, 'loaded')
         logging.warning('Previous execution of aa was not closed!')
         logging.warning('Killing jobs and restoring path settings for both linux and MATLAB...!')
         reproa.close('restorepath',true,'restorewarnings',true,'killjobs',true);
@@ -14,3 +14,17 @@ function reproa = reproaSetup()
     end
 
 end
+
+%!test
+%!  reproa = reproaSetup();
+%!  global reproacache
+%!  assert(isa(reproacache,'cacheClass'))
+%!  reproa.unload();
+%!  global reproacache
+%!  assert(~isa(reproacache,'cacheClass') & isempty(reproacache))
+%!  reproa.reload(true);
+%!  reproacache = evalin('base','reproacache')
+%!  assert(isa(reproacache,'cacheClass'))
+%!  global reproaworker
+%!  reproaworker = evalin('base','reproaworker')
+%!  reproa.close()

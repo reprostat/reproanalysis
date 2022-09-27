@@ -21,7 +21,7 @@ classdef reproaClass < toolboxClass
     methods
         function this = reproaClass(varargin)
             reproafile = [mfilename('fullpath') '.m'];
-            repropath = fileparts(reproafile);
+            repropath = fileparts(fileparts(reproafile));
 
             % Info (JSON)
             fid = fopen(fullfile(repropath,'.zenodo.json'),'r');
@@ -108,6 +108,8 @@ classdef reproaClass < toolboxClass
             t = datetime(); t = t.toVec;
             reproaworker = workerClass(gethostname(),getpid,fullfile(this.configdir,'reproa.log'));
             reproacache = cacheClass();
+            assignin('base','reproaworker',reproaworker);
+            assignin('base','reproacache',reproacache);
 
             % Sub-toolboxes
             xml = readxml(this.getUserParameterFile);
@@ -383,4 +385,3 @@ if ismac()
     pause(0.5)
 end
 end
-
