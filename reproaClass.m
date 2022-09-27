@@ -29,7 +29,12 @@ classdef reproaClass < toolboxClass
             fclose(fid);
             reproname = info.name;
 
-            this = this@toolboxClass(reproname,repropath,false,{});
+            vars = {...
+                '{"name": "reproacache", "attributes": ["global"]}'...
+                '{"name": "reproaworker", "attributes": ["global"]}'...
+                };
+
+            this = this@toolboxClass(reproname,repropath,false,vars);
 
             this.version = info.version;
             this.date = info.date;
@@ -80,6 +85,8 @@ classdef reproaClass < toolboxClass
         end
 
         function close(this,varargin)
+            logging.info('Closing reproa');
+
             close@toolboxClass(this)
         end
 
@@ -95,23 +102,32 @@ classdef reproaClass < toolboxClass
 
             addpath(strjoin(setdiff(pathToAdd,pathToExclude),pathsep));
 
+            % Init globals
+            global reproacache
+            global reproaworker
+            t = datetime(); t = t.toVec;
+            reproaworker = workerClass(gethostname(),getpid,fullfile(this.configdir,'reproa.log'));
+            reproacache = cacheClass();
+
             % Sub-toolboxes
             xml = readxml(this.getUserParameterFile);
+            reproaworker.logLevel = xml.options.loglevel.CONTENT;
+            logging.info('Starting reproa');
 %            this.addToolbox(fieldtripClass(fullfile(this.toolPath,'external','fieldtrip'),'name','fieldtrip'));
 
-            load@toolboxClass(this)
+            load@toolboxClass(this);
         end
 
-        function unload(this)
+        function unload(this,varargin)
             rmpath(this.configdir);
 
-            unload@toolboxClass(this)
+            unload@toolboxClass(this,varargin{:})
         end
 
-        function reload(this)
+        function reload(this,varargin)
             addpath(this.configdir);
 
-            reload@toolboxClass(this)
+            reload@toolboxClass(this,varargin{:})
         end
 
         function resp = getUserParameterFile(this,varargin)
@@ -173,6 +189,7 @@ classdef reproaClass < toolboxClass
                 % Final check and messaging
                 % The file should now be on the path. But check, it might not be e.g. if
                 % aa was not added to the path properly before calling this function.
+                pause(1)
                 if ~exist(this.parameterFile,'file')
                     logging.error('Could not find %s - Are you sure it is on your path?', this.parameterFile);
                 end
