@@ -112,10 +112,30 @@ classdef reproaClass < toolboxClass
             assignin('base','reproacache',reproacache);
 
             % Sub-toolboxes
-            xml = readxml(this.getUserParameterFile);
-            reproaworker.logLevel = xml.options.loglevel.CONTENT;
+            rap = readparameters(this.getUserParameterFile);
+            reproaworker.logLevel = rap.options.loglevel;
             logging.info('Starting reproa');
-%            this.addToolbox(fieldtripClass(fullfile(this.toolPath,'external','fieldtrip'),'name','fieldtrip'));
+            for tbx = reshape(rap.directoryconventions.toolbox,1,[])
+                if isempty(tbx.dir), continue; end % unspecified
+
+                if ~exist([tbx.name 'Class'],'class'), logging.error('no interface class found for toolbox %s', tbx.name); end
+                constr = str2func([tbx.name 'Class']);
+
+                params = {};
+                if isfield(tbx,'extraparameters') && ~isempty(tbx.extraparameters)
+                    for p = fieldnames(tbx.extraparameters)
+                        val = tbx.extraparameters.(p{1});
+                        if isempty(val), continue; end
+                        if ischar(val) && contains(val,pathsep), val = strsplit(val,pathsep); end
+                        params{end+1} = p{1};
+                        params{end+1} = val;
+                    end
+                end
+                T = constr(tbx.dir,'name',tbx.name,params{:});
+                if strcmp(tbx.name,'spm'), T.setAutoLoad(); end % SPM is auto-loaded with ReproA
+                this.addToolbox(T);
+                reproacache(['toolbox.' tbx.name]) = T;
+            end
 
             load@toolboxClass(this);
         end
@@ -133,6 +153,8 @@ classdef reproaClass < toolboxClass
         end
 
         function resp = getUserParameterFile(this,varargin)
+            MAXIMUMRETRY = 1; % re-trying retrieving file
+
             argParse = inputParser;
             argParse.addParameter('useGUI',true,@(x) islogical(x) || isnumeric(x));
             argParse.parse(varargin{:});
@@ -191,10 +213,7 @@ classdef reproaClass < toolboxClass
                 % Final check and messaging
                 % The file should now be on the path. But check, it might not be e.g. if
                 % aa was not added to the path properly before calling this function.
-                pause(1)
-                if ~exist(this.parameterFile,'file')
-                    logging.error('Could not find %s - Are you sure it is on your path?', this.parameterFile);
-                end
+                % retrieveFile(this.parameterFile,MAXIMUMRETRY); % often leads to false error
 
                 msg = sprintf('New parameter set in %s has been created.\nYou may need to edit this file further to reflect local configuration.',destination);
                 if useGUI

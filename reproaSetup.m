@@ -18,13 +18,14 @@ end
 %!test
 %!  reproa = reproaSetup();
 %!  global reproacache
-%!  assert(isa(reproacache,'cacheClass'))
+%!  assert(isa(reproacache,'cacheClass'),'Cache is not initialised')
+%!  assert(isa(reproacache('toolbox.spm'),'spmClass'),'SPM is not loaded')
 %!  reproa.unload();
 %!  global reproacache
-%!  assert(~isa(reproacache,'cacheClass') & isempty(reproacache))
+%!  assert(~isa(reproacache,'cacheClass') & isempty(reproacache),'Unload failed to clear cache')
 %!  reproa.reload(true);
-%!  reproacache = evalin('base','reproacache')
-%!  assert(isa(reproacache,'cacheClass'))
+%!  reproacache = evalin('base','reproacache');
+%!  assert(isa(reproacache,'cacheClass'),'Cache is not reloaded')
 %!  global reproaworker
-%!  reproaworker = evalin('base','reproaworker')
+%!  reproaworker = evalin('base','reproaworker');
 %!  reproa.close()

@@ -10,7 +10,7 @@ function out = contains(str,pttrn,varargin)
 
     switch class(str)
         case 'char'
-            out = ~isempty(regexp(p,pttrn, 'once'));
+            out = ~isempty(regexp(str,pttrn, 'once'));
         case 'cell'
             out = cellfun(@(p) ~isempty(regexp(p,pttrn, 'once')), str);
     end
