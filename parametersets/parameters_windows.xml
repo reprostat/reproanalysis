@@ -4,7 +4,6 @@
     <local>
         <directoryconventions>
             <rawdatadir desc="Directory to find raw MRI data" ui="dir_list"></rawdatadir>
-            <rawmeegdatadir desc="Directory to find raw MEEG data" ui="dir"></rawmeegdatadir>
             <toolbox desc="Toolbox with implemented interface in extrafunctions/toolboxes" ui="custom">
                 <name desc="Name corresponding to the name of the interface without the 'Class' suffix" ui="text">spm</name>
                 <dir ui="dir">D:\Programs\spm12</dir>

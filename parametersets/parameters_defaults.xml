@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
+
     <directoryconventions>
         <rawdatadir desc="Directory to find raw MRI data" ui="dir_list"></rawdatadir>
-        <rawmeegdatadir desc="Directory to find raw MEEG data" ui="dir"></rawmeegdatadir>
         <dicomfolderstructure desc="Dicom folder structure, 'flat' if all files in one directory (e.g., Robarts), 'series' if series in separate directory (e.g., CBU)" ui="text">flat</dicomfolderstructure>
-        <subjectoutputformat desc="sprintf formatting string to get subject directory from number - at CBU CBU%%06d*" ui="text">%%s</subjectoutputformat>
-        <meegsubjectoutputformat desc="sprintf formatting string to get subject directory from number - at CBU meg*_%%04d*" ui="text">meg*_%%04d*</meegsubjectoutputformat>        
+        <subjectoutputformat desc="sprintf formatting string to get subject directory from number - at CBU CBU%%06d*" ui="text">%%s</subjectoutputformat>        
         <seriesoutputformat desc="sprintf formatting string to get series directory from number - at AWS Series_%%04d  at CBU Series_%%03d*; at CABI *_%%d" ui="text">Series_%%03d*</seriesoutputformat>
         <fieldmapprotocol ui="text">FieldMapping</fieldmapprotocol>
         <structuralprotocol ui="text">MPRAGE</structuralprotocol>
@@ -27,51 +26,18 @@
         <continueanalysis desc="Continue previous analysis?" ui="yesno">1</continueanalysis>
         <remotefilesystem  desc="Type of files for imaging data" options="none|s3" ui="optionlist">none</remotefilesystem>
         <allowremotecache desc="Allow local caching of files from remote server" ui="optionlist">1</allowremotecache>
+        <poolprofile desc="Cluster Profile and (optional) initial submit argument (e.g. asking for specific queue or resource) separated with colon" ui="text"></poolprofile>        
+        <mailerserver desc="Path to file containing E-mail address and password for the mailer account for sending notifications (empty means sending no emails)" ui="text">$HOME/.reproa/mailerserver</mailerserver>
+        <DCMTKdir desc="Path to DICOM Toolkit" ui="dir"></DCMTKdir>        
+        <templatedir desc="Path to folder with various templates (e.g. for module_freesurfer_deface)" ui="dir"></templatedir>
         <matlabtoolsdir desc="Path(s) to MATLAB tools (colon separated list)" ui="dir"></matlabtoolsdir>
         <toolbox desc="Toolbox with implemented interface in extrafunctions/toolboxes" ui="custom">
             <name desc="Name corresponding to the name of the interface without the 'Class' suffix" ui="text">spm</name>
             <dir ui="dir"></dir>
         </toolbox>
-        <toolbox desc="Toolbox with implemented interface in extrafunctions/toolboxes" ui="custom">
-            <name desc="Name corresponding to the name of the interface without the 'Class' suffix" ui="text">eeglab</name>
-            <dir ui="dir"></dir>
-            <extraparameters>
-                <requiredPlugins></requiredPlugins>
-            </extraparameters>
-        </toolbox>
-        <fsldir desc="Path to fsl" ui="dir"></fsldir>
-        <fslsetup desc="Path to fsl setup script, executing before any fsl command" ui="text"></fslsetup>
-        <fsloutputtype desc="Output type used by FSL" ui="text">NIFTI</fsloutputtype>
-        <freesurferdir desc="Path to freesurfer" ui="dir"></freesurferdir>
-        <freesurfersetup desc="Path to FreeSurfer setup script, executing before any FreeSurfer command" ui="text"></freesurfersetup>
-        <freesurferenvironment desc="Path to FreeSurfer environmental setup script, executing before any FreeSurfer command" ui="text"></freesurferenvironment>
-        <neuromagdir desc="Path to Neuromag" ui="dir"></neuromagdir>
         <GIFTdir desc="Path to GIFT toolbox" ui="dir"></GIFTdir>
-        <templatedir desc="Path to folder with various templates (e.g. for module_freesurfer_deface)" ui="dir"></templatedir>
-        <ANTSdir desc="Path to Advanced Normalisation Tools (ANTS)" ui="dir"></ANTSdir>
-        <DCMTKdir desc="Path to DICOM Toolkit" ui="dir"></DCMTKdir>
         <FaceMaskingdir desc="Path to FaceMasking (WUSTL NRG)" ui="dir"></FaceMaskingdir>
-        <mailerserver desc="Path to file containing E-mail address and password for the mailer account for sending notifications (empty means sending no emails)" ui="text">$HOME/.reproa/mailerserver</mailerserver>
-        <poolprofile desc="Cluster Profile and (optional) initial submit argument (e.g. asking for specific queue or resource) separated with colon" ui="text"></poolprofile>
     </directoryconventions>
-
-    <paralleldependencies desc="Describes relationships of different domains of processing" ui="custom">
-        <study desc="The whole study (root)" ui="custom">
-            <subject desc="A subject" ui="custom">
-                <run desc="A run" ui="custom">
-                </run>
-                <meegrun desc="MEEG acquisition" ui="custom"></meegrun>
-                <diffusionrun desc="Diffusion acquisition" ui="custom">
-                    <diffusionrunpedir desc="Diffusion phase encoding direction" ui="custom"></diffusionrunpedir>
-                </diffusionrun>
-                <bedpostx desc="Diffusion bedpostx" ui="custom">
-                    <tractography desc="Probablistic tractography" ui="custom">
-                    </tractography>
-                </bedpostx>
-                <specialrun desc="Special/Undefined acquisition" ui="custom"></specialrun>
-            </subject>
-        </study>
-    </paralleldependencies>
 
     <options>
         <maximumretry desc="Maximum number of (re)tries to retrieve file" ui="double">1</maximumretry>
@@ -101,6 +67,45 @@
         </parallelresources>
     </options>
 
+    <acqdetails>
+        <root desc="Root on local machine for processed data" ui="dir"></root>
+        <input>
+            <selectedsubjects desc="Allows subselection of a subset of subjects from the list" ui="custom"></selectedsubjects>
+            <selectedsession desc="Allows subselection of a subset of sessions from the list" ui="custom"></selectedsession>
+            <combinemultiple desc="Combine multiple entries/visits into one?" ui="yesno">0</combinemultiple>
+            <selectedruns desc="Allows subselection of a subset of series from the list" ui="custom"></selectedruns>
+            <correctEVfordummies desc="Automatically correct event onset time according for dummies?" ui="yesno">1</correctEVfordummies>
+        </input>
+
+        <subject>
+            <subjname desc="Subject foldername" ui="dir"/>
+            <mriname desc="Subject MRI filename" ui="dir_part_allowwildcards"/>
+            <structural desc="Series number or filename for structural" ui="int"/>
+            <wholebrainepi desc="Series number or filename for wholebrain EPI (for partial volume EPI)" ui="int"/>
+            <fieldmaps desc="Series numbers or filename for fieldmaps" ui="intarray"/>
+            <fmriseries desc="Series numbers or filename for fMRI" ui="intarray"/>
+            <specialseries desc="Specialseries Series number in raw data" ui="int"/>
+            <ignoreseries desc="Series to be ignored when automatically scanning raw data" ui="int"/>
+        </subject>
+        <run desc="Functional runs" ui="structarray">
+            <name desc="Run name" ui="dir_part"/>
+        </run>
+        <selectedrun desc="Allows subselection of a subset of series, usually during branching" ui="intarray"/>
+        <specialrun desc="Specialseries runs" ui="structarray">
+            <name desc="Specialseries run name (used to determine stream name and folder name)" ui="dir_part"/>
+        </specialrun>
+    </acqdetails>
+
+    <paralleldependencies desc="Describes relationships of different domains of processing" ui="custom">
+        <study desc="The whole study (root)" ui="custom">
+            <subject desc="A subject" ui="custom">
+                <run desc="A run" ui="custom">
+                </run>                
+                <specialrun desc="Special/Undefined acquisition" ui="custom"></specialrun>
+            </subject>
+        </study>
+    </paralleldependencies>
+
     <guicontrols>
         <usecolouroutput desc="use colour to organise text output written to display" ui="yesno">1</usecolouroutput>
         <colours>
@@ -115,43 +120,5 @@
             <outputstreams ui="rgb">0.5 0.5 0.5</outputstreams>
         </colours>
     </guicontrols>
-
-    <acqdetails>
-        <root desc="Root on local machine for processed data" ui="dir"></root>
-        <input>
-            <selectedsubjects desc="Allows subselection of a subset of subjects from the list" ui="custom"></selectedsubjects>
-            <selectedsession desc="Allows subselection of a subset of sessions from the list" ui="custom"></selectedsession>
-            <combinemultiple desc="Combine multiple entries/visits into one?" ui="yesno">0</combinemultiple>
-            <selectedruns desc="Allows subselection of a subset of series from the list" ui="custom"></selectedruns>
-            <correctEVfordummies desc="Automatically correct event onset time according for dummies?" ui="yesno">1</correctEVfordummies>
-        </input>
-
-        <subject>
-            <subjname desc="Subject foldername" ui="dir"/>
-            <mriname desc="Subject MRI filename" ui="dir_part_allowwildcards"/>
-            <meegname desc="Subject MEEG filename" ui="dir_part_allowwildcards"/>
-            <structural desc="Series number or filename for structural" ui="int"/>
-            <wholebrainepi desc="Series number or filename for wholebrain EPI (for partial volume EPI)" ui="int"/>
-            <fieldmaps desc="Series numbers or filename for fieldmaps" ui="intarray"/>
-            <fmriseries desc="Series numbers or filename for fMRI" ui="intarray" />
-            <meegseries desc="Series numbers for MEEG" ui="intarray" />
-            <diffusionseries desc="Series numbers for diffusion data" ui="intarray" />
-            <specialseries desc="Specialseries Series number in raw data" ui="int"/>
-            <ignoreseries desc="Series to be ignored when automatically scanning raw data" ui="int"/>
-        </subject>
-        <run desc="Functional runs" ui="structarray">
-            <name desc="Run name" ui="dir_part"/>
-        </run>
-        <diffusionrun desc="Diffusion runs" ui="structarray">
-            <name desc="Diffusion run name" ui="dir_part"/>
-        </diffusionrun>
-        <meegrun desc="MEG runs" ui="structarray">
-            <name desc="MEG run name" ui="dir_part"/>
-        </meegrun>
-        <selectedrun desc="Allows subselection of a subset of series, usually during branching" ui="intarray"/>
-        <specialrun desc="Specialseries runs" ui="structarray">
-            <name desc="Specialseries run name (used to determine stream name and folder name)" ui="dir_part"/>
-        </specialrun>
-    </acqdetails>
 
 </rap>
