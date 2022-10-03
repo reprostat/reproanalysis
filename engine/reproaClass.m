@@ -71,13 +71,6 @@ classdef reproaClass < toolboxClass
                 fprintf('Ready.\n');
             end
 
-            % user config directory
-            if ispc, this.configdir = fullfile([getenv('HOMEDRIVE') getenv('HOMEPATH')],'.reproa');
-            else, this.configdir = fullfile(getenv('HOME'),'.reproa');
-            end
-            makedir(this.configdir);
-            addpath(this.configdir);
-
             % Load
             if ~any(strcmp(varargin,'noload'))
                 this.load;
@@ -92,6 +85,7 @@ classdef reproaClass < toolboxClass
 
         function load(this)
             fprintf('\nPlease wait a moment, adding %s to the path\n',this.name);
+            addpath(fullfile(this.toolPath,'utilities'));
             pathToAdd = strsplit(genpath(this.toolPath),pathsep); % recursively add reproa subfolders
             pathToAdd(contains(pathToAdd,'D:\Projects\reproanalysis\.git')) = []; % exclude GitHub-related path
 
@@ -101,6 +95,13 @@ classdef reproaClass < toolboxClass
             pathToExclude = strsplit(strjoin(cellfun(@genpath, fullfile(this.toolPath,'external','toolboxes',{tbxdirs.name}), 'UniformOutput', false),pathsep),pathsep);
 
             addpath(strjoin(setdiff(pathToAdd,pathToExclude),pathsep));
+
+            % user config directory
+            if ispc, this.configdir = fullfile([getenv('HOMEDRIVE') getenv('HOMEPATH')],'.reproa');
+            else, this.configdir = fullfile(getenv('HOME'),'.reproa');
+            end
+            dirMake(this.configdir);
+            addpath(this.configdir);
 
             % Init globals
             global reproacache
@@ -213,7 +214,7 @@ classdef reproaClass < toolboxClass
                 % Final check and messaging
                 % The file should now be on the path. But check, it might not be e.g. if
                 % aa was not added to the path properly before calling this function.
-                % retrieveFile(this.parameterFile,MAXIMUMRETRY); % often leads to false error
+                % fileRetrieve(this.parameterFile,MAXIMUMRETRY); % often leads to false error
 
                 msg = sprintf('New parameter set in %s has been created.\nYou may need to edit this file further to reflect local configuration.',destination);
                 if useGUI

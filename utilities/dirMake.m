@@ -1,6 +1,6 @@
 % checks a directory is made - if not makes it
 
-function resp = makedir(dirname)
+function resp = dirMake(dirname)
     if ~exist(dirname,'dir')
         try
             mkdir(dirname);

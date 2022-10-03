@@ -9,7 +9,9 @@ function reproa = reproaSetup()
         reproa.close('restorepath',true,'restorewarnings',true,'killjobs',true);
         logging.warning('Done!')
     else
+        addpath(fullfile(fileparts([mfilename('fullpath') '.m']),'engine'));
         addpath(fullfile(fileparts([mfilename('fullpath') '.m']),'external','toolboxes'));
+
         reproa = reproaClass();
     end
 

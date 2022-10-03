@@ -1,4 +1,4 @@
-function isFound = retrieveFile(fname,maximumretry)
+function isFound = fileRetrieve(fname,maximumretry)
     if nargin < 2, maximumretry = 0; end
     if ~exist(fname,'file')
         isFound = false;
