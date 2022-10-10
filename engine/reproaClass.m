@@ -96,6 +96,12 @@ classdef reproaClass < toolboxClass
 
             addpath(strjoin(setdiff(pathToAdd,pathToExclude),pathsep));
 
+            if ~isOctave()
+                rmpath(strjoin({...
+                    fullfile(this.toolPath,'external','pool-octave','extrafunctions')...
+                    },pathsep));
+            end
+
             % user config directory
             if ispc, this.configdir = fullfile([getenv('HOMEDRIVE') getenv('HOMEPATH')],'.reproa');
             else, this.configdir = fullfile(getenv('HOME'),'.reproa');
@@ -106,8 +112,7 @@ classdef reproaClass < toolboxClass
             % Init globals
             global reproacache
             global reproaworker
-            t = datetime(); t = t.toVec;
-            reproaworker = workerClass(gethostname(),getpid,fullfile(this.configdir,'reproa.log'));
+            reproaworker = workerClass(fullfile(this.configdir,'reproa.log'));
             reproacache = cacheClass();
             assignin('base','reproaworker',reproaworker);
             assignin('base','reproacache',reproacache);
@@ -249,7 +254,7 @@ function create_minimalXML(seedparam,destination,analysisroot, rawdataroot, spmr
     rap.setAttribute('xmlns:xi','http://www.w3.org/2001/XInclude');
 
     seed = DOMnode.createElement('xi:include');
-    seed.setAttribute('href',seedparam);
+    seed.setAttribute('href',strrep(seedparam,filesep,'/'));
     seed.setAttribute('parse','xml');
     rap.appendChild(seed);
 
@@ -264,7 +269,7 @@ function create_minimalXML(seedparam,destination,analysisroot, rawdataroot, spmr
             rawdatadir = DOMnode.createElement('rawdatadir');
             rawdatadir.setAttribute('desc','Root on local machine for processed data');
             rawdatadir.setAttribute('ui','dir');
-            rawdatadir.appendChild(DOMnode.createTextNode(rawdataroot));
+            rawdatadir.appendChild(DOMnode.createTextNode(strrep(rawdataroot,filesep,'/')));
             directoryconventions.appendChild(rawdatadir);
         end
 
@@ -282,7 +287,7 @@ function create_minimalXML(seedparam,destination,analysisroot, rawdataroot, spmr
 
             spmdir = DOMnode.createElement('dir');
             spmdir.setAttribute('ui','dir_list');
-            spmdir.appendChild(DOMnode.createTextNode(spmroot));
+            spmdir.appendChild(DOMnode.createTextNode(strrep(spmroot,filesep,'/')));
             toolbox.appendChild(spmdir);
         end
     end
@@ -293,7 +298,7 @@ function create_minimalXML(seedparam,destination,analysisroot, rawdataroot, spmr
     root = DOMnode.createElement('root');
     root.setAttribute('desc','Root on local machine for processed data');
     root.setAttribute('ui','dir');
-    root.appendChild(DOMnode.createTextNode(analysisroot));
+    root.appendChild(DOMnode.createTextNode(strrep(analysisroot,filesep,'/')));
     acqdetails.appendChild(root);
 
     xmlwrite(destination,DOMnode);

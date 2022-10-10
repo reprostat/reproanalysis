@@ -3,7 +3,7 @@ classdef logging
     methods  (Static = true)
         function this = info(varargin)
             varargin{1} = ['info: ' varargin{1} '\n'];
-            printf(varargin{:});
+            fprintf(varargin{:});
 
             global reproaworker
             if isa(reproaworker,'workerClass'), reproaworker.addLog(varargin{:}); end

@@ -8,17 +8,18 @@ classdef cacheClass < containers.Map
     end
 
     methods
-        function this = cacheClass(hashFunc='MD5')
+        function this = cacheClass(hashFunc)
+            this = this@containers.Map();
+
+            if ~nargin, hashFunc='MD5'; end
             assert(any(strcmp(strsplit(this.validHashFuncs,','),hashFunc)),'wrong hash function: %s\nvalid options are: %s', hashFunc, this.validHashFuncs);
             this.hashFunc = hashFunc;
-
-            this = this@containers.Map();
         end
 
         function this = subsasgn(this,idx,value)
             switch idx(1).type
                 case '()'
-                    idx.subs{1} = hash(this.hashFunc,idx.subs{1});
+                    idx.subs{1} = doHash(this.hashFunc,idx.subs{1});
                 case '.' % access custom properties
                     switch idx.subs
                         case 'hashFunc'
@@ -33,19 +34,27 @@ classdef cacheClass < containers.Map
         function resp = subsref(this,idx)
             switch idx(1).type
                 case '()'
-                    idx.subs{1} = hash(this.hashFunc,idx.subs{1});
+                    idx.subs{1} = doHash(this.hashFunc,idx.subs{1});
             end
             resp = subsref@containers.Map(this,idx);
         end
 
         function resp = isKey(this,key)
-            resp = isKey@containers.Map(this,hash(this.hashFunc,key));
+            resp = isKey@containers.Map(this,doHash(this.hashFunc,key));
         end
 
         function this = remove(this,keys)
             if ~iscell(keys), keys = {keys}; end
-            keys = cellfun(@(k) hash(this.hashFunc,k), keys, 'UniformOutput',false);
+            keys = cellfun(@(k) doHash(this.hashFunc,k), keys, 'UniformOutput',false);
             resp = remove@containers.Map(this,keys);
         end
+    end
+end
+
+function resp = doHash(hashFunc,str)
+    if isOctave()
+        resp = hash(hashFunc,str);
+    else
+        resp = char(mlreportgen.utils.hash(str));
     end
 end
