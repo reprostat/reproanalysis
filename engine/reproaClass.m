@@ -19,7 +19,7 @@ classdef reproaClass < toolboxClass
     end
 
     methods
-        function this = reproaClass(varargin)
+        function this = reproaClass(varargin) % optional parameters: nogreet, noload
             reproafile = [mfilename('fullpath') '.m'];
             repropath = fileparts(fileparts(reproafile));
 
@@ -85,21 +85,19 @@ classdef reproaClass < toolboxClass
 
         function load(this)
             fprintf('\nPlease wait a moment, adding %s to the path\n',this.name);
-            addpath(fullfile(this.toolPath,'utilities'));
-            pathToAdd = strsplit(genpath(this.toolPath),pathsep); % recursively add reproa subfolders
-            pathToAdd(contains(pathToAdd,'D:\Projects\reproanalysis\.git')) = []; % exclude GitHub-related path
+            addpath([...
+                genpath(fullfile(this.toolPath,'engine')) pathsep...
+                fullfile(this.toolPath,'modules') pathsep...
+                fullfile(this.toolPath,'parametersets') pathsep...
+                fullfile(this.toolPath,'utilities') pathsep...
+                fullfile(this.toolPath,'external','toolboxes') ...
+                ]);
 
-            % exclude toolbox mods
-            tbxdirs = dir(fullfile(this.toolPath,'external','toolboxes'));
-            tbxdirs = tbxdirs(cellfun(@(d) ~isempty(regexp(d,'.*_mods$', 'once')), {tbxdirs.name}));
-            pathToExclude = strsplit(strjoin(cellfun(@genpath, fullfile(this.toolPath,'external','toolboxes',{tbxdirs.name}), 'UniformOutput', false),pathsep),pathsep);
-
-            addpath(strjoin(setdiff(pathToAdd,pathToExclude),pathsep));
-
-            if ~isOctave()
-                rmpath(strjoin({...
-                    fullfile(this.toolPath,'external','pool-octave','extrafunctions')...
-                    },pathsep));
+            if isOctave()
+                addpath([...
+                    genpath(fullfile(this.toolPath,'external','octave-pool')) pathsep...
+                    fullfile(this.toolPath,'external','octave-tablicious','inst') ...
+                    ]);
             end
 
             % user config directory
