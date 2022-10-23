@@ -1,6 +1,6 @@
 [submodule "external/toolboxes"]
 	path = external/toolboxes
 	url = https://github.com/reprostat/toolboxes
-[submodule "external/pool-octave"]
+[submodule "external/octave-pool"]
 	path = external/octave-pool
 	url = https://github.com/reprostat/octave-pool
