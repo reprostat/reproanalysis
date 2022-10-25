@@ -5,6 +5,7 @@ end
 
 function node = processattributes(node)
 if isstruct(node)
+    if isfield(node,'COMMENT'), node = rmfield(node,'COMMENT');  end
     if isfield(node,'ATTRIBUTE')
         if isfield(node,'CONTENT')
             attr = node.ATTRIBUTE;
