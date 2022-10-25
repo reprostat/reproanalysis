@@ -1,0 +1,32 @@
+[
+    {
+        "ID": "MoAEpilot",
+        "URL": "https://www.fil.ion.ucl.ac.uk/spm/download/data/MoAEpilot/MoAEpilot.bids.zip",
+        "type": ".zip",
+        "modality": "MRI"
+    },
+    {
+        "ID": "ds000114",
+        "URL": "s3://openneuro.org/ds000114",
+        "type": "AWS",
+        "modality": "MRI"
+    },
+    {
+        "ID": "ds002737",
+        "URL": "s3://openneuro.org/ds002737",
+        "type": "AWS",
+        "modality": "MRI"
+    },
+    {
+        "ID": "LEMON_EEG",
+        "URL": "s3://fcp-indi/data/Projects/INDI/MPI-LEMON/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID",
+        "type": "AWS",
+        "modality": "MEEG"
+    },
+    {
+        "ID": "LEMON_MRI",
+        "URL": "s3://fcp-indi/data/Projects/INDI/MPI-LEMON/MRI_MPILMBB_LEMON/MRI_Raw",
+        "type": "AWS",
+        "modality": "MRI"
+    }
+]
