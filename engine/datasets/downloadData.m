@@ -1,6 +1,6 @@
 % -*- texinfo -*-
-% @deftypefn {Function} downloaddemo (@var{rap}, @var{dataset_id})
-% @deftypefnx {Function} downloaddemo (@var{rap}, @var{dataset_id}, @var{subset})
+% @deftypefn {Function} downloadData (@var{rap}, @var{dataset_id})
+% @deftypefnx {Function} downloadData (@var{rap}, @var{dataset_id}, @var{subset})
 % Download one of the predefined datasets into rap.directory_conventions.raw(meeg)datadir.
 %
 % Only does the download if rap.directory_conventions.raw(eeg)datadir does not yet exist or is empty.
@@ -28,7 +28,7 @@
 %   @end itemize
 %
 % @end deftypefn
-function downloaddemo(rap, dataset_id, subset)
+function downloadData(rap, dataset_id, subset)
 
 %% Inputs checking
 demodir = rap.directoryconventions.rawdatadir;
@@ -38,8 +38,8 @@ logsafe_path = strrep(demodir, '\', '\\');
 % Check aap.directory_conventions.rawdatadir
 sources = strsplit(demodir, pathsep);
 if length(sources)>1
-    % only want one rawdatadir for downloaddemo
-    logging.error('For use with aa_downloaddemo, aap.directory_conventions.rawdatadir (%s) must specify exactly one directory.', logsafe_path);
+    % only want one rawdatadir for downloadData
+    logging.error('For use with aa_downloadData, aap.directory_conventions.rawdatadir (%s) must specify exactly one directory.', logsafe_path);
 end
 
 % Check dataset_id
@@ -70,7 +70,7 @@ if ~exist(fullfile(demodir),'dir') ... % Does not exist yet
     if nargin == 3, dataset.subset = subset; end
     dataset.download(demodir);
 else
-    logging.info('downloaddemo: Directory %s is already non-empty, skipping data download', logsafe_path);
+    logging.info('downloadData: Directory %s is already non-empty, skipping data download', logsafe_path);
 end
 
 end

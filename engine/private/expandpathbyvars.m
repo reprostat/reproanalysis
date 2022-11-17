@@ -9,15 +9,15 @@
 % If verbose is true, we print each expanded string to the command window.
 %
 % Examples:
-% expandpathbyvars('/imaging/$USER/aa'); % /imaging/jc01/aa
-% expandpathbyvars('$HOME/aa/$HOSTNAME'); % /home/jc01/login24
-% expandpathbyvars(aap); % yes, this works
+% expandPathByVars('/imaging/$USER/aa'); % /imaging/jc01/aa
+% expandPathByVars('$HOME/aa/$HOSTNAME'); % /home/jc01/login24
+% expandPathByVars(aap); % yes, this works
 %
 % 20180730 J Carlin
 % 20220926 T Auer
 %
-% xnew = expandpathbyvars(x, [verbose=false])
-function x = expandpathbyvars(x, varargin)
+% xnew = expandPathByVars(x, [verbose=false])
+function x = expandPathByVars(x, varargin)
 
 argParse = inputParser;
 argParse.addOptional('verbose',false,@(x) islogical(x) || isnumeric(x));
@@ -28,7 +28,7 @@ if isstruct(x)
     for thisfn = fieldnames(x)'
         fnstr = thisfn{1};
         for n = 1:numel(x)
-            x(n).(fnstr) = expandpathbyvars(x(n).(fnstr), verbose);
+            x(n).(fnstr) = expandPathByVars(x(n).(fnstr), verbose);
         end
     end
     return
@@ -36,14 +36,14 @@ end
 
 if iscell(x)
     for cellind = 1:numel(x)
-        x{cellind} = expandpathbyvars(x{cellind}, verbose);
+        x{cellind} = expandPathByVars(x{cellind}, verbose);
     end
     return
 end
 
 if size(x,1) > 1
     for rowind = 1:size(x,1)
-        x(rowind,:) = expandpathbyvars(x(rowind,:), verbose);
+        x(rowind,:) = expandPathByVars(x(rowind,:), verbose);
     end
     return
 end

@@ -87,10 +87,11 @@ classdef reproaClass < toolboxClass
             fprintf('\nPlease wait a moment, adding %s to the path\n',this.name);
             addpath([...
                 genpath(fullfile(this.toolPath,'engine')) pathsep...
-                fullfile(this.toolPath,'modules') pathsep...
+                genpath(fullfile(this.toolPath,'modules')) pathsep...
                 fullfile(this.toolPath,'parametersets') pathsep...
                 fullfile(this.toolPath,'external','toolboxes') pathsep ...
-                genpath(fullfile(this.toolPath,'external','octave-pool','external','fileio'))...
+                genpath(fullfile(this.toolPath,'external','octave-pool','external','fileio')) pathsep...
+                genpath(fullfile(this.toolPath,'examples')) ...
                 ]);
 
             if isOctave()
@@ -115,7 +116,7 @@ classdef reproaClass < toolboxClass
             assignin('base','reproacache',reproacache);
 
             % Sub-toolboxes
-            rap = readparameters(this.getUserParameterFile);
+            rap = readParameterset(this.getUserParameterFile);
             reproaworker.logLevel = rap.options.loglevel;
             logging.info('Starting reproa');
             for tbx = reshape(rap.directoryconventions.toolbox,1,[])
@@ -182,7 +183,7 @@ classdef reproaClass < toolboxClass
                 % Get value for acq_details.root
                 % Initialise the save dialogue in the current rap.acq_details.root if specified
                 xml = readxml(seedparam);
-                analysisroot = expandpathbyvars(xml.acqdetails.root.CONTENT);
+                analysisroot = expandPathByVars(xml.acqdetails.root.CONTENT);
                 previous = '';
                 while ~isempty(analysisroot) && ~strcmp(previous, analysisroot)
                     if exist(analysisroot, 'dir'), break; end

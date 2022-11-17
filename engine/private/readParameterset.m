@@ -1,5 +1,7 @@
-function rap = readparameters(parametersetFile)
-    xml = readxml(parametersetFile);
+function rap = readParameterset(parametersetFile)
+    if exist(parametersetFile,'file'), xml = readxml(parametersetFile);
+    else, logging.error('File %s not found', parametersetFile);
+    end
     rap = processattributes(xml);
 end
 
