@@ -1,6 +1,7 @@
 classdef reproaClass < toolboxClass
     properties (Access = protected)
         hGUI = []% GUI handles
+        warnings = struct('identifier',{},'state',{});
     end
 
     properties (Hidden)
@@ -84,12 +85,17 @@ classdef reproaClass < toolboxClass
         end
 
         function load(this)
+            % ignore warnings
+            this.warnings(end+1) = warning('query','Octave:shadowed-function');
+            warning('off','Octave:shadowed-function')
+
             fprintf('\nPlease wait a moment, adding %s to the path\n',this.name);
             addpath([...
                 genpath(fullfile(this.toolPath,'engine')) pathsep...
                 genpath(fullfile(this.toolPath,'modules')) pathsep...
                 fullfile(this.toolPath,'parametersets') pathsep...
                 fullfile(this.toolPath,'external','toolboxes') pathsep ...
+                fullfile(this.toolPath,'external','bids-matlab') pathsep ...
                 genpath(fullfile(this.toolPath,'external','octave-pool','external','fileio')) pathsep...
                 genpath(fullfile(this.toolPath,'examples')) ...
                 ]);
@@ -146,6 +152,9 @@ classdef reproaClass < toolboxClass
 
         function unload(this,varargin)
             rmpath(this.configdir);
+
+            % restore warnings
+            arrayfun(@(w) warning(w.state,w.identifier), this.warnings)
 
             unload@toolboxClass(this,varargin{:})
         end
