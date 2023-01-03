@@ -71,8 +71,8 @@
         <root desc="Root on local machine for processed data" ui="dir"></root>
         <input>
             <selectedsubjects desc="Allows subselection of a subset of subjects from the list" ui="custom"></selectedsubjects>
-            <selectedsession desc="Allows subselection of a subset of sessions from the list" ui="custom"></selectedsession>
-            <combinemultiple desc="Combine multiple entries/visits into one?" ui="yesno">0</combinemultiple>
+            <selectedsessions desc="Allows subselection of a subset of sessions from the list" ui="custom"></selectedsessions>
+            <combinemultiple desc="Combine multiple visits per subjects (1) or treat them as separate subjects (0)?" ui="yesno">0</combinemultiple>
             <selectedruns desc="Allows subselection of a subset of series from the list" ui="custom"></selectedruns>
             <correctEVfordummies desc="Automatically correct event onset time according for dummies?" ui="yesno">1</correctEVfordummies>
         </input>
