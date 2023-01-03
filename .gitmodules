@@ -4,3 +4,6 @@
 [submodule "external/octave-pool"]
 	path = external/octave-pool
 	url = https://github.com/reprostat/octave-pool
+[submodule "external\\bids-matlab"]
+	path = external\\bids-matlab
+	url = https://github.com/bids-standard/bids-matlab.git
