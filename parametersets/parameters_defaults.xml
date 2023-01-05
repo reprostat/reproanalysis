@@ -4,8 +4,8 @@
     <directoryconventions>
         <rawdatadir desc="Directory to find raw MRI data" ui="dir_list"></rawdatadir>
         <dicomfolderstructure desc="Dicom folder structure, 'flat' if all files in one directory (e.g., Robarts), 'series' if series in separate directory (e.g., CBU)" ui="text">flat</dicomfolderstructure>
-        <subjectoutputformat desc="sprintf formatting string to get subject directory from number - at CBU CBU%%06d*" ui="text">%%s</subjectoutputformat>        
-        <seriesoutputformat desc="sprintf formatting string to get series directory from number - at AWS Series_%%04d  at CBU Series_%%03d*; at CABI *_%%d" ui="text">Series_%%03d*</seriesoutputformat>
+        <subjectoutputformat desc="sprintf formatting string to get subject directory from number" ui="text">%s</subjectoutputformat>        
+        <seriesoutputformat desc="sprintf formatting string to get series directory from number" ui="text">Series_%03d*</seriesoutputformat>
         <fieldmapprotocol ui="text">FieldMapping</fieldmapprotocol>
         <structuralprotocol ui="text">MPRAGE</structuralprotocol>
         <t2protocol ui="text">t2_spc</t2protocol>
@@ -79,7 +79,7 @@
 
         <subject>
             <subjname desc="Subject foldername" ui="dir"/>
-            <mriname desc="Subject MRI filename" ui="dir_part_allowwildcards"/>
+            <mridata desc="Subject MRI filename" ui="dir_part_allowwildcards"/>
             <structural desc="Series number or filename for structural" ui="int"/>
             <wholebrainepi desc="Series number or filename for wholebrain EPI (for partial volume EPI)" ui="int"/>
             <fieldmaps desc="Series numbers or filename for fieldmaps" ui="intarray"/>
@@ -87,9 +87,9 @@
             <specialseries desc="Specialseries Series number in raw data" ui="int"/>
             <ignoreseries desc="Series to be ignored when automatically scanning raw data" ui="int"/>
         </subject>
-        <run desc="Functional runs" ui="structarray">
+        <fmrirun desc="Functional MRI runs" ui="structarray">
             <name desc="Run name" ui="dir_part"/>
-        </run>
+        </fmrirun>
         <selectedrun desc="Allows subselection of a subset of series, usually during branching" ui="intarray"/>
         <specialrun desc="Specialseries runs" ui="structarray">
             <name desc="Specialseries run name (used to determine stream name and folder name)" ui="dir_part"/>
