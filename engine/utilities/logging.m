@@ -20,7 +20,7 @@ classdef logging
         end
 
         function this = error(varargin)
-            error(varargin{:});
+            error(sprintf(varargin{:}));
 
             global reproaworker
             if isa(reproaworker,'workerClass')
