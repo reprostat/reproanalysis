@@ -1,5 +1,5 @@
 function module = readModule(parametersetFile)
-    module = struct('header',[],'hpc',[],'permanenceofoutput',[],'settings',[],'inputstreams',[],'outputstreams',[]);
+    module = struct('name',spm_file(parametersetFile,'basename'),'aliasfor','','index',[],'header',[],'hpc',[],'permanenceofoutput',[],'extraparameters',[],'settings',[],'inputstreams',[],'outputstreams',[]);
 
     xml = readxml(parametersetFile);
 

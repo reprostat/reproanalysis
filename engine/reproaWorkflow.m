@@ -38,7 +38,14 @@ function rap = reproaWorkflow(varargin)
     % - main
     rap.tasklist.main = rap.tasklist.initialisation(false);
     for m = reshape(tasks.module,1,[])
-        rap.tasklist.main(end+1) = readModule([m.name '.xml']);
+        if isfield(m,'aliasfor') && ~isempty(m.aliasfor)
+            rap.tasklist.main(end+1) = readModule([m.aliasfor '.xml']);
+            rap.tasklist.main(end).aliasfor = rap.tasklist.main(end).name;
+            rap.tasklist.main(end).name = m.name;
+        else
+            rap.tasklist.main(end+1) = readModule([m.name '.xml']);
+        end
+        rap.tasklist.main(end).index = numel(strcmp({rap.tasklist.main.name},m.name));
         if isfield(rap.tasklist.main(end),'settings')
             rap.tasksettings.(m.name) = rap.tasklist.main(end).settings;
         end
