@@ -38,13 +38,13 @@ function rap = processBIDS(rap,varargin)
 %           column in events.tsv to use for firstlevel model (default = 'trial_type')
 %     - 'stripEventNames':
 %           strip special characters from event names (default = false)
-%     - 'omitNullEvents':
-%           do not add "null" events to model (default = false)
 %     - 'convertEventsToUppercase':
 %           convert event names to uppercase as required for contrast specification based on
 %           event names (default = false)
 %     - 'maxEventNameLength:'
 %           truncate event names longer than the specified value (default = inf)
+%     - 'omitNullEvents':
+%           do not add "null" events to model (default = false)
 %
 % N.B.: MRI only
 %
@@ -62,8 +62,6 @@ if ~exist('spm')
 end
 
 %% Initialise parameters
-BIDSsettings.combinemultiple = rap.acqdetails.input.combinemultiple;
-
 argParse = inputParser;
 argParse.addParameter('omitModeling',false,@(x) islogical(x) || isnumeric(x));
 argParse.addParameter('regcolumn','trial_type',@ischar);
@@ -73,7 +71,8 @@ argParse.addParameter('convertEventsToUppercase',false,@(x) islogical(x) || isnu
 argParse.addParameter('maxEventNameLength',inf,@isnumeric);
 argParse.parse(varargin{:});
 
-BIDSsettings.modelling = argParse.Results;
+BIDSsettings = argParse.Results;
+BIDSsettings.combinemultiple = rap.acqdetails.input.combinemultiple;
 
 if BIDSsettings.combinemultiple
     logging.warning('You have selected combining multiple BIDS sessions!\n\tMake sure that you have also set rap.options.autoidentify* appropriately!\n\tN.B.: <runname> = <BIDS task+run name>_<BIDS session name>');
@@ -87,7 +86,7 @@ rap.directoryconventions.subjectdirectoryformat = 3;
 rap.directoryconventions.subjectoutputformat = 'sub-%s';
 
 % - ensure that models (if any) use seconds
-if isfield(rap.tasksettings,'firstlevelmodel')
+if isfield(rap.tasksettings,'firstlevelmodel') && ~BIDSsettings.omitModeling
     for m = 1:numel(rap.tasksettings.firstlevelmodel)
         rap.tasksettings.firstlevelmodel(m).xBF.UNITS  ='secs';
     end
@@ -130,9 +129,9 @@ for subj = SUBJ
             else, hdr = repmat({hdr},1,numel(image));
             end
             if BIDSsettings.combinemultiple
-                structuralimages = horzcat(structuralimages,struct('fname',image,'hdr',hdr));
+                structuralimages = horzcat(structuralimages,struct('fname',image{1},'hdr',hdr));
             else
-                structuralimages{sessInd} = horzcat(structuralimages{sessInd},struct('fname',image,'hdr',hdr));
+                structuralimages{sessInd} = horzcat(structuralimages{sessInd},struct('fname',image{1},'hdr',hdr));
             end
         end
     end
@@ -162,13 +161,59 @@ for subj = SUBJ
                 eventfile = bids.query(BIDS, 'data', 'sub', subj{1}, 'sess',SESS{sessInd}, 'suffix', 'events', 'task', task{1});
 
                 if BIDSsettings.combinemultiple
-                    fmriimages = horzcat(fmriimages,struct('fname',image,'hdr',hdr));
+                    fmriimages = horzcat(fmriimages,struct('fname',image{1},'hdr',hdr));
                 else
-                    fmriimages{sessInd} = horzcat(fmriimages{sessInd},struct('fname',image,'hdr',hdr));
+                    fmriimages{sessInd} = horzcat(fmriimages{sessInd},struct('fname',image{1},'hdr',hdr));
                 end
 
-                TR = 0;
-                if isfield(hdr,'RepetitionTime'), TR = hdr.RepetitionTime; end
+                if ~BIDSsettings.omitModeling
+                    subjname = subj{1};
+                    if ~BIDSsettings.combinemultiple && ~isempty(SESS{sessInd}), subjname = [subjname '_' SESS{sessInd}]; end
+
+                    TR = 0; if isfield(hdr,'RepetitionTime'), TR = hdr.RepetitionTime; end
+
+                    % locate firstlevelmodel modules
+                    indModel = [];
+                    for stageInd = find(strcmp({rap.tasklist.main.name},'firstlevelmodel'))
+                        runs = textscan(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedrun,'%s'); runs = runs{1};
+                        if any(strcmp(runs,'*')) || any(strcmp(runs,taskname)), indModel(end+1) = rap.tasklist.main(stageInd).index; end
+                    end
+
+                    if isempty(eventfile), logging.warning('No event found for subject %s task/run %s\n',subjname,taskname);
+                    else
+                        if ~TR, logging.warning('No (RepetitionTime in) header found for subject %s task/run %s\n\tNo correction of EV onset for dummies is possible!',subjname,taskname); end
+                        tDummies = rap.acqdetails.input.correctEVfordummies*rap.tasksettings.fromnifti_fmri.numdummies*TR;
+
+                        % process events
+                        EVENTS = bids.util.tsvread(eventfile{1});
+                        allEvents = EVENTS.(BIDSsettings.regcolumn);
+                        eventNames = unique(allEvents);
+                        for n = 1:numel(eventNames)
+                            indEvent = strcmp(allEvents,eventNames{n});
+                            eventOnsets{n} = EVENTS.onset(indEvent);
+                            eventDurations{n} = EVENTS.duration(indEvent);
+                        end
+
+                        % - preprocess even names
+                        if BIDSsettings.stripEventNames
+                            eventNames = regexprep(eventNames,'[^a-zA-Z0-9]','');
+                        end
+                        if BIDSsettings.convertEventsToUppercase
+                            eventNames = upper(eventNames);
+                        end
+                        if BIDSsettings.maxEventNameLength < Inf
+                            eventNames = cellfun(@(x) x(1:min(BIDSsettings.maxEventNameLength,length(x))), eventNames,'UniformOutput',false);
+                        end
+
+                        % - add events to the models
+                        for m = indModel
+                            for e = 1:numel(eventNames)
+                                if BIDSsettings.omitNullEvents && strcmpi(eventNames{e},'null'), continue; end
+                                rap = addEvent(rap,sprintf('%s_%05d',firstlevelmodel,m),subjname,taskname,eventNames{e},eventOnsets{e}-tDummies,eventDurations{e});
+                            end
+                        end
+                    end
+                end
             end
         end
     end
