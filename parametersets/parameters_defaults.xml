@@ -21,8 +21,8 @@
         <specialseriesdirname desc="Subdirectory in subject dir for special series" ui="text">specialseries</specialseriesdirname>
         <statsdirname desc="Directory for single subject statistics" ui="dir">stats</statsdirname>
         <groupstatsdirname desc="Directory for random effects statistics" ui="dir">group_stats</groupstatsdirname>
-        <analysisid ui="dir_part"></analysisid>
-        <analysisidsuffix ui="dir_part"></analysisidsuffix>
+        <analysisid desc='Directory for the analysis' ui="dir_part"></analysisid>
+        <analysisidsuffix desc='Directory suffix for the branch (placeholder)' ui="dir_part"></analysisidsuffix>      
         <continueanalysis desc="Continue previous analysis?" ui="yesno">1</continueanalysis>
         <remotefilesystem  desc="Type of files for imaging data" options="none|s3" ui="optionlist">none</remotefilesystem>
         <allowremotecache desc="Allow local caching of files from remote server" ui="optionlist">1</allowremotecache>

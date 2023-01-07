@@ -27,9 +27,55 @@ function rap = reproaWorkflow(varargin)
 
     % Read parameterset
     rap = readParameterset(parametersetFile);
+    rap.internal.parametersetFile = parametersetFile;
+    rap.internal.tasklistFile = tasklistFile;
 
     % Read tasklist
     tasks = readParameterset(tasklistFile);
+    if ~isfield(tasks.module,'branch') % no branches
+        modules = tasks.module';
+    else % process branches
+        branchIDs = num2cell('abcdefghijklmnopqrstuvwxyz'); % CAVE: max 26 levels per branch
+        branchid = branchIDs(1); analysisidsuffix = {''}; selectedrun = {'*'};
+        modules = struct('name',{},'branchid',{},'extraparameters',{});
+
+        while ~isempty(tasks.module)
+            if ~isempty(tasks.module(1).name) % normal module
+                for b = 1:numel(branchid) % add for all branches with corresponding parameters
+                    modules(end+1).name = tasks.module(1).name;
+                    modules(end).branchid = branchid{b};
+                    modules(end).extraparameters.rap.directoryconventions.analysisidsuffix = analysisidsuffix{b};
+                    modules(end).extraparameters.rap.acqdetails.selectedrun = selectedrun{b};
+                end
+                tasks.module(1) = [];
+            else % branch
+                branch = tasks.module(1).branch;
+                tasks.module(1) = [];
+
+                % update branch parameters
+                branchid = strjoin_comb(branchid,branchIDs(1:numel(branch)));
+                analysisidsuffix = strjoin_comb(analysisidsuffix,{branch.analysisidsuffix});
+                if isfield(branch,'selectedrun')
+                    selectedrun = strjoin_comb(selectedrun,{branch.selectedrun},true);
+                else
+                    selectedrun = strjoin_comb(selectedrun,repmat({''},1,numel(branch)));
+                end
+
+                % add modules within branches
+                if isfield(branch,'module')
+                    for b = 1:numel(branchid)
+                        selb = strcmp(branchIDs, branchid{b}(end));
+                        for m = branch(selb).module
+                            modules(end+1).name = m.name;
+                            modules(end).branchid = branchid{b};
+                            modules(end).extraparameters.rap.directoryconventions.analysisidsuffix = analysisidsuffix{b};
+                            modules(end).extraparameters.rap.acqdetails.selectedrun = selectedrun{b};
+                        end
+                    end
+                end
+            end
+        end
+    end
 
     % Process tasklist
     % - initialisation
@@ -37,7 +83,7 @@ function rap = reproaWorkflow(varargin)
 
     % - main
     rap.tasklist.main = rap.tasklist.initialisation(false);
-    for m = reshape(tasks.module,1,[])
+    for m = reshape(modules,1,[])
         if isfield(m,'aliasfor') && ~isempty(m.aliasfor)
             rap.tasklist.main(end+1) = readModule([m.aliasfor '.xml']);
             rap.tasklist.main(end).aliasfor = rap.tasklist.main(end).name;
@@ -45,9 +91,29 @@ function rap = reproaWorkflow(varargin)
         else
             rap.tasklist.main(end+1) = readModule([m.name '.xml']);
         end
-        rap.tasklist.main(end).index = numel(strcmp({rap.tasklist.main.name},m.name));
+        rap.tasklist.main(end).index = sum(strcmp({rap.tasklist.main.name},m.name));
+        if exist('branchIDs','var') % branches
+            rap.tasklist.main(end).branchid = m.branchid;
+            rap.tasklist.main(end).extraparameters = m.extraparameters;
+        end
         if isfield(rap.tasklist.main(end),'settings')
-            rap.tasksettings.(m.name) = rap.tasklist.main(end).settings;
+            rap.tasksettings.(m.name)(rap.tasklist.main(end).index) = rap.tasklist.main(end).settings;
+        end
+    end
+end
+
+function strlist = strjoin_comb(strlist1,strlist2,doReplace)
+    if nargin < 3, doReplace = false; end
+    strlist = {};
+    for s1 = strlist1
+        for s2 = strlist2
+            if doReplace
+                if ~isempty(s2{1}), strlist{end+1} = s2{1};
+                else, strlist{end+1} = s1{1};
+                end
+            else
+                strlist{end+1} = [s1{1} s2{1}];
+            end
         end
     end
 end

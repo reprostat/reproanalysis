@@ -1,7 +1,7 @@
-function module = readModule(parametersetFile)
-    module = struct('name',spm_file(parametersetFile,'basename'),'aliasfor','','index',[],'header',[],'hpc',[],'permanenceofoutput',[],'extraparameters',[],'settings',[],'inputstreams',[],'outputstreams',[]);
+function module = readModule(moduleFile)
+    module = struct('name',spm_file(moduleFile,'basename'),'aliasfor','','index',[],'branchid',[],'extraparameters',[],'header',[],'hpc',[],'permanenceofoutput',[],'settings',[],'inputstreams',[],'outputstreams',[]);
 
-    xml = readxml(parametersetFile);
+    xml = readxml(moduleFile);
 
     module.header = rmfield(xml.header.ATTRIBUTE,'desc');
     if isfield(xml,'hpc'), module.hpc = xml.hpc; end
