@@ -14,16 +14,16 @@ switch domain
 
         switch domain
             case 'fmrirun'
-                runs = rap.acqdetails.fmrirun;
+                runs = rap.acqdetails.fmriruns;
                 if ~isempty(indices), runnumbers = horzcat(rap.acqdetails.subjects(indices(1)).fmriseries{:}); end
             case 'diffusionrun'
-                runs = rap.acqdetails.diffusionrun;
+                runs = rap.acqdetails.diffusionruns;
                 if ~isempty(indices), runnumbers = horzcat(rap.acqdetails.subjects(indices(1)).diffusionseries{:}); end
             case 'specialrun'
-                runs = rap.acqdetails.specialrun;
+                runs = rap.acqdetails.specialruns;
                 if ~isempty(indices), runnumbers = horzcat(rap.acqdetails.subjects(indices(1)).specialseries{:}); end
             case 'meegrun'
-                runs = rap.acqdetails.meegrun;
+                runs = rap.acqdetails.meegruns;
                 if ~isempty(indices), runnumbers = horzcat(rap.acqdetails.subjects(indices(1)).meegseries{:}); end
         end
 
@@ -43,11 +43,11 @@ switch domain
 
         % Parse selected_runs into indices if necessary
         rap = parseSelectedruns(rap,runs);
-        I = intersect(rap.acqdetails.selectedrun,I);
+        I = intersect(rap.acqdetails.selectedruns,I);
         N = numel(I);
 
     case 'subject'
-        N = numel(rap.acqdetails.subject);
+        N = numel(rap.acqdetails.subjects);
         I = 1:N;
 
     case 'study'

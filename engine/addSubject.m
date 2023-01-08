@@ -82,10 +82,10 @@ function rap = addSubject(rap, varargin)
 %% Parse
 iMRIData = 1; % new subject
 iMEEGData = 1;
-if isempty(rap.acqdetails.subject(end).subjname)
+if isempty(rap.acqdetails.subjects(end).subjname)
     subjind = 1;
 else
-    subjind = numel(rap.acqdetails.subject) + 1;
+    subjind = numel(rap.acqdetails.subjects) + 1;
 end
 
 name = '';
@@ -128,7 +128,7 @@ args = argParse.Results;
 
 %% Initialize subject
 % with a blank template for a subject entry
-fields=fieldnames(rap.acqdetails.subject);
+fields=fieldnames(rap.acqdetails.subjects);
 fields(strcmp(fields,'ATTRIBUTE')) = [];
 for field=fields'
     thissubj.(field{1})={[]};
@@ -137,12 +137,12 @@ fields(strcmp(fields,'subjname')) = [];
 
 % search for existing subject
 name = args.name;
-if ~isempty(name) && ~isempty(rap.acqdetails.subject(1).subjname)
+if ~isempty(name) && ~isempty(rap.acqdetails.subjects(1).subjname)
 % name specified --> check whether subject already exists (only if there is at least one already)
-    subjserach = strcmp({rap.acqdetails.subject.subjname},name);
+    subjserach = strcmp({rap.acqdetails.subjects.subjname},name);
     if subjserach
         subjind = subjserach;
-        thissubj = rap.acqdetails.subject(subjind);
+        thissubj = rap.acqdetails.subjects(subjind);
         iMRIData = numel(thissubj.mridata)+1;
         if isfield(thissubj,'meegdata'), iMEEGData = numel(thissubj.meegdata)+1; end
         for field=fields'
@@ -253,7 +253,7 @@ for meas = {'structural' 'fieldmaps' 'specialseries' 'ignoreseries'}
 end
 
 % And put into acqdetails, replacing a single blank entry if it exists
-rap.acqdetails.subject(subjind)=thissubj;
+rap.acqdetails.subjects(subjind)=thissubj;
 end
 
 function name = data2name(format,data)

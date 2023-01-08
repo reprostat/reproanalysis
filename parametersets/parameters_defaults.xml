@@ -70,14 +70,15 @@
     <acqdetails>
         <root desc="Root on local machine for processed data" ui="dir"></root>
         <input>
-            <selectedsubjects desc="Allows subselection of a subset of subjects from the list" ui="custom"></selectedsubjects>
-            <selectedsessions desc="Allows subselection of a subset of sessions from the list" ui="custom"></selectedsessions>
+            <selectedsubjects desc="Allows subselection of a subset of subjects from the list" ui="custom"/>
+            <selectedsessions desc="Allows subselection of a subset of sessions from the list" ui="custom"/>
             <combinemultiple desc="Combine multiple visits per subjects (1) or treat them as separate subjects (0)?" ui="yesno">0</combinemultiple>
-            <selectedruns desc="Allows subselection of a subset of series from the list" ui="custom"></selectedruns>
+            <selectedruns desc="Allows subselection of a subset of series from the list" ui="custom"/>
             <correctEVfordummies desc="Automatically correct event onset time according for dummies?" ui="yesno">1</correctEVfordummies>
         </input>
-
-        <subject>
+        <selectedruns desc="Allows subselection of a subset of series, usually during branching" ui="intarray"/>        
+        
+        <subjects>
             <subjname desc="Subject foldername" ui="dir"/>
             <mridata desc="Subject MRI filename" ui="dir_part_allowwildcards"/>
             <structural desc="Series number or filename for structural" ui="int"/>
@@ -86,22 +87,19 @@
             <fmriseries desc="Series numbers or filename for fMRI" ui="intarray"/>
             <specialseries desc="Specialseries Series number in raw data" ui="int"/>
             <ignoreseries desc="Series to be ignored when automatically scanning raw data" ui="int"/>
-        </subject>
-        <fmrirun desc="Functional MRI runs" ui="structarray">
+        </subjects>
+        <fmriruns desc="Functional MRI runs" ui="structarray">
             <name desc="Run name" ui="dir_part"/>
-        </fmrirun>
-        <selectedrun desc="Allows subselection of a subset of series, usually during branching" ui="intarray"/>
-        <specialrun desc="Specialseries runs" ui="structarray">
+        </fmriruns>
+        <specialruns desc="Specialseries runs" ui="structarray">
             <name desc="Specialseries run name (used to determine stream name and folder name)" ui="dir_part"/>
-        </specialrun>
+        </specialruns>
     </acqdetails>
 
     <paralleldependencies desc="Describes relationships of different domains of processing" ui="custom">
         <study desc="The whole study (root)" ui="custom">
             <subject desc="A subject" ui="custom">
-                <run desc="A run" ui="custom">
-                </run>                
-                <specialrun desc="Special/Undefined acquisition" ui="custom"></specialrun>
+                <run desc="A run" ui="custom"/>
             </subject>
         </study>
     </paralleldependencies>

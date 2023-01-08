@@ -152,7 +152,7 @@ for subj = SUBJ
                 end
 
                 % Skip?
-                if ~isempty(rap.acqdetails.selectedrun) && ~any(strcmp({rap.acqdetails.fmrirun(rap.acqdetails.selectedrun).name},taskname)), continue; end
+                if ~isempty(rap.acqdetails.selectedruns) && ~any(strcmp({rap.acqdetails.fmrirun(rap.acqdetails.selectedruns).name},taskname)), continue; end
 
                 rap = addRun(rap, 'fmri', taskname);
 
@@ -175,7 +175,7 @@ for subj = SUBJ
                     % locate firstlevelmodel modules
                     indModel = [];
                     for stageInd = find(strcmp({rap.tasklist.main.name},'firstlevelmodel'))
-                        runs = textscan(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedrun,'%s'); runs = runs{1};
+                        runs = textscan(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedruns,'%s'); runs = runs{1};
                         if any(strcmp(runs,'*')) || any(strcmp(runs,taskname)), indModel(end+1) = rap.tasklist.main(stageInd).index; end
                     end
 

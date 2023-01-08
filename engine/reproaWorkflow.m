@@ -36,7 +36,7 @@ function rap = reproaWorkflow(varargin)
         modules = tasks.module';
     else % process branches
         branchIDs = num2cell('abcdefghijklmnopqrstuvwxyz'); % CAVE: max 26 levels per branch
-        branchid = branchIDs(1); analysisidsuffix = {''}; selectedrun = {'*'};
+        branchid = branchIDs(1); analysisidsuffix = {''}; selectedruns = {'*'};
         modules = struct('name',{},'branchid',{},'extraparameters',{});
 
         while ~isempty(tasks.module)
@@ -45,7 +45,7 @@ function rap = reproaWorkflow(varargin)
                     modules(end+1).name = tasks.module(1).name;
                     modules(end).branchid = branchid{b};
                     modules(end).extraparameters.rap.directoryconventions.analysisidsuffix = analysisidsuffix{b};
-                    modules(end).extraparameters.rap.acqdetails.selectedrun = selectedrun{b};
+                    modules(end).extraparameters.rap.acqdetails.selectedruns = selectedruns{b};
                 end
                 tasks.module(1) = [];
             else % branch
@@ -55,10 +55,10 @@ function rap = reproaWorkflow(varargin)
                 % update branch parameters
                 branchid = strjoin_comb(branchid,branchIDs(1:numel(branch)));
                 analysisidsuffix = strjoin_comb(analysisidsuffix,{branch.analysisidsuffix});
-                if isfield(branch,'selectedrun')
-                    selectedrun = strjoin_comb(selectedrun,{branch.selectedrun},true);
+                if isfield(branch,'selectedruns')
+                    selectedruns = strjoin_comb(selectedruns,{branch.selectedruns},true);
                 else
-                    selectedrun = strjoin_comb(selectedrun,repmat({''},1,numel(branch)));
+                    selectedruns = strjoin_comb(selectedruns,repmat({''},1,numel(branch)));
                 end
 
                 % add modules within branches
@@ -69,7 +69,7 @@ function rap = reproaWorkflow(varargin)
                             modules(end+1).name = m.name;
                             modules(end).branchid = branchid{b};
                             modules(end).extraparameters.rap.directoryconventions.analysisidsuffix = analysisidsuffix{b};
-                            modules(end).extraparameters.rap.acqdetails.selectedrun = selectedrun{b};
+                            modules(end).extraparameters.rap.acqdetails.selectedruns = selectedruns{b};
                         end
                     end
                 end

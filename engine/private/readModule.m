@@ -3,7 +3,7 @@ function module = readModule(moduleFile)
 
     xml = readxml(moduleFile);
 
-    module.header = rmfield(xml.header.ATTRIBUTE,'desc');
+    module.header = xml.header.ATTRIBUTE;
     if isfield(xml,'hpc'), module.hpc = xml.hpc; end
     if isfield(xml,'permanenceofoutput'), module.permanenceofoutput = xml.permanenceofoutput; end
     if isfield(xml,'settings'), module.settings = processAttributes(xml.settings); end

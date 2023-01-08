@@ -61,4 +61,5 @@ else
 end
 
 if ~strcmp(domain,'study')
+    logging.error('NYI')
 end

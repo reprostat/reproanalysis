@@ -39,10 +39,10 @@ rap.internal.rap_initial = rap;
 for k = 1:numel(rap.tasklist.initialisation)
     switch rap.tasklist.initialisation(k).header.domain
         case 'study'
-            rap = runModule(rap,-k,'run',[]);
+            rap = runModule(rap,-k,'doit',[]);
         case 'subject'
             for subj = 1:getNByDomain(rap,'subject')
-                rap = runModule(rap,-k,'run',subj);
+                rap = runModule(rap,-k,'doit',subj);
             end
     end
 end

@@ -4,30 +4,30 @@
 function rap = parseSelectedruns(rap,runs,subject)
 
 % Check subselected runs
-selectedrun = rap.acqdetails.selectedrun;
-if ischar(selectedrun)
-    if strcmp(selectedrun,'*')
+selectedruns = rap.acqdetails.selectedruns;
+if ischar(selectedruns)
+    if strcmp(selectedruns,'*')
         % Wildcard, same as empty
-        selectedrun=1:numel(runs);
+        selectedruns=1:numel(runs);
     else
         % Named runs, parse to get numbers
-        runnames = textscan(selectedrun,'%s'); runnames = runnames{1};
-        selectedrun=[];
+        runnames = textscan(selectedruns,'%s'); runnames = runnames{1};
+        selectedruns=[];
         for runname = runnames'
             indRun = find(strcmp({runs.name},runname{1}));
             if isempty(indRun)
-                logging.error('Unknown run %s specified in selectedrun field, runs were %s',runname{1},sprintf('%s ',runs.name));
+                logging.error('Unknown run %s specified in selectedruns field, runs were %s',runname{1},sprintf('%s ',runs.name));
             end;
-            selectedrun = [selectedrun indRun];
+            selectedruns = [selectedruns indRun];
         end
     end
 end
 
 if subject ~= 0
     [~, subjRun] = getNByDomain(rap,getRunType(rap),subject);
-    selectedrun = intersect(selectedrun,subjRun);
+    selectedruns = intersect(selectedruns,subjRun);
 end
 
-rap.acqdetails.selectedrun = selectedrun;
+rap.acqdetails.selectedruns = selectedruns;
 
 end

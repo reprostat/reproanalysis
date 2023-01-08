@@ -40,24 +40,24 @@ if argParse.Results.task
         switch modality
             case 'MRI'
                 modality = 'FMRI';
-                runs = rap.acqdetails.fmrirun;
+                runs = rap.acqdetails.fmriruns;
             case 'DWI'
                 modality = 'FMRI';
-                runs = rap.acqdetails.diffusionrun;
+                runs = rap.acqdetails.diffusionruns;
             case {'MTI' 'ASL'}
                 modality = 'FMRI';
-                runs = rap.acq_details.specialrun;
+                runs = rap.acqdetails.specialruns;
             case {'MEEG' 'MEG' 'EEG'}
                 modality = 'EEG';
-                runs = rap.acq_details.meegrun;
+                runs = rap.acqdetails.meegruns;
             otherwise
                 modality = 'FMRI';
-                runs = rap.acqdetails.fmrirun;
+                runs = rap.acqdetails.fmriruns;
         end
     else
         logging.warning('WARNING:modality is not set; (F)MRI is assumed');
         modality = 'FMRI';
-        runs = rap.acqdetails.fmrirun;
+        runs = rap.acqdetails.fmriruns;
     end
 
     % Set SPM defaults appropriately
@@ -86,6 +86,7 @@ if argParse.Results.task
     rap.tasklist.currenttask.inputstreams =     module.inputstreams;
     rap.tasklist.currenttask.outputstreams =    module.outputstreams;
     rap.tasklist.currenttask.name =             sprintf('%s_%05d',module.name,module.index);
+    rap.tasklist.currenttask.description =      module.header.desc;
     rap.tasklist.currenttask.mfile =            funcname;
     rap.tasklist.currenttask.index =            module.index;
     rap.tasklist.currenttask.tasknumber =       indTask;

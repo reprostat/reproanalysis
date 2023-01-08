@@ -4,7 +4,7 @@
 
 function rap = checkparameters(rap,task)
 switch task
-    case 'run'
+    case 'doit'
         % Check parameters
         validateParameters('rap',rmfield(rap,{'internal' 'tasklist' 'tasksettings'}),readxml(rap.internal.parametersetFile));
 
