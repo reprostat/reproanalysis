@@ -15,9 +15,5 @@ function rap = runModule(rap,indTask,command,dataIndices,varargin)
     rap = setCurrenttask(rap,'task',indTask);
 
     % run task
-    switch rap.tasklist.currenttask.domain
-        case 'study'
-            rap = evalModule(rap.tasklist.currenttask.mfile,rap,'run',[]);
-        case 'subject'
-    end
+    rap = evalModule(rap.tasklist.currenttask.mfile,rap,command,dataIndices);
 end

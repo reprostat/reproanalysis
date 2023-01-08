@@ -36,7 +36,16 @@ rap.internal.pwd = pwd;
 rap.internal.rap_initial = rap;
 
 % Run initialisation modules (negative index)
-for k = 1:numel(rap.tasklist.initialisation), rap = runModule(rap,-k,'run',[]); end
+for k = 1:numel(rap.tasklist.initialisation)
+    switch rap.tasklist.initialisation(k).header.domain
+        case 'study'
+            rap = runModule(rap,-k,'run',[]);
+        case 'subject'
+            for subj = 1:getNByDomain(rap,'subject')
+                rap = runModule(rap,-k,'run',subj);
+            end
+    end
+end
 
 end
 
