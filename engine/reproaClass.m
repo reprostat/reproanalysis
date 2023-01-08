@@ -85,10 +85,6 @@ classdef reproaClass < toolboxClass
         end
 
         function load(this)
-            % ignore warnings
-            this.warnings(end+1) = warning('query','Octave:shadowed-function');
-            warning('off','Octave:shadowed-function')
-
             fprintf('\nPlease wait a moment, adding %s to the path\n',this.name);
             addpath([...
                 genpath(fullfile(this.toolPath,'engine')) pathsep...
@@ -96,14 +92,24 @@ classdef reproaClass < toolboxClass
                 fullfile(this.toolPath,'parametersets') pathsep...
                 fullfile(this.toolPath,'external','toolboxes') pathsep ...
                 fullfile(this.toolPath,'external','bids-matlab') pathsep ...
-                genpath(fullfile(this.toolPath,'external','octave-pool','external','fileio')) pathsep...
+                genpath(fullfile(this.toolPath,'external','octave-pool')) pathsep ...
                 genpath(fullfile(this.toolPath,'examples')) ...
                 ]);
 
-            if isOctave()
-                addpath([...
-                    genpath(fullfile(this.toolPath,'external','octave-pool')) ...
+            if ~isOctave()
+                rmpath([...
+                    fullfile(this.toolPath,'external','octave-pool','extrafunctions') ...
                     ]);
+            end
+
+            % ignore warnings
+            noWarnings = {};
+            if isOctave(), noWarnings{end+1} = 'Octave:shadowed-function';
+            else, noWarnings{end+1} = 'MATLAB:dispatcher:nameConflict';
+            end
+            for w = noWarnings
+                this.warnings(end+1) = warning('query',w{1});
+                warning('off',w{1})
             end
 
             % user config directory
