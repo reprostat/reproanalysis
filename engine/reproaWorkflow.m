@@ -79,7 +79,7 @@ function rap = reproaWorkflow(varargin)
 
     % Process tasklist
     % - initialisation
-    rap.tasklist.initialisation = [readModule('checkparameters.xml') readModule('evaluatesubjectnames.xml') readModule('initialiseanalysis.xml')];
+    rap.tasklist.initialisation = [readModule('checkparameters.xml') readModule('makeanalysisroot.xml')];
 
     % - main
     rap.tasklist.main = rap.tasklist.initialisation(false);
