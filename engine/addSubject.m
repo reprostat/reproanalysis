@@ -156,10 +156,10 @@ try
     if iscell(data) && numel(data) == 2 % MEEG
         thissubj.meegdata{iMEEGData}=data{1};
         thissubj.mridata{iMRIData}=data{2};
-        if isempty(name), name = data2name(rap.directoryconventions.meegsubjectoutputformat,thissubj.meegdata{1}); end
+        if isempty(name), name = getData(rap.directoryconventions.meegsubjectoutputformat,thissubj.meegdata{1}); end
     else % MRI
         thissubj.mridata{iMRIData}=data;
-        if isempty(name), name = data2name(rap.directoryconventions.subjectoutputformat,thissubj.mridata{1}); end
+        if isempty(name), name = getData(rap.directoryconventions.subjectoutputformat,thissubj.mridata{1}); end
     end
 catch
     logging.error('In addSubject, data is expected to be either single item, according to rap.directoryconventions.subjectoutputformat for MRI,\n\tor a cell of two items, according to rap.directoryconventions.subjectoutputformat and according to rap.directoryconventions.meegsubjectoutputformat for MEEG, written like this {''meegdata'',''mridata''}.');
@@ -256,7 +256,7 @@ end
 rap.acqdetails.subjects(subjind)=thissubj;
 end
 
-function name = data2name(format,data)
+function name = getData(format,data)
 name = sprintf(format,data);
 name = strtok(name,' */\\_,.');
 end
