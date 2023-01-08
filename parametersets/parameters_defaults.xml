@@ -4,8 +4,8 @@
     <directoryconventions>
         <rawdatadir desc="Directory to find raw MRI data" ui="dir_list"></rawdatadir>
         <dicomfolderstructure desc="Dicom folder structure, 'flat' if all files in one directory (e.g., Robarts), 'series' if series in separate directory (e.g., CBU)" ui="text">flat</dicomfolderstructure>
-        <subjectoutputformat desc="sprintf formatting string to get subject directory from number" ui="text">%s</subjectoutputformat>        
-        <seriesoutputformat desc="sprintf formatting string to get series directory from number" ui="text">Series_%03d*</seriesoutputformat>
+        <subjectoutputformat desc="sprintf formatting string to get subject data directory from number" ui="text">%s</subjectoutputformat>        
+        <seriesoutputformat desc="sprintf formatting string to get series data directory from number" ui="text">Series_%03d*</seriesoutputformat>
         <fieldmapprotocol ui="text">FieldMapping</fieldmapprotocol>
         <structuralprotocol ui="text">MPRAGE</structuralprotocol>
         <t2protocol ui="text">t2_spc</t2protocol>
@@ -99,7 +99,7 @@
     <paralleldependencies desc="Describes relationships of different domains of processing" ui="custom">
         <study desc="The whole study (root)" ui="custom">
             <subject desc="A subject" ui="custom">
-                <run desc="A run" ui="custom"/>
+                <fmrirun desc="An fmri run" ui="custom"/>
             </subject>
         </study>
     </paralleldependencies>

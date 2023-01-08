@@ -6,7 +6,7 @@
 function [N, I] = getNByDomain(rap,domain,indices)
 
 switch domain
-    case 'diffusionrun_phaseencodedirection'
+    case 'diffusionrunpedir'
         N=2;
         I=1:2;
 
