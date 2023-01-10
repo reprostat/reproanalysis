@@ -24,80 +24,70 @@
 
 function processWorkflow(rap)
 
-global reproa;
-global reproacache;
-global queue;
-global localqueue;
+    MINIMUMREQUIREDDISKSPACE = 10; % in GB
 
-logging.info(['REPRODUCIBILITY ANALYSIS ' datestr(now)]);
-logging.info('=============================================================');
+    global reproa;
+    global reproacache;
+    global queue;
 
-rap.internal.pwd = pwd;
-rap.internal.rap_initial = rap;
+    logging.info(['REPRODUCIBILITY ANALYSIS ' datestr(now)]);
+    logging.info('=============================================================');
 
-% Run initialisation modules (negative index)
-for k = 1:numel(rap.tasklist.initialisation)
-    switch rap.tasklist.initialisation(k).header.domain
-        case 'study'
-            rap = runModule(rap,-k,'doit',[]);
-        case 'subject'
-            for subj = 1:getNByDomain(rap,'subject')
-                rap = runModule(rap,-k,'doit',subj);
-            end
+    rap.internal.pwd = pwd;
+    rap.internal.reproaversion = reproa.version;
+    rap.internal.reproapath = reproa.toolPath;
+    rap.internal.spmversion = spm('Version');
+    rap.internal.spmpath = spm('Dir');
+    rap.internal.matlabversion = version;
+    rap.internal.matlabpath = matlabroot;
+    rap.internal.rap_initial = rap;
+
+    % Run initialisation modules (negative index)
+    for k = 1:numel(rap.tasklist.initialisation)
+        switch rap.tasklist.initialisation(k).header.domain
+            case 'study' % checkparameters, makeanalysisroot
+                rap = runModule(rap,-k,'doit',[]);
+            case 'subject' % NYI
+                for subj = 1:getNByDomain(rap,'subject')
+                    rap = runModule(rap,-k,'doit',subj);
+                end
+        end
     end
-end
+    rap = setCurrenttask(rap); % reset rap
+
+    % Connect modules
+    rap = buildWorkflow(rap);
+
+    % Check disk space
+    if isOctave
+        jvFile = javaObject('java.io.File',getPathByDomain(rap,'study',[]))
+    else
+        jvFile = java.io.File(getPathByDomain(rap,'study',[]));
+    end
+    spaceAvailable = jvFile.getUsableSpace/1024/1024/1024; % in GB
+    if spaceAvailable < MINIMUMREQUIREDDISKSPACE, logging.error('Only %f GB of disk space free on analysis drive',spaceAvailable); end
+
+    % Create queue
+    if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
+        logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
+    end
+    queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
+
+    % Save rap
+    switch rap.directoryconventions.remotefilesystem
+        case 'none'
+            if isOctave
+                save('-mat-binary',fullfile(getPathByDomain(rap,'study',[]),'rap.mat'),'rap');
+            else
+                save(fullfile(getPathByDomain(rap,'study',[]),'rap.mat'),'rap');
+            end
+
+        otherwise
+            logging.error('NYI');
+    end
 
 end
 
-%% get dependencies of stages, referenced in both directions (aap.internal.dependenton
-%% and aap.internal.dependencyof)
-%aap=aas_builddependencymap(aap);
-
-%% - find out what data comes from where and goes where
-%% - store initial settings before any module specific customisation
-%% - save AAP structure
-%orig = aap.options.verbose;
-%aap.options.verbose = -1;
-%aap = update_aap(aap);
-%aap.options.verbose = orig;
-%aap.aap_beforeuserchanges.options.verbose = orig;
-%aap.internal.aap_initial.options.verbose = orig;
-%aap.internal.aap_initial.aap_beforeuserchanges.options.verbose = orig;
-
-%% check disk space
-%FileObj=java.io.File(aas_getstudypath(aap));
-%GBFree=FileObj.getUsableSpace/1024/1000/1000;
-%if (GBFree<10)
-%    aas_log(aap,false,sprintf('WARNING: Only %f GB of disk space free on analysis drive',GBFree));
-%end
-%
-%% Choose where to run all tasks
-%if ~exist(sprintf('aaq_%s', aap.options.wheretoprocess),'file')
-%    aas_log(aap,true,sprintf('Unknown aap.options.wheretoprocess: %s\n',aap.options.wheretoprocess));
-%end
-%taskqueue = feval(sprintf('aaq_%s', aap.options.wheretoprocess),aap);
-%% Create a local taskqueue for localonly modules
-%try
-%    localtaskqueue=aaq_localsingle(aap);
-%catch
-%    aas_log(aap,true,'Failed to initiate local queue!\n');
-%end
-%
-%% Check registered with django
-%if (strcmp(aap.directory_conventions.remotefilesystem,'s3'))
-%    % Get bucket nid
-%    [aap, ~, aaworker.bucket_drupalnid]=drupal_checkexists(aap,'bucket',aaworker.bucket);
-%
-%    % Check all subjects are specified as datasets that belong to the job...
-%    %     attr=[];
-%    %     for i=1:length(aap.acq_details.subjects)
-%    %         attr.datasetref(i).nid=aap.acq_details.subjects(i).drupalnid;
-%    %     end
-%    %
-%    %     % Register analysis (or "job") with Drupal
-%    %     [aap waserror aap.directory_conventions.analysisid_drupalnid]=drupal_checkexists(aap,'job',aap.directory_conventions.analysisid,attr,aaworker.bucket_drupalnid,aaworker.bucket);
-%end
-%
 %%% Main task loop
 %for mytasks = {'checkrequirements','doit'} %
 %    for k=1:length(aap.tasklist.main.module)
