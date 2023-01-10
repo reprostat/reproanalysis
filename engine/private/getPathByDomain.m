@@ -57,9 +57,9 @@ function  localroot = getPathByDomain(rap,domain,indices,varargin)
         % otherwise, just use the root we've been given
         switch remotefilesystem
             case 'none'
-                localroot = rap.acqdetails.root;
+                localroot = fullfile(rap.acqdetails.root, rap.directoryconventions.analysisid);
             otherwise
-                localroot = rap.acqdetails.(remotefilesystem).root;
+                localroot = fullfile(rap.acqdetails.(remotefilesystem).root, rap.directoryconventions.analysisid);
         end
     end
 
