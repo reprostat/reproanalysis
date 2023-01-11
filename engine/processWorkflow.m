@@ -40,7 +40,9 @@ function processWorkflow(rap)
     rap.internal.spmpath = spm('Dir');
     rap.internal.matlabversion = version;
     rap.internal.matlabpath = matlabroot;
-    rap.internal.rap_initial = rap;
+
+    % Backup
+    rap = backupWorkflow(rap);
 
     % Run initialisation modules (negative index)
     for k = 1:numel(rap.tasklist.initialisation)
@@ -53,14 +55,13 @@ function processWorkflow(rap)
                 end
         end
     end
-    rap = setCurrenttask(rap); % reset rap
 
-    % Connect modules
-    rap = buildWorkflow(rap);
+    % Connect modules and save rap
+    rap = updateWorkflow(rap);
 
     % Check disk space
     if isOctave
-        jvFile = javaObject('java.io.File',getPathByDomain(rap,'study',[]))
+        jvFile = javaObject('java.io.File',getPathByDomain(rap,'study',[]));
     else
         jvFile = java.io.File(getPathByDomain(rap,'study',[]));
     end
@@ -68,12 +69,31 @@ function processWorkflow(rap)
     if spaceAvailable < MINIMUMREQUIREDDISKSPACE, logging.error('Only %f GB of disk space free on analysis drive',spaceAvailable); end
 
     % Create queue
-    if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
-        logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
-    end
-    queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
+%    if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
+%        logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
+%    end
+%    queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
 
-    % Save rap
+end
+
+function rap = backupWorkflow(rap)
+    bcprap.directoryconventions.analysisid = rap.directoryconventions.analysisid;
+    bcprap.directoryconventions.analysisidsuffix = rap.directoryconventions.analysisidsuffix;
+    bcprap.acqdetails.root = rap.acqdetails.root;
+
+    remotefilesystem = rap.directoryconventions.remotefilesystem;
+    if ~strcmp(remotefilesystem,'none')
+        bcpraprap.acqdetails.(remotefilesystem).root = rap.acqdetails.(remotefilesystem).root;
+    end
+
+    bcprap.acqdetails.selectedruns = rap.acqdetails.selectedruns;
+
+    rap.internal.rap_initial = bcprap;
+end
+
+function rap = updateWorkflow(rap)
+    rap = buildWorkflow(rap);
+
     switch rap.directoryconventions.remotefilesystem
         case 'none'
             if isOctave
@@ -85,7 +105,6 @@ function processWorkflow(rap)
         otherwise
             logging.error('NYI');
     end
-
 end
 
 %%% Main task loop

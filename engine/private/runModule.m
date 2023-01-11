@@ -12,7 +12,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     reproacache = argParse.Results.reproacache;
 
     % load task
-    rap = setCurrenttask(rap,'task',indTask);
+    if ~isfield(rap.tasklist,'currenttask'), rap = setCurrenttask(rap,'task',indTask); end
     studyPath = spm_file(getPathByDomain(rap,'study',[]),'path');
     taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,indices);
     pDesc = strsplit(strrep(taskRoot,[studyPath filesep],''),filesep);
@@ -24,8 +24,11 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     if indTask < 0 % initialisation
         logging.info('INITIALISATION - %s RUNNING: %s on %s',pDesc{1},rap.tasklist.currenttask.description,pDesc{2});
     else
-        logging.error('NYI');
+        logging.info('MODULE - %s RUNNING: %s on %s',pDesc{1},rap.tasklist.currenttask.description,pDesc{2});
     end
 
     rap = evalModule(rap.tasklist.currenttask.mfile,rap,command,indices);
+
+    % reset rap
+    rap = setCurrenttask(rap);
 end

@@ -20,9 +20,8 @@ argParse.addParameter('subject',0,@isnumeric);
 argParse.parse(varargin{:});
 
 % Reset rap
-initinternal = rap.internal;
-rap = rap.internal.rap_initial;
-rap.internal = initinternal;
+rap = structUpdate(rap,rap.internal.rap_initial,'Mode','update');
+if isfield(rap.tasklist,'currenttask'), rap.tasklist = rmfield(rap.tasklist,'currenttask'); end
 
 if argParse.Results.task
     indTask = argParse.Results.task;
