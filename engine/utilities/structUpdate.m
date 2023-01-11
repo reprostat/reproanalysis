@@ -11,7 +11,7 @@ sUpd = argParse.Results.sUpd;
 % Nested structs
 fields = fieldnames(sIn);
 isStructField = cellfun(@(f) isstruct(sIn.(f)) & isfield(sUpd, f), fields);
-for field = fields(isStructField)
+for field = fields(isStructField)'
     sIn.(field{1}) = structUpdate(sIn.(field{1}),sUpd.(field{1}),'Mode',argParse.Results.Mode);
     sUpd.(field{1}) = sIn.(field{1});
 end
