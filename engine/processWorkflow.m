@@ -69,10 +69,10 @@ function processWorkflow(rap)
     if spaceAvailable < MINIMUMREQUIREDDISKSPACE, logging.error('Only %f GB of disk space free on analysis drive',spaceAvailable); end
 
     % Create queue
-%    if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
-%        logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
-%    end
-%    queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
+    if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
+        logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
+    end
+    queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
 
 end
 
