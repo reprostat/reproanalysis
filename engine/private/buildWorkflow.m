@@ -56,18 +56,17 @@ function rap = buildWorkflow(rap,varargin)
 
                 % Update inputstream
                 hasSource = true;
+                indOutput = strcmp({rap.tasklist.main(indSource).outputstreams.name},inputstream.name);
                 rap.tasklist.main(indTask).inputstreams(indInput).taskindex = indSource;
-                rap.tasklist.main(indTask).inputstreams(indInput).domain = rap.tasklist.main(indSource).header.domain;
+                rap.tasklist.main(indTask).inputstreams(indInput).domain = rap.tasklist.main(indSource).outputstreams(indOutput).domain;
                 rap.tasklist.main(indTask).inputstreams(indInput).modality = rap.tasklist.main(indSource).header.modality;
 
                 % Update outputstream
                 streamInd = strcmp({rap.tasklist.main(indSource).outputstreams.name},inputstream.name);
                 if ~isfield(rap.tasklist.main(indSource).outputstreams(streamInd),'taskindex') % first update
                     rap.tasklist.main(indSource).outputstreams(streamInd).taskindex = indTask;
-                    rap.tasklist.main(indSource).outputstreams(streamInd).domain = {rap.tasklist.main(indTask).header.domain};
                 else
                     rap.tasklist.main(indSource).outputstreams(streamInd).taskindex(end+1) = indTask;
-                    rap.tasklist.main(indSource).outputstreams(streamInd).domain(end+1) = {rap.tasklist.main(indTask).header.domain};
                 end
             elseif ~isempty(rap.acqdetails.input.remotepipeline(1).path) % Check remote
                 logging.error('NYI')
@@ -85,7 +84,7 @@ function rap = buildWorkflow(rap,varargin)
             end
         end
         % update domain and modality of generic modules based on the main input, which is expected to be the last inputstream
-        if strcmp(rap.tasklist.main(indTask).header.domain, '*')
+        if strcmp(rap.tasklist.main(indTask).header.domain, '?')
             rap.tasklist.main(indTask).header.domain = rap.tasklist.main(indTask).inputstreams(end).domain;
             rap.tasklist.main(indTask).header.modality = rap.tasklist.main(indTask).inputstreams(end).modality;
         end

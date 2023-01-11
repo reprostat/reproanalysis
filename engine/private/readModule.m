@@ -7,8 +7,8 @@ function module = readModule(moduleFile)
     if isfield(xml,'hpc'), module.hpc = xml.hpc; end
     if isfield(xml,'permanenceofoutput'), module.permanenceofoutput = xml.permanenceofoutput; end
     if isfield(xml,'settings'), module.settings = processAttributes(xml.settings); end
-    if isfield(xml,'inputstreams'), module.inputstreams = processStreams(xml.inputstreams.stream); end
-    if isfield(xml,'outputstreams'), module.outputstreams = processStreams(xml.outputstreams.stream); end
+    if isfield(xml,'inputstreams'), module.inputstreams = processStreams(xml.inputstreams.stream,module.header.domain); end
+    if isfield(xml,'outputstreams'), module.outputstreams = processStreams(xml.outputstreams.stream,module.header.domain); end
 end
 
 function node = processAttributes(node)
@@ -30,25 +30,29 @@ if isstruct(node)
 end
 end
 
-function node = processStreams(node)
+function node = processStreams(node,moduleDomain)
+    domain = moduleDomain;
     switch class(node)
         case 'char' % single stream without attributes
             node = struct(...
                 'name',node,...
+                'domain',domain,...
                 'isessential',1,...
                 'isrenameable',0 ...
                 );
-        case 'struct'
-            if numel(node) > 1, node = arrayfun(@(x) processStreams(x), node);
+        case 'struct' % with attributes
+            if numel(node) > 1, node = arrayfun(@(x) processStreams(x,domain), node);
             else
+                if isfield(node.ATTRIBUTE,'domain'), domain = node.ATTRIBUTE.domain; end
                 node = struct(...
                     'name',node.CONTENT,...
+                    'domain',domain,...
                     'isessential',~isfield(node.ATTRIBUTE,'isessential') || node.ATTRIBUTE.isessential,...
                     'isrenameable',isfield(node.ATTRIBUTE,'isrenameable') && node.ATTRIBUTE.isrenameable ...
                     );
             end
         case 'cell'
-            node = cellfun(@(x) processStreams(x), node);
+            node = cellfun(@(x) processStreams(x,domain), node);
     end
 end
 
