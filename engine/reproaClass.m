@@ -88,6 +88,7 @@ classdef reproaClass < toolboxClass
             fprintf('\nPlease wait a moment, adding %s to the path\n',this.name);
             addpath([...
                 genpath(fullfile(this.toolPath,'engine')) pathsep...
+                fullfile(this.toolPath,'engine','queue') pathsep...
                 genpath(fullfile(this.toolPath,'modules')) pathsep...
                 fullfile(this.toolPath,'parametersets') pathsep...
                 fullfile(this.toolPath,'external','toolboxes') pathsep ...
@@ -103,14 +104,7 @@ classdef reproaClass < toolboxClass
             end
 
             % ignore warnings
-            noWarnings = {};
-            if isOctave(), noWarnings{end+1} = 'Octave:shadowed-function';
-            else, noWarnings{end+1} = 'MATLAB:dispatcher:nameConflict';
-            end
-            for w = noWarnings
-                this.warnings(end+1) = warning('query',w{1});
-                warning('off',w{1})
-            end
+            this.ignoreWarnings();
 
             % user config directory
             if ispc, this.configdir = fullfile([getenv('HOMEDRIVE') getenv('HOMEPATH')],'.reproa');
@@ -168,7 +162,21 @@ classdef reproaClass < toolboxClass
         function reload(this,varargin)
             addpath(this.configdir);
 
+            % Re-ignore warnings
+            this.ignoreWarnings();
+
             reload@toolboxClass(this,varargin{:})
+        end
+
+        function ignoreWarnings(this)
+            noWarnings = {};
+            if isOctave(), noWarnings{end+1} = 'Octave:shadowed-function';
+            else, noWarnings{end+1} = 'MATLAB:dispatcher:nameConflict';
+            end
+            for w = noWarnings
+                this.warnings(end+1) = warning('query',w{1});
+                warning('off',w{1})
+            end
         end
 
         function resp = getUserParameterFile(this,varargin)
