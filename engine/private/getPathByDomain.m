@@ -57,10 +57,12 @@ function  localroot = getPathByDomain(rap,domain,indices,varargin)
         % otherwise, just use the root we've been given
         switch remotefilesystem
             case 'none'
-                localroot = fullfile(rap.acqdetails.root, rap.directoryconventions.analysisid);
+                localroot = rap.acqdetails.root;
             otherwise
-                localroot = fullfile(rap.acqdetails.(remotefilesystem).root, rap.directoryconventions.analysisid);
+                localroot = rap.acqdetails.(remotefilesystem).root;
         end
+        % analysisid is already included if within task
+        if ~isfield(rap.tasklist,'currenttask'), localroot = fullfile(localroot, rap.directoryconventions.analysisid); end
     end
 
     for ind = 2:numel(domaintree)

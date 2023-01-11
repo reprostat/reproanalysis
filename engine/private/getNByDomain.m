@@ -41,8 +41,8 @@ switch domain
             end
         end
 
-        % Parse selected_runs into indices if necessary
-        rap = parseSelectedruns(rap,runs);
+        % Parse selected_runs if necessary
+        rap = parseSelectedruns(rap,runs,0);
         I = intersect(rap.acqdetails.selectedruns,I);
         N = numel(I);
 

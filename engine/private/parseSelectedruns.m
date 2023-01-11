@@ -5,8 +5,8 @@ function rap = parseSelectedruns(rap,runs,subject)
 
 % Check subselected runs
 selectedruns = rap.acqdetails.selectedruns;
-if ischar(selectedruns)
-    if strcmp(selectedruns,'*')
+if isempty(selectedruns) || ischar(selectedruns)
+    if isempty(selectedruns) || strcmp(selectedruns,'*')
         % Wildcard, same as empty
         selectedruns=1:numel(runs);
     else
