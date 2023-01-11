@@ -1,8 +1,15 @@
-function deps = getDependencyByDomain(rap,sourceDomain,targetDomain,targetIndices)
+function deps = getDependencyByDomain(rap,sourceDomain,varargin)
+
+    argParse = inputParser;
+    argParse.addOptional('targetDomain','study',@ischar)
+    argParse.addOptional('targetIndices',[],@isnumeric)
+    argParse.parse(varargin{:});
+    targetDomain = argParse.Results.targetDomain;
+    targetIndices = argParse.Results.targetIndices;
 
     % identify difference in domain level between source and target
-    sourceDomainTree = dependencyFindDomain(sourceDomain,rap.paralleldependencies);
-    targetDomainTree = dependencyFindDomain(targetDomain,rap.paralleldependencies);
+    sourceDomainTree = findDomainDependency(sourceDomain,rap.paralleldependencies);
+    targetDomainTree = findDomainDependency(targetDomain,rap.paralleldependencies);
     % Find the point where the source and target branches converge
     for indCommon = 1:min(numel(sourceDomainTree),numel(targetDomainTree))
         if ~strcmp(sourceDomainTree{indCommon},targetDomainTree{indCommon})

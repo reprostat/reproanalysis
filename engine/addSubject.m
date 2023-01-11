@@ -192,7 +192,7 @@ if ~isempty(args.fmri)
                 end
 
                 % - try in rawdatadir/mridata
-                if ~exist(fname,'file'), fname = fullfile(findvol(rap,'mri',thissubj.mridata{iMRIData}),fname); end
+                if ~exist(fname,'file'), fname = fullfile(findData(rap,'mri',thissubj.mridata{iMRIData}),fname); end
                 if ~exist(fname,'file'), logging.error('File %s does not exist!',fname); end
 
                 V = spm_vol(fname);
@@ -231,9 +231,9 @@ if ~isempty(args.meeg)
             end
 
             % - try in rawmeegdatadir/meegdata
-            if ~exist(fname,'file'), fname = fullfile(findvol(rap,'meeg',thissubj.meegdata{iMEEGData}),fname); end
+            if ~exist(fname,'file'), fname = fullfile(findData(rap,'meeg',thissubj.meegdata{iMEEGData}),fname); end
             % - try in rawmeegdatadir (for emptyroom)
-            if ~exist(fname,'file'), fname = findvol(rap,'meeg',fname); end
+            if ~exist(fname,'file'), fname = findData(rap,'meeg',fname); end
             if ~exist(fname,'file'), logging.error('File %s does not exist!',fname); end
 
             MEEG{end+1} = args.meeg{s};

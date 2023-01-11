@@ -1,4 +1,4 @@
-% volunteer locator
+% data locator
 %   mandatory inputs
 %       rap
 %       modality ('mri' or 'meeg')
@@ -10,7 +10,7 @@
 %
 % E.g.: 90952 --> CBU090952_MR09032/20090828_131456
 
-function strSubj = findvol(rap,varargin)
+function strSubj = findData(rap,varargin)
 
 DTFORMAT = {'yymmdd' 'yyyymmdd' 'yyyymmdd_HHMMSS'};
 

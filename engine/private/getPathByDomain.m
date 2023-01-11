@@ -1,6 +1,6 @@
 function  localroot = getPathByDomain(rap,domain,indices,varargin)
 
-    domaintree = dependencyFindDomain(domain,rap.paralleldependencies);
+    domaintree = findDomainDependency(domain,rap.paralleldependencies);
     if numel(indices) ~= (numel(domaintree)-1), logging.error('Expected %d indicies for domain "%s" but got %d',numel(domaintree)-1,domain,numel(indices)); end
 
     argParse = inputParser;

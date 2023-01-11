@@ -1,4 +1,4 @@
-function domaintree = dependencyFindDomain(domain,tree,root)
+function domaintree = findDomainDependency(domain,tree,root)
 
 if nargin < 3, root = {}; end
 
@@ -9,7 +9,7 @@ if ~isempty(tree)
             domaintree={root{:} domain};
             break;
         else
-            domaintree = dependencyFindDomain(domain,tree.(fn{1}),{root{:} fn{1}});
+            domaintree = findDomainDependency(domain,tree.(fn{1}),{root{:} fn{1}});
             if ~isempty(domaintree), break; end
         end
     end
