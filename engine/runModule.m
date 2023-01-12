@@ -20,19 +20,25 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     if ~isfield(rap.tasklist,'currenttask'), rap = setCurrenttask(rap,'task',indTask); end
     taskDescription = getTaskDescription(rap,indices);
 
-    % run task
+    % prepare task
     if indTask < 0 % initialisation
         logging.info('INITIALISATION - %s',taskDescription);
     else
         if strcmp(command,'doit')
             taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,indices);
             dirMake(taskRoot);
+
+            % obtain inputstream
+            for s = rap.tasklist.currenttask.inputstreams
+                logging.error('NYI');
+            end
+
         end
 
         logging.info('%s - %s',upper(command),taskDescription);
     end
 
-    % run module
+    % run task
     if ~exist(spm_file(rap.tasklist.currenttask.mfile,'ext','.m'),'file'), logging.error('%s doesn''t appear to be a valid m file?',funcname); end
     ci = num2cell(indices);
     rap = feval(rap.tasklist.currenttask.mfile,rap,command,ci{:});
