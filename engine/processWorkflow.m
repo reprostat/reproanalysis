@@ -45,13 +45,13 @@ function processWorkflow(rap)
     rap = backupWorkflow(rap);
 
     % Run initialisation modules (negative index)
-    for k = 1:numel(rap.tasklist.initialisation)
-        switch rap.tasklist.initialisation(k).header.domain
+    for indTask = 1:numel(rap.tasklist.initialisation)
+        switch rap.tasklist.initialisation(indTask).header.domain
             case 'study' % checkparameters, makeanalysisroot
-                rap = runModule(rap,-k,'doit',[]);
+                rap = runModule(rap,-indTask,'doit',[]);
             case 'subject' % NYI
                 for subj = 1:getNByDomain(rap,'subject')
-                    rap = runModule(rap,-k,'doit',subj);
+                    rap = runModule(rap,-indTask,'doit',subj);
                 end
         end
     end
@@ -68,12 +68,29 @@ function processWorkflow(rap)
     spaceAvailable = jvFile.getUsableSpace/1024/1024/1024; % in GB
     if spaceAvailable < MINIMUMREQUIREDDISKSPACE, logging.error('Only %f GB of disk space free on analysis drive',spaceAvailable); end
 
-    % Create queue
-    if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
-        logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
-    end
-    queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
+    for command = {'checkrequirements' 'doit'}
+        if strcmp(command{1},'doit')
+            rap = updateWorkflow(rap);
+                % Create queue
+                if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
+                    logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
+                end
+                queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
+        end
 
+        for indTask = 1:numel(rap.tasklist.main)
+            deps = getDependencyByDomain(rap,rap.tasklist.main(indTask).header.domain);
+            switch command{1}
+                case 'checkrequirements'
+                    % run each module once locally
+                    rap = runModule(rap,indTask,command{1},deps(1,:));
+                case 'doit'
+                    for depInd = 1:size(deps,1)
+                        queue.addTask(indTasl,deps(depInd,:));
+                    end
+            end
+        end
+    end
 end
 
 function rap = backupWorkflow(rap)

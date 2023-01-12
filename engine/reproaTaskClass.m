@@ -1,6 +1,8 @@
 classdef reproaTaskClass
     properties
+        indQueue
         name
+        description
         doneflag
     end
 
@@ -33,20 +35,21 @@ classdef reproaTaskClass
                 end
 
                 this.name = rap.tasklist.currenttask.name;
+                this.description = getTaskDescription(rap,indices);
                 this.taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,this.indices);
                 this.doneflag = fullfile(this.taskRoot,this.DONEFLAG);
                 this.waitFor = waitFor; % list of doneflags
             end
         end
 
-        function resp = isReady(this)
+        function resp = isNext(this)
             isDone = cellfun(@(df) this.doneflagExists(df), this.waitFor);
             this.waitFor(isDone) = [];
 
             resp = isempty(this.waitFor);
         end
 
-        function rap = process(this,rap,toDo)
+        function rap = process(this,rap)
             rap = runModule(rap,this.indTask,'doit',this.indices);
             fclose(fopen(this.doneflag,'w'));
         end

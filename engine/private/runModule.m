@@ -13,21 +13,19 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
     % load task
     if ~isfield(rap.tasklist,'currenttask'), rap = setCurrenttask(rap,'task',indTask); end
-    studyPath = spm_file(getPathByDomain(rap,'study',[]),'path');
-    taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,indices);
-    pDesc = strsplit(strrep(taskRoot,[studyPath filesep],''),filesep);
-    if numel(pDesc)==1, pDesc{2} = 'study';
-    else, pDesc{2} = strjoin(pDesc(2:end),'/');
-    end
+    taskDescription = getTaskDescription(rap,indices);
 
     % run task
     if indTask < 0 % initialisation
-        logging.info('INITIALISATION - %s RUNNING: %s on %s',pDesc{1},rap.tasklist.currenttask.description,pDesc{2});
+        logging.info('INITIALISATION - %s',taskDescription);
     else
-        logging.info('MODULE - %s RUNNING: %s on %s',pDesc{1},rap.tasklist.currenttask.description,pDesc{2});
+        logging.info('%s - %s',upper(command),taskDescription);
     end
 
-    rap = evalModule(rap.tasklist.currenttask.mfile,rap,command,indices);
+    % run module
+    if ~exist(spm_file(rap.tasklist.currenttask.mfile,'ext','.m'),'file'), logging.error('%s doesn''t appear to be a valid m file?',funcname); end
+    ci = num2cell(indices);
+    rap = feval(rap.tasklist.currenttask.mfile,rap,command,ci{:});
 
     % reset rap
     rap = setCurrenttask(rap);
