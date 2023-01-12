@@ -11,8 +11,9 @@
 % Tibor Auer 2022
 
 function rap = reproaWorkflow(varargin)
-    global reproa
-    assert(isa(reproa,'reproaClass'),'reproa is not initialised -> run reproaSetup')
+    global reproacache
+    assert(isa(reproacache,'cacheClass'),'reproa is not initialised -> run reproaSetup')
+    reproa = reproacache('reproa');
 
     switch(numel(varargin))
         case 0

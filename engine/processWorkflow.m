@@ -26,9 +26,9 @@ function processWorkflow(rap)
 
     MINIMUMREQUIREDDISKSPACE = 10; % in GB
 
-    global reproa;
     global reproacache;
     global queue;
+    reproa = reproacache('reproa');
 
     logging.info(['REPRODUCIBILITY ANALYSIS ' datestr(now)]);
     logging.info('=============================================================');
@@ -86,7 +86,7 @@ function processWorkflow(rap)
                     rap = runModule(rap,indTask,command{1},deps(1,:));
                 case 'doit'
                     for depInd = 1:size(deps,1)
-                        queue.addTask(indTasl,deps(depInd,:));
+                        queue.addTask(indTask,deps(depInd,:));
                     end
             end
         end

@@ -11,12 +11,27 @@ classdef queueClass < statusClass
             );
     end
 
-    properties (Access = private)
+    properties (Access = protected)
+        queueFolder
         currentQueueInd = 0
     end
 
     methods
         function this = queueClass(rap)
+            global reproacache
+            if ~isa(reproacache,'cacheClass'), logging.error('Cannot find reproacache'); end
+            global reproaworker
+            if ~isa(reproaworker,'workerClass'), logging.error('Cannot find reproaworker'); end
+
+            reproa = reproacache('reproa');
+
+            if isOctave, strnow = char(datetime(clock,'yyyymmddHHMMSS'));
+            else, strnow = char(datetime(clock,'Format','yyyyMMddHHmmss'));
+            end
+            this.queueFolder = fullfile(reproa.configdir,['queue_' strnow]);
+            dirMake(this.queueFolder);
+            reproaworker.logFile = spm_file(reproaworker.logFile,'path',this.queueFolder);
+
             this.rap = rap;
             this.pStatus = this.STATUS('pending');
         end
@@ -42,14 +57,14 @@ classdef queueClass < statusClass
             task = reproaTaskClass(this.rap,indTask,indices);
             if ~task.isDone()
                 this.currentQueueInd = this.currentQueueInd+1;
-                this.taskQueue = [this.taskQueue,task];
-                this.taskQueue(end).queueInd = this.currentQueueInd;
+                this.taskQueue(end+1) = task;
+                this.taskQueue(end).indQueue = this.currentQueueInd;
                 resp = true;
             end
         end
 
         function reportTasks(this,status,queueIndices)
-            msg = arrayfun(@(s) sprintf('%s - #%3d: %s\n',upper(status),s.queueInd,s.description), this.taskQueue(setdiff(nextTaskIndices,doneTaskIndices)),'UniformOutput',false);
+            msg = arrayfun(@(t) sprintf('%s - #%3d: %s\n',upper(status),t.indQueue,t.description), this.taskQueue(setdiff(nextTaskIndices,doneTaskIndices)),'UniformOutput',false);
             logging.info('%s',sprintf('%s',msg{:}));
             switch status
                 case 'failed'

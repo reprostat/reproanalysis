@@ -9,8 +9,8 @@ classdef localsingleClass < queueClass
             if ~isempty(this.taskQueue)
                 this.pStatus = this.STATUS('running');
                 nextTaskIndices = find([this.taskQueue.isNext()]);
-                for taskInd = nextTaskIndices
-                    this.rap = this.taskQueue(taskInd).process(this.rap);
+                for task = this.taskQueue(nextTaskIndices)
+                    rap = runModule(rap,task.indTask,'doit',task.indices);
                 end
                 doneTaskIndices = find([this.taskQueue.isDone()]);
                 this.reportTasks('finished',doneTaskIndices);

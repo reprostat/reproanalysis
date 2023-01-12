@@ -3,14 +3,16 @@ classdef reproaTaskClass
         indQueue
         name
         description
-        doneflag
+
+        indTask
+        indices
     end
 
     properties (Access=private)
-        indTask
-        indices
         taskRoot
         waitFor
+
+        doneflag
     end
 
     properties (Access=private, Constant=true)
@@ -49,13 +51,8 @@ classdef reproaTaskClass
             resp = isempty(this.waitFor);
         end
 
-        function rap = process(this,rap)
-            rap = runModule(rap,this.indTask,'doit',this.indices);
-            fclose(fopen(this.doneflag,'w'));
-        end
-
         function resp = isDone(this)
-            resp = doneflagExists(this)
+            resp = doneflagExists(this);
         end
 
     end
