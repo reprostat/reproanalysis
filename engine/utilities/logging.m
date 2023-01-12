@@ -10,23 +10,23 @@ classdef logging
         end
 
         function this = warning(varargin)
-            warning(sprintf(varargin{:}));
-
             global reproaworker
             if isa(reproaworker,'workerClass')
                 varargin{1} = ['warning: ' varargin{1}];
                 reproaworker.addLog(varargin{:});
             end
+
+            warning(sprintf(varargin{:}));
         end
 
         function this = error(varargin)
-            error(sprintf(varargin{:}));
-
             global reproaworker
             if isa(reproaworker,'workerClass')
                 varargin{1} = ['error: ' varargin{1}];
                 reproaworker.addLog(varargin{:});
             end
+
+            error(sprintf(varargin{:}));
         end
     end
 
