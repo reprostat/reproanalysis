@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='subject' desc='Find structural input files from nifti' modality='MRI'/>
+            
+    <hpc>
+        <timeBase>0.2</timeBase>
+        <memoryBase>0.2</memoryBase>
+    </hpc>
+    
+    <permanenceofoutput>1</permanenceofoutput>
+    
+    <settings>
+        <rejectimages></rejectimages>
+        <sfxformodality desc='Colon separated substrings to look for in the filename. The order of the substrings corresponds to the order of streams'>T1w:T2w</sfxformodality>
+    </settings>
+    
+    <outputstreams>
+        <stream isessential='0'>structural</stream>
+        <stream isessential='0'>structural_header</stream>
+        <stream isessential='0'>t2</stream>
+        <stream isessential='0'>t2_header</stream>
+    </outputstreams>
+</rap>
