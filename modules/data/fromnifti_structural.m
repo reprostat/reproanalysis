@@ -14,7 +14,7 @@ switch command
             allseries = cellfun(@(x) struct('fname',x,'hdr',''), allseries);
         else
             help aas_addsubject
-            logging.error('rap.acqdetails.subjects.structural has a wrong format');
+            logging.error(['rap.acqdetails.subjects.structural has a wrong format\n\n' help('addSubject')]);
         end
         allstreams = rap.tasklist.currenttask.outputstreams; allstreams(contains({allstreams.name},'header')) = [];
         sfxs = strsplit(getSetting(rap,'sfxformodality'),':');
@@ -45,26 +45,26 @@ switch command
                     end
             end
 
-            localpath = fullfile(getPathByDomain(rap,'subject',subj),rap.directoryconventions.structdirname);
-            dirMake(localpath);
+            localPath = fullfile(getPathByDomain(rap,'subject',subj),rap.directoryconventions.structdirname);
+            dirMake(localPath);
             Ys = 0;
             for s = 1:numel(series)
-                niftifile = series(s).fname;
-                hdrfile = series(s).hdr;
+                niftiFile = series(s).fname;
+                hdrFile = series(s).hdr;
 
                 %% Image
-                if ~exist(niftifile,'file')
+                if ~exist(niftiFile,'file')
                     niftisearchpth = findvol(rap,'mri',rap.acqdetails.subjects(subj).mridata);
                     if ~isempty(niftisearchpth)
-                        niftifile = fullfile(niftisearchpth,niftifile);
-                        if ~exist(niftifile,'file'), logging.error(['Image ' niftifile ' not found']); end
+                        niftiFile = fullfile(niftisearchpth,niftiFile);
+                        if ~exist(niftiFile,'file'), logging.error(['Image ' niftiFile ' not found']); end
                     end
                 end
 
-                V(s) = spm_vol(niftifile);
+                V(s) = spm_vol(niftiFile);
                 Y = spm_read_vols(V(s));
 
-                fn{s} = spm_file(niftifile,'path',localpath,'suffix','_0001');
+                fn{s} = spm_file(niftiFile,'path',localPath,'suffix','_0001');
                 if strcmp(spm_file(fn{s},'ext'),'gz'), fn{s} = spm_file(fn{s},'ext',''); end
                 V(s).fname=deblank(fn{s});
                 V(s).n=[1 1];
@@ -76,21 +76,21 @@ switch command
                 end
 
                 %% header
-                if ~isempty(hdrfile)
-                    if isstruct(hdrfile)
-                        dcmhdr = hdrfile;
+                if ~isempty(hdrFile)
+                    if isstruct(hdrFile)
+                        header = hdrFile;
                     else
-                        switch spm_file(hdrfile,'ext')
-                            case 'mat'
-                                dcmhdr = load(hdrfile,'dcmhdr');
-                            case 'json'
-                                dcmhdr = jsonread(hdrfile);
-                                % convert timings to ms (DICOM default)
-                                for f = fieldnames(hdrfile)'
-                                    if strfind(f{1},'Time'), dcmhdr{s}.(f{1}) = dcmhdr.(f{1})*1000; end
+                        switch spm_file(hdrFile,'ext')
+                            case 'mat' % already processed by reproa
+                                load(hdrFile,'header');
+                            case 'json' % BIDS
+                                header = jsonread(hdrFile);
+                                % convert timings to ms (consistent with DICOM)
+                                for f = fieldnames(hdrFile)'
+                                    if strfind(f{1},'Time'), header{s}.(f{1}) = header.(f{1})*1000; end
                                 end
-                                if isfield(dcmhdr{s},'RepetitionTime'), dcmhdr{s}.volumeTR = dcmhdr{s}.RepetitionTime/1000; end
-                                if isfield(dcmhdr{s},'EchoTime'), dcmhdr{s}.volumeTE = dcmhdr{s}.EchoTime/1000; end
+                                if isfield(header{s},'RepetitionTime'), header{s}.volumeTR = header{s}.RepetitionTime/1000; end
+                                if isfield(header{s},'EchoTime'), header{s}.volumeTE = header{s}.EchoTime/1000; end
                         end
                     end
                 else
@@ -103,19 +103,19 @@ switch command
                 V = V(1);
                 V.fname = fn;
                 spm_write_vol(V,Ys);
-                dcmhdr = dcmhdr(1);
+                header = header(1);
             end
 
             rap = putFileByStream(rap,'subject',subj,stream,fn);
 
-            if exist('dcmhdr','var')
-                dcmhdrfn = fullfile(localpath,[stream '_header.mat']);
-                save(dcmhdrfn,'dcmhdr');
+            if exist('header','var')
+                dcmhdrfn = fullfile(localPath,[stream '_header.mat']);
+                save(dcmhdrfn,'header');
                 rap = putFileByStream(rap,'subject',subj,[stream '_header'],dcmhdrfn);
             end
 
             % remove variable to avoid writing wrong header to subsequent sfxs
-            clear dcmhdr
+            clear header
         end
     case 'checkrequirements'
 
