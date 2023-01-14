@@ -1,5 +1,9 @@
 function [val, index] = getSetting(rap,settingstring,varargin)
 % Obtain (data-specific) task setting while running the task
+% [val, index] = getSetting(rap,settingstring);
+% [val, index] = getSetting(rap,settingstring,index);
+% [val, index] = getSetting(rap,settingstring,'subject',subj);
+% [val, index] = getSetting(rap,settingstring,'fmrirun',[subj, run]);
 
     % Parse setting path
     settingpath = strsplit(settingstring,'.');
@@ -45,7 +49,7 @@ function [val, index] = getSetting(rap,settingstring,varargin)
                     index = [];
                     if ~isfield(val,varargin{1}), logging.warning('There is no %s-specific setting.',varargin{1});
                     else
-                        index = find(strcmp({val.subject},rap.acqdetails.subject(varargin{2}(1)).subjname) & strcmp({val.session},getRunName(rap,varargin{2}(2))));
+                        index = find(strcmp({val.subject},rap.acqdetails.subject(varargin{2}(1)).subjname) & strcmp({val.(varargin{1})},getRunName(rap,varargin{2}(2))));
                     end
                     if isempty(index)
                         logging.warning('Setting <%s> for %s is not specified!',settingstring,getRunName(rap,varargin{2}(2)));
