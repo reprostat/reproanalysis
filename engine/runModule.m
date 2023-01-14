@@ -26,7 +26,14 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     else
         if strcmp(command,'doit')
             taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,indices);
+
+            % create taskfolder and save rap
             dirMake(taskRoot);
+            if isOctave
+                save('-mat-binary',fullfile(taskRoot,['rap_' rap.tasklist.currenttask.name '.mat']),'rap');
+            else
+                save(fullfile(taskRoot,['rap_' rap.tasklist.currenttask.name '.mat']),'rap');
+            end
 
             % obtain inputstream
             for s = rap.tasklist.currenttask.inputstreams
