@@ -1,5 +1,5 @@
 % Put file(s) into stream
-%  function [rap]=putFileByStream(rap,domain,indices,streamName,fileNames)
+%  function putFileByStream(rap,domain,indices,streamName,fileNames)
 %  e.g.,
 %   putFileByStream(rap,'subject',[1],'structural',fns)
 %   putFileByStream(rap,'fmrirun',[1,1],'fmri',fns)
@@ -7,7 +7,7 @@
 % File names may be provided in a cell array or as a character matrix.
 % File names may either be specified using a relative to task path or absolute path. If the latter, the path is converted to relative.
 
-function  rap = putFileByStream(rap,domain,indices,streamName,fileNames)
+function  putFileByStream(rap,domain,indices,streamName,fileNames)
 
     % If fully specified
     streamName = strsplit(streamName,'.'); streamName = streamName{end};
