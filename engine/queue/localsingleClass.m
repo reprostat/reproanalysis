@@ -18,7 +18,7 @@ classdef localsingleClass < queueClass
                 if ~isequal(nextTaskIndices,doneTaskIndices)
                     this.reportTasks('failed',setdiff(nextTaskIndices,doneTaskIndices));
                 end
-                this.taskQueue(doneTaskIndices) = [];
+                if ~isempty(doneTaskIndices), this.taskQueue(doneTaskIndices) = []; end
             else
                 this.pStatus = this.STATUS('finished');
                 logging.info('Task queue is finished!');

@@ -60,11 +60,13 @@ classdef queueClass < statusClass
                 this.taskQueue(end+1) = task;
                 this.taskQueue(end).indQueue = this.currentQueueInd;
                 resp = true;
+            else
+                logging.info('DONE - %s', task.description);
             end
         end
 
         function reportTasks(this,status,queueIndices)
-            msg = arrayfun(@(t) sprintf('%s - #%3d: %s\n',upper(status),t.indQueue,t.description), this.taskQueue(setdiff(nextTaskIndices,doneTaskIndices)),'UniformOutput',false);
+            msg = arrayfun(@(t) sprintf('%s - #%3d: %s\n',upper(status),t.indQueue,t.description), this.taskQueue(queueIndices),'UniformOutput',false);
             logging.info('%s',sprintf('%s',msg{:}));
             switch status
                 case 'failed'
