@@ -76,26 +76,23 @@ switch command
                 end
 
                 %% header
-                if ~isempty(hdrFile)
-                    if isstruct(hdrFile)
-                        header = hdrFile;
-                    else
-                        switch spm_file(hdrFile,'ext')
-                            case 'mat' % already processed by reproa
-                                load(hdrFile,'header');
-                            case 'json' % BIDS
-                                header = jsonread(hdrFile);
-                                % convert timings to ms (consistent with DICOM)
-                                for f = fieldnames(hdrFile)'
-                                    if strfind(f{1},'Time'), header{s}.(f{1}) = header.(f{1})*1000; end
-                                end
-                                if isfield(header{s},'RepetitionTime'), header{s}.volumeTR = header{s}.RepetitionTime/1000; end
-                                if isfield(header{s},'EchoTime'), header{s}.volumeTE = header{s}.EchoTime/1000; end
-                        end
-                    end
+                header{s} = [];
+                if ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'mat') % already processed by reproa
+                    tmp = load(hdrFile); header{s} = tmp.header;
                 else
-                    logging.warning('No header provided!');
+                    if isstruct(hdrFile)
+                        header{s} = hdrFile;
+                    elseif ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'json') % BIDS
+                        header{s} = jsonread(hdrFile);
+                    end
+                    % convert timings to ms (consistent with DICOM)
+                    for f = fieldnames(header{s})'
+                        if strfind(f{1},'Time'), header{s}.(f{1}) = header{s}.(f{1})*1000; end
+                    end
+                    if isfield(header{s},'RepetitionTime'), header{s}.volumeTR = header{s}.RepetitionTime/1000; end
+                    if isfield(header{s},'EchoTime'), header{s}.volumeTE = header{s}.EchoTime/1000; end
                 end
+                if isempty(header{s}), logging.warning('No header provided!'); end
             end
 
             if doAverage
@@ -106,16 +103,13 @@ switch command
                 header = header(1);
             end
 
-            rap = putFileByStream(rap,'subject',subj,stream,fn);
+            putFileByStream(rap,'subject',subj,stream,fn);
 
-            if exist('header','var')
-                dcmhdrfn = fullfile(localPath,[stream '_header.mat']);
-                save(dcmhdrfn,'header');
-                rap = putFileByStream(rap,'subject',subj,[stream '_header'],dcmhdrfn);
+            if ~all(@isempty,header)
+                hdrfn = fullfile(localPath,[stream '_header.mat']);
+                save(hdrfn,'header');
+                putFileByStream(rap,'subject',subj,[stream '_header'],hdrfn);
             end
-
-            % remove variable to avoid writing wrong header to subsequent sfxs
-            clear header
         end
     case 'checkrequirements'
 
