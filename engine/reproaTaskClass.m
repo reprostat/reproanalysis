@@ -32,7 +32,7 @@ classdef reproaTaskClass
                 for s = rap.tasklist.currenttask.inputstreams
                     deps = getDependencyByDomain(rap,s.domain,rap.tasklist.currenttask.domain,this.indices);
                     for d = 1:size(deps,1)
-                        waitFor{end+1} = fullfile(getPathByDomain(rap,s.domain,deps(d,:)),this.DONEFLAG);
+                        waitFor{end+1} = fullfile(getPathByDomain(rap,s.domain,deps(d,:),'task',s.taskindex),this.DONEFLAG);
                     end
                 end
 
