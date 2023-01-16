@@ -53,7 +53,6 @@ classdef queueClass < statusClass
         end
 
         function resp = addTask(this,indTask,indices)
-            resp = false;
             task = reproaTaskClass(this.rap,indTask,indices);
             if ~task.isDone()
                 this.currentQueueInd = this.currentQueueInd+1;
@@ -62,6 +61,7 @@ classdef queueClass < statusClass
                 resp = true;
             else
                 logging.info('DONE - %s', task.description);
+                resp = false;
             end
         end
 

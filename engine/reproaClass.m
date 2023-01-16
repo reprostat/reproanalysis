@@ -19,6 +19,10 @@ classdef reproaClass < toolboxClass
         reproawiki
     end
 
+    properties (Access = private, Constant = true)
+        DONEFLAG = 'done';
+    end
+
     methods
         function this = reproaClass(varargin) % optional parameters: nogreet, noload
             reproafile = [mfilename('fullpath') '.m'];
@@ -120,6 +124,7 @@ classdef reproaClass < toolboxClass
             reproacache = cacheClass();
             assignin('base','reproaworker',reproaworker);
             assignin('base','reproacache',reproacache);
+            reproacache('doneflag') = this.DONEFLAG;
 
             % Sub-toolboxes
             rap = readParameterset(this.getUserParameterFile);
