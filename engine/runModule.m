@@ -50,9 +50,9 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     % - make sure the path is canonical
                     srcStreamPath = readLink(srcStreamPath);
                     srcStreamDescriptor = fullfile(srcStreamPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name));
-                    srcStream = strsplit(fileread(srcStreamDescriptor),'\n');
+                    srcStream = strsplit(fileRetrieve(srcStreamDescriptor,rap.options.maximumretry,'content'),'\n');
                     srcHash = regexp(srcStream{1},'(?<=(#\t))[0-9a-f]*','match'); srcHash = srcHash{1};
-                    srcFile = srcStream{2};
+                    srcFile = srcStream(2:end-1); % last is newline
 
                     % Destination
                     destStreamPath = getPathByDomain(rap,s.streamdomain,deps(d,:));
@@ -66,14 +66,14 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
                     if exist(destStreamDescriptor,'file')
                         % compare hashes of input at source and destination
-                        destHash = regexp(fileread(destStreamDescriptor),'(?<=(#\t))[0-9a-f]*','match'); destHash = destHash{1};
+                        destHash = regexp(fileRetrieve(destStreamDescriptor,rap.options.maximumretry,'content'),'(?<=(#\t))[0-9a-f]*','match'); destHash = destHash{1};
                         if strcmp(srcHash,destHash), continue;
                         else, logging.warning('\tInput has changed at source - re-copying');
                         end
                     else, logging.warning('\tretrieving');
                     end
                     copyfile(srcStreamDescriptor,destStreamDescriptor);
-                    copyfile(fullfile(srcStreamPath,srcFile),destStreamPath);
+                    cellfun(@(f) copyfile(fullfile(srcStreamPath,f),destStreamPath), srcFile);
                 end
             end
 
