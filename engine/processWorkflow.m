@@ -1,27 +1,3 @@
-% Dependencies are calculated by a set of helper functions - e.g.,
-%  deps=aas_dependencytree_allfromtrunk(aap,domain);
-%   given a task of domain "domain", return a list of all indices at this
-%   level - e.g., for "session", deps= {{'session', [1 1]},{'session', [1
-%   2]},{'session', [2,1]}....{'session',[nsubj nsess]}}
-%
-%  aas_doneflag_getpath_bydomain(aap,domain,indices,k)
-%   "domaind" specifies the domain (e.g., session, which branched below subject)
-%   "indicies" is an array with the number of parameters required for a
-%   given branch level (e.g., 2 parameters, subject & session for a
-%   session-level task)
-%
-%  aas_getdependencies_bydomain(aap,sourcedomain,targetdomain,indices,'doneflaglocations');
-%   if a task of domain "targetdomain" and indices "indices" is waiting for
-%   a task of a given sourcedomain, the stages it must wait for are
-%   returned
-%
-%  aas_getN_bydomain(aap,domain,[indices])
-%   get number of parts to domain
-%
-%  aas_getdirectory_bydomain(aap,domain.index)
-%   get subdirectory name for a single example specified by index of this
-%   domain (e.g., 'movie' for session 1)
-
 function processWorkflow(rap)
 
     MINIMUMREQUIREDDISKSPACE = 10; % in GB
@@ -80,14 +56,25 @@ function processWorkflow(rap)
         end
 
         for indTask = 1:numel(rap.tasklist.main)
-            deps = getDependencyByDomain(rap,rap.tasklist.main(indTask).header.domain);
+            deps = getDependencyByDomain(rap,rap.tasklist.main(indTask).header.domain); % get all instances required by the study (destination domain)
             switch command{1}
                 case 'checkrequirements'
                     % run each module once locally
-                    rap = runModule(rap,indTask,command{1},deps(1,:));
+                    rap = runModule(rap,indTask,command{1},deps(1,:)); % we ran checkrequirements only once
                 case 'doit'
-                    for depInd = 1:size(deps,1)
-                        queue.addTask(indTask,deps(depInd,:));
+                    for depInd = 1:size(deps,1) % iterate through all instances
+                        toDo = queue.addTask(indTask,deps(depInd,:));
+                        if toDo % if to be run, delete doneflags of dependent tasks
+                            if isfield(rap.tasklist.main(indTask).outputstreams,'taskindex') % output to any task
+                                for destIndTask = [rap.tasklist.main(indTask).outputstreams.taskindex]
+                                    destTaskDomain = rap.tasklist.main(indTask).header.domain
+                                    destDeps = getDependencyByDomain(rap,destTaskDomain,rap.tasklist.main(indTask).header.domain,deps(depInd,:)); % get all dependent instances (using reverse-depedency search)
+                                    for destDepInd = 1:size(destDeps,1)
+                                        fileDetele(fullfile(getPathByDomain(rap,destTaskDomain,destDeps(destDepInd,:),'task',destIndTask),reproacache('doneflag')));
+                                    end
+                                end
+                            end
+                        end
                     end
             end
         end
