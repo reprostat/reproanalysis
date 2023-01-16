@@ -1,25 +1,25 @@
 function deps = getDependencyByDomain(rap,sourceDomain,varargin)
 
     argParse = inputParser;
-    argParse.addOptional('targetDomain','study',@ischar)
-    argParse.addOptional('targetIndices',[],@isnumeric)
+    argParse.addOptional('destinationDomain','study',@ischar)
+    argParse.addOptional('destinationIndices',[],@isnumeric)
     argParse.parse(varargin{:});
-    targetDomain = argParse.Results.targetDomain;
-    targetIndices = argParse.Results.targetIndices;
+    destinationDomain = argParse.Results.destinationDomain;
+    destinationIndices = argParse.Results.destinationIndices;
 
-    % identify difference in domain level between source and target
+    % identify difference in domain level between source and destination
     sourceDomainTree = findDomainDependency(sourceDomain,rap.paralleldependencies);
-    targetDomainTree = findDomainDependency(targetDomain,rap.paralleldependencies);
-    % Find the point where the source and target branches converge
-    for indCommon = 1:min(numel(sourceDomainTree),numel(targetDomainTree))
-        if ~strcmp(sourceDomainTree{indCommon},targetDomainTree{indCommon})
+    destinationDomainTree = findDomainDependency(destinationDomain,rap.paralleldependencies);
+    % Find the point where the source and destination branches converge
+    for indCommon = 1:min(numel(sourceDomainTree),numel(destinationDomainTree))
+        if ~strcmp(sourceDomainTree{indCommon},destinationDomainTree{indCommon})
             indCommon = indCommon-1;
             break
 		end
 	end
 
-    if numel(targetIndices) ~= (numel(targetDomainTree)-1)
-        logging.error('Expected %d indicies for domain "%s" but got %d',numel(targetDomainTree)-1,targetDomain,numel(targetIndices));
+    if numel(destinationIndices) ~= (numel(destinationDomainTree)-1)
+        logging.error('Expected %d indicies for domain "%s" but got %d',numel(destinationDomainTree)-1,destinationDomain,numel(destinationIndices));
 	end
 
     % dependency: only relevant sources until the common point and all possible sources below
@@ -29,8 +29,8 @@ function deps = getDependencyByDomain(rap,sourceDomain,varargin)
             depInd = indDomain-indCommon;
             deps{depInd}(1) = sourceDomainTree(indDomain);
             if depInd == 1
-                [~,ind] = getNByDomain(rap,deps{depInd}{1},targetIndices);
-                deps{depInd}{2} = [repmat(targetIndices,numel(ind),1) ind'];
+                [~,ind] = getNByDomain(rap,deps{depInd}{1},destinationIndices);
+                deps{depInd}{2} = [repmat(destinationIndices,numel(ind),1) ind'];
             else
                 deps{depInd}{2} = [];
                 for i = 1:size(deps{depInd-1}{2},1)
@@ -42,8 +42,8 @@ function deps = getDependencyByDomain(rap,sourceDomain,varargin)
             end
         end
         deps = deps{end}{2};
-    else % if the source domain is at the same or higher level -> only relevant sources as specified in the targetIndices
-        deps = targetIndices(1:indCommon-1);
+    else % if the source domain is at the same or higher level -> only relevant sources as specified in the destinationIndices
+        deps = destinationIndices(1:indCommon-1);
     end
 
 end
