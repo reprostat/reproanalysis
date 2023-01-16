@@ -1,6 +1,7 @@
 classdef hashClass < handle
     properties
         hashFunc = 'MD5'
+        maximumRetry = 5;
     end
 
     properties (Access=private)
@@ -21,7 +22,7 @@ classdef hashClass < handle
 
         function update(this,data)
             if ischar(data) && exist(data,'file')
-                this.md.update(uint8(fileread(data)));
+                this.md.update(uint8(fileRetrieve(data,this.maximumRetry,'content')));
             else
                 this.md.update(uint8(data));
             end

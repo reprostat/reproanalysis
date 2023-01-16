@@ -1,15 +1,24 @@
-function isFound = fileRetrieve(fname,maximumretry)
-    if nargin < 2, maximumretry = 0; end
-    if ~exist(fname,'file')
-        isFound = false;
-        if maximumretry
-            retry = 0;
-            while ~isFound && (retry < maximumretry)
-                isFound = exist(fname,'file');
-                retry = retry + 1;
-                pause(1);
+function resp = fileRetrieve(fname,varargin)
+
+    argParse = inputParser;
+    argParse.addOptional('maximumRetry',0,@isnumeric);
+    argParse.addOptional('toRespond','state',@(x) ischar(x) & any(strcmp({'state','content'},x)));
+    argParse.parse(varargin{:});
+
+    resp = '';
+    for r = 0:argParse.Results.maximumRetry
+        resp = exist(fname,'file');
+        if resp
+            switch argParse.Results.toRespond
+                case 'state'
+                    resp = true;
+                    break
+                case 'content'
+                    try, resp = fileread(fname); catch, end
+                    if ~isempty(resp), break; end
             end
         end
-        if ~isFound, logging.error('Could not find %s - Are you sure it is in your path?', fname); end
+        pause(1);
     end
+    if isempty(resp) || ~resp, logging.error('Could not find or read %s - Are you sure it is in your path?', fname); end
 end
