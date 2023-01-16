@@ -1,7 +1,5 @@
 function rap = runModule(rap,indTask,command,indices,varargin)
 
-    DONEFLAG = 'done';
-
     global reproaworker
     global reproacache
 
@@ -37,7 +35,46 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
             % obtain inputstream
             for s = rap.tasklist.currenttask.inputstreams
-                logging.error('NYI');
+                % obtain streams
+                streamName = strsplit(s.name,'.'); streamName = streamName{end};
+
+                if s.taskindex == -1 % remote
+                    logging.error('NYI');
+                end
+
+                srcrap = setCurrenttask(rap,'task',s.taskindex);
+                deps = getDependencyByDomain(rap,s.streamdomain,rap.tasklist.currenttask.domain,indices);
+                for d = 1:size(deps,1)
+                    % Source
+                    srcStreamPath = getPathByDomain(srcrap,s.streamdomain,deps(d,:));
+                    % - make sure the path is canonical
+                    srcStreamPath = readLink(srcStreamPath);
+                    srcStreamDescriptor = fullfile(srcStreamPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name));
+                    srcStream = strsplit(fileread(srcStreamDescriptor),'\n');
+                    srcHash = regexp(srcStream{1},'(?<=(#\t))[0-9a-f]*','match'); srcHash = srcHash{1};
+                    srcFile = srcStream{2};
+
+                    % Destination
+                    destStreamPath = getPathByDomain(rap,s.streamdomain,deps(d,:));
+                    destStreamName = sprintf('stream_%s_inputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name);
+                    % - make sure the path is canonical
+                    destStreamPath = readLink(destStreamPath);
+                    dirMake(destStreamPath);
+                    destStreamDescriptor = fullfile(destStreamPath,destStreamName);
+
+                    logging.info('Input - %s',destStreamName);
+
+                    if exist(destStreamDescriptor,'file')
+                        % compare hashes of input at source and destination
+                        destHash = regexp(fileread(destStreamDescriptor),'(?<=(#\t))[0-9a-f]*','match'); destHash = destHash{1};
+                        if strcmp(srcHash,destHash), continue;
+                        else, logging.warning('\tInput has changed at source - re-copying');
+                        end
+                    else, logging.warning('\tretrieving');
+                    end
+                    copyfile(srcStreamDescriptor,destStreamDescriptor);
+                    copyfile(fullfile(srcStreamPath,srcFile),destStreamPath);
+                end
             end
 
         end
@@ -51,7 +88,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     rap = feval(rap.tasklist.currenttask.mfile,rap,command,ci{:});
 
     % flag done (not for initialisation)
-    if (indTask > 0) && strcmp(command,'doit'), fclose(fopen(fullfile(taskRoot,DONEFLAG),'w')); end
+    if (indTask > 0) && strcmp(command,'doit'), fclose(fopen(fullfile(taskRoot,reproacache('doneflag')),'w')); end
 
     % reset rap
     rap = setCurrenttask(rap);
