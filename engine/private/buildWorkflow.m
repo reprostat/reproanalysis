@@ -58,7 +58,8 @@ function rap = buildWorkflow(rap,varargin)
                 hasSource = true;
                 indOutput = strcmp({rap.tasklist.main(indSource).outputstreams.name},inputstream.name);
                 rap.tasklist.main(indTask).inputstreams(indInput).taskindex = indSource;
-                rap.tasklist.main(indTask).inputstreams(indInput).domain = rap.tasklist.main(indSource).outputstreams(indOutput).domain;
+                rap.tasklist.main(indTask).inputstreams(indInput).taskdomain = rap.tasklist.main(indSource).header.domain;;
+                rap.tasklist.main(indTask).inputstreams(indInput).streamdomain = rap.tasklist.main(indSource).outputstreams(indOutput).domain;
                 rap.tasklist.main(indTask).inputstreams(indInput).modality = rap.tasklist.main(indSource).header.modality;
 
                 % Update outputstream
