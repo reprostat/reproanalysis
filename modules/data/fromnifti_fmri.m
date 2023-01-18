@@ -62,6 +62,7 @@ switch command
                 else, header{1}.(f{1}) = [];
                 end
             end
+            if isempty(header{1}.EchoTime), logging.warning('EchoTime is not provided -> calculating CNR is not possible'); end
             if isempty(header{1}.SliceTiming), logging.warning('SliceTiming is not provided -> slicetime-correction is not possible'); end
             if isempty(header{1}.EffectiveEchoSpacing), logging.warning('EffectiveEchoSpacing is not provided -> distortion-correction is not possible'); end
 
@@ -132,7 +133,7 @@ switch command
         end
         finalepis = [finalepis(1:ind-1) sfx '.nii'];
         if iscell(V), V = cell2mat(V); end
-        spm_file_merge(char({V.fname}),finalepis,0,header{1}.volumeTR);
+        V = spm_file_merge(char({V.fname}),finalepis,0,header{1}.volumeTR);
 
         % And describe outputs
         putFileByStream(rap,'fmrirun',[subj run],'fmri',finalepis);
@@ -142,6 +143,17 @@ switch command
         save(hdrfn,'header');
         putFileByStream(rap,'fmrirun',[subj run],'fmri_header',hdrfn);
 
+        % QA
+        Y = spm_read_vols(V);
+        Ymean = mean(Y,4);
+        QA.sd = std(Y,[],4); QA.sd(QA.sd==0) = NaN;
+        QA.snr = Ymean./QA.sd;
+        if ~isempty(header{1}.EchoTime), QA.cnr = Ysnr*header{1}.EchoTime; end
+        for m = fieldnames(QA)'
+            V(1).fname = spm_file(finalepis,'suffix',['_' m{1}]);
+            spm_write_vol(V(1),QA.(m{1}));
+            putFileByStream(rap,'fmrirun',[subj run],['fmri_' m{1}],V(1).fname);
+        end
     case 'checkrequirements'
 
 end

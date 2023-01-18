@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
     <header domain='fmrirun' desc='Find fMRI input files from nifti' modality='FMRI'/>
-            
+
     <hpc>
         <timeBase>0.2</timeBase>
         <memoryBase>0.2</memoryBase>
     </hpc>
-    
+
     <permanenceofoutput>1</permanenceofoutput>
-    
+
     <settings>
         <numdummies desc='Number of dummy scans to remove. It can be a number (for all data) or a structure specifying numdummies for each subject and fmrirun explicitly'>0</numdummies>
     </settings>
-    
+
     <outputstreams>
         <stream>fmri</stream>
         <stream>fmri_header</stream>
+        <stream>fmri_sd</stream>
+        <stream>fmri_snr</stream>
+        <stream>fmri_cnr</stream>
         <stream isessential='0'>dummyscans</stream>
     </outputstreams>
 </rap>
