@@ -67,10 +67,10 @@ function processWorkflow(rap)
                         if toDo % if to be run, delete doneflags of dependent tasks
                             if isfield(rap.tasklist.main(indTask).outputstreams,'taskindex') % output to any task
                                 for destIndTask = [rap.tasklist.main(indTask).outputstreams.taskindex]
-                                    destTaskDomain = rap.tasklist.main(indTask).header.domain
+                                    destTaskDomain = rap.tasklist.main(indTask).header.domain;
                                     destDeps = getDependencyByDomain(rap,destTaskDomain,rap.tasklist.main(indTask).header.domain,deps(depInd,:)); % get all dependent instances (using reverse-depedency search)
                                     for destDepInd = 1:size(destDeps,1)
-                                        fileDetele(fullfile(getPathByDomain(rap,destTaskDomain,destDeps(destDepInd,:),'task',destIndTask),reproacache('doneflag')));
+                                        fileDelete(fullfile(getPathByDomain(rap,destTaskDomain,destDeps(destDepInd,:),'task',destIndTask),reproacache('doneflag')));
                                     end
                                 end
                             end
