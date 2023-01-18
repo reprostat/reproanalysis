@@ -26,9 +26,10 @@ function rap = buildWorkflow(rap,varargin)
             taskToCheck = taskToCheck & cellfun(@(b) startsWith(rap.tasklist.main(indTask).branchid,b), {rap.tasklist.main(1:indTask-1).branchid});
         end
 
+        inputToOmit = []; % non-existing non-essential streams
         for indInput = 1:numel(rap.tasklist.main(indTask).inputstreams)
             inputstream = rap.tasklist.main(indTask).inputstreams(indInput);
-            hasSource = false;
+            if iscell(inputstream.name), inputstream.name = inputstream.name{1}; end % ingore original name after renaming
             indSource = [];
 
             % if fully specified
@@ -39,7 +40,18 @@ function rap = buildWorkflow(rap,varargin)
             end
 
             if any(taskToCheck)
-                indSource = find(arrayfun(@(i) taskToCheck(i) & ~isempty(rap.tasklist.main(i).outputstreams) || any(strcmp({rap.tasklist.main(i).outputstreams.name},inputstream.name)), 1:indTask-1),1,'last');
+                indSource = find(arrayfun(@(i) taskToCheck(i) && ~isempty(rap.tasklist.main(i).outputstreams) && any(strcmp(cellstr({rap.tasklist.main(i).outputstreams.name}),inputstream.name)), 1:indTask-1),1,'last');
+            end
+
+            if isempty(indSource) && ~isempty(rap.acqdetails.input.remotepipeline(1).path) % Check remote
+                logging.error('NYI')
+%                rap.tasklist.main(indTask).inputstreams(indInput).name = ;
+%                rap.tasklist.main(indTask).inputstreams(indInput).taskindex = -1;
+%                rap.tasklist.main(indTask).inputstreams(indInput).domain =
+%                rap.tasklist.main(indTask).inputstreams(indInput).modality =
+%                rap.tasklist.main(indTask).inputstreams(indInput).host =
+%                rap.tasklist.main(indTask).inputstreams(indInput).rapPath =
+%                rap.tasklist.main(indTask).inputstreams(indInput).allowCache =
             end
 
             if ~isempty(indSource)
@@ -55,35 +67,27 @@ function rap = buildWorkflow(rap,varargin)
                 end
 
                 % Update inputstream
-                hasSource = true;
-                indOutput = strcmp({rap.tasklist.main(indSource).outputstreams.name},inputstream.name);
+                selectOutput = arrayfun(@(s) any(strcmp(s.name,inputstream.name)), rap.tasklist.main(indSource).outputstreams);
                 rap.tasklist.main(indTask).inputstreams(indInput).taskindex = indSource;
                 rap.tasklist.main(indTask).inputstreams(indInput).taskdomain = rap.tasklist.main(indSource).header.domain;;
-                rap.tasklist.main(indTask).inputstreams(indInput).streamdomain = rap.tasklist.main(indSource).outputstreams(indOutput).domain;
+                rap.tasklist.main(indTask).inputstreams(indInput).streamdomain = rap.tasklist.main(indSource).outputstreams(selectOutput).domain;
                 rap.tasklist.main(indTask).inputstreams(indInput).modality = rap.tasklist.main(indSource).header.modality;
 
                 % Update outputstream
-                streamInd = strcmp({rap.tasklist.main(indSource).outputstreams.name},inputstream.name);
-                if ~isfield(rap.tasklist.main(indSource).outputstreams(streamInd),'taskindex') % first update
-                    rap.tasklist.main(indSource).outputstreams(streamInd).taskindex = indTask;
+                if ~isfield(rap.tasklist.main(indSource).outputstreams(selectOutput),'taskindex') % first update
+                    rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex = indTask;
                 else
-                    rap.tasklist.main(indSource).outputstreams(streamInd).taskindex(end+1) = indTask;
+                    rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex(end+1) = indTask;
                 end
-            elseif ~isempty(rap.acqdetails.input.remotepipeline(1).path) % Check remote
-                logging.error('NYI')
-%                rap.tasklist.main(indTask).inputstreams(indInput).name = ;
-%                rap.tasklist.main(indTask).inputstreams(indInput).taskindex = -1;
-%                rap.tasklist.main(indTask).inputstreams(indInput).domain =
-%                rap.tasklist.main(indTask).inputstreams(indInput).modality =
-%                rap.tasklist.main(indTask).inputstreams(indInput).host =
-%                rap.tasklist.main(indTask).inputstreams(indInput).rapPath =
-%                rap.tasklist.main(indTask).inputstreams(indInput).allowCache =
-            end
-
-            if ~hasSource && ~argParse.Results.isProbe
+            elseif ~inputstream.isessential
+                inputToOmit(end+1) = indInput;
+            else ~argParse.Results.isProbe
                 logging.error('Task %s requires %s which is not an output of any task in the same branch. You might need to add it via the addInitialStream or from a remote pipeline.',taskName,inputstream.name);
             end
         end
+
+        rap.tasklist.main(indTask).inputstreams(inputToOmit) = [];
+
         % update domain and modality of generic modules based on the main input, which is expected to be the last inputstream
         if strcmp(rap.tasklist.main(indTask).header.domain, '?')
             rap.tasklist.main(indTask).header.domain = rap.tasklist.main(indTask).inputstreams(end).domain;

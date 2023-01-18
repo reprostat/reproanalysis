@@ -36,6 +36,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
             % obtain inputstream
             for s = rap.tasklist.currenttask.inputstreams
                 % obtain streams
+                if iscell(s.name), s.name = s.name{1}; end
                 streamName = strsplit(s.name,'.'); streamName = streamName{end};
 
                 if s.taskindex == -1 % remote
