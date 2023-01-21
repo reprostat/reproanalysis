@@ -68,7 +68,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     if exist(destStreamDescriptor,'file')
                         % compare hashes of input at source and destination
                         destHash = regexp(fileRetrieve(destStreamDescriptor,rap.options.maximumretry,'content'),'(?<=(#\t))[0-9a-f]*','match'); destHash = destHash{1};
-                        if strcmp(srcHash,destHash), continue;
+                        if strcmp(destHash,getHashByFiles(srcFile,'localroot',destStreamPath)) && strcmp(srcHash,destHash), continue;
                         else, logging.warning('\tInput has changed at source - re-copying');
                         end
                     else, logging.warning('\tretrieving');
