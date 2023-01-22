@@ -12,11 +12,9 @@ classdef datasetClass
 
     methods
         function this = datasetClass(ID,URL,type)
-            if nargin
-                this.ID = ID;
-                this.URL = URL;
-                this.type = type;
-            end
+            this.ID = ID;
+            this.URL = URL;
+            this.type = type;
         end
 
         function this = set.subset(this,value)
@@ -63,13 +61,6 @@ classdef datasetClass
             movefile(fullfile(this.tmpdir, this.ID, '*'), demodir);
         end
 
-    end
-
-    methods (Static = true)
-        function this = empty()
-            this = datasetClass();
-            this = this(false);
-        end
     end
 
 end

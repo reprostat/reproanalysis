@@ -1,7 +1,7 @@
 classdef queueClass < statusClass
     properties
         rap
-        taskQueue = reproaTaskClass.empty()
+        taskQueue = {}
     end
 
     properties (Access = protected, Constant = true)
@@ -56,8 +56,8 @@ classdef queueClass < statusClass
             task = reproaTaskClass(this.rap,indTask,indices);
             if ~task.isDone()
                 this.currentQueueInd = this.currentQueueInd+1;
-                this.taskQueue(end+1) = task;
-                this.taskQueue(end).indQueue = this.currentQueueInd;
+                this.taskQueue{end+1} = task;
+                this.taskQueue{end}.indQueue = this.currentQueueInd;
                 resp = true;
             else
                 logging.info('DONE - %s', task.description);
@@ -66,7 +66,7 @@ classdef queueClass < statusClass
         end
 
         function reportTasks(this,status,queueIndices)
-            msg = arrayfun(@(t) sprintf('%s - #%3d: %s\n',upper(status),t.indQueue,t.description), this.taskQueue(queueIndices),'UniformOutput',false);
+            msg = cellfun(@(t) sprintf('%s - #%3d: %s\n',upper(status),t.indQueue,t.description), this.taskQueue(queueIndices),'UniformOutput',false);
             logging.info('%s',sprintf('%s',msg{:}));
             switch status
                 case 'failed'

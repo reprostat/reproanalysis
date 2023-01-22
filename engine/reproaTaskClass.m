@@ -17,29 +17,27 @@ classdef reproaTaskClass
 
     methods
         function this = reproaTaskClass(rap,indTask,indices)
-            if nargin
-                global reproacache
+            global reproacache
 
-                this.indTask = indTask;
-                this.indices = indices;
+            this.indTask = indTask;
+            this.indices = indices;
 
-                rap = setCurrenttask(rap,'task',this.indTask);
+            rap = setCurrenttask(rap,'task',this.indTask);
 
-                % get dependency
-                waitFor = {};
-                for s = rap.tasklist.currenttask.inputstreams
-                    deps = getDependencyByDomain(rap,s.taskdomain,rap.tasklist.currenttask.domain,this.indices);
-                    for d = 1:size(deps,1)
-                        waitFor{end+1} = fullfile(getPathByDomain(rap,s.taskdomain,deps(d,:),'task',s.taskindex),reproacache('doneflag'));
-                    end
+            % get dependency
+            waitFor = {};
+            for s = rap.tasklist.currenttask.inputstreams
+                deps = getDependencyByDomain(rap,s.taskdomain,rap.tasklist.currenttask.domain,this.indices);
+                for d = 1:size(deps,1)
+                    waitFor{end+1} = fullfile(getPathByDomain(rap,s.taskdomain,deps(d,:),'task',s.taskindex),reproacache('doneflag'));
                 end
-
-                this.name = rap.tasklist.currenttask.name;
-                this.description = getTaskDescription(rap,indices);
-                this.taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,this.indices);
-                this.doneflag = fullfile(this.taskRoot,reproacache('doneflag'));
-                this.waitFor = waitFor; % list of doneflags
             end
+
+            this.name = rap.tasklist.currenttask.name;
+            this.description = getTaskDescription(rap,indices);
+            this.taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,this.indices);
+            this.doneflag = fullfile(this.taskRoot,reproacache('doneflag'));
+            this.waitFor = waitFor; % list of doneflags
         end
 
         function resp = isNext(this)
@@ -68,10 +66,4 @@ classdef reproaTaskClass
         end
     end
 
-    methods  (Static = true)
-        function this = empty()
-            this = reproaTaskClass();
-            this = this(false);
-        end
-    end
 end

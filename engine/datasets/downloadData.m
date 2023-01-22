@@ -43,19 +43,19 @@ if length(sources)>1
 end
 
 % Check dataset_id
-datasets = datasetClass.empty;
+datasets = {};
 for d = jsonread('datasets.json')'
     [~,indFields] = intersect(fieldnames(d),{'ID' 'URL' 'type'});
     par = struct2cell(d);
-    datasets(end+1) = datasetClass(par{indFields});
+    datasets{end+1} = datasetClass(par{indFields});
 end
-IDs = {datasets.ID};
+IDs = cellfun(@(d) d.ID, datasets,'UniformOutput',false);
 ID_ind = strcmp(dataset_id, IDs);
 if sum(ID_ind) ~= 1
     IDs_str = strjoin(IDs,', ');
     logging.error('Expected exactly one match for input dataset_id (%s) in list of known datasets %s', dataset_id, IDs_str);
 end
-dataset = datasets(ID_ind); dataset = dataset(1); % work around a weird Octave bug
+dataset = datasets{ID_ind};
 
 %% Download if not already has data
 if ~exist(fullfile(demodir),'dir') ... % Does not exist yet
