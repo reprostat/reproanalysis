@@ -97,7 +97,7 @@ function rap = reproaWorkflow(varargin)
             rap.tasklist.main(end).branchid = m.branchid;
             rap.tasklist.main(end).extraparameters = m.extraparameters;
         end
-        if isfield(rap.tasklist.main(end),'settings')
+        if isfield(rap.tasklist.main(end),'settings') && ~isempty(rap.tasklist.main(end).settings)
             rap.tasksettings.(m.name)(rap.tasklist.main(end).index) = rap.tasklist.main(end).settings;
         end
     end
