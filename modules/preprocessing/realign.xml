@@ -45,11 +45,11 @@
     
     <inputstreams>
         <stream domain="fmrirun" isessential="0" isrenameable="1">weighting_image</stream>
-        <stream domain="fmrirun">fmri</stream>
+        <stream domain="fmrirun" tobemodified="0">fmri</stream>
     </inputstreams>
 
     <outputstreams>
-        <stream>meanfmri</stream>
+        <stream domain="subject">meanfmri</stream>
         <stream domain="fmrirun">fmri</stream>
         <stream domain="fmrirun">realignment_parameter</stream>
         <stream domain="fmrirun">fd</stream>
