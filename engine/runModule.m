@@ -74,7 +74,17 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     else, logging.warning('\tretrieving');
                     end
                     copyfile(srcStreamDescriptor,destStreamDescriptor);
-                    cellfun(@(f) copyfile(fullfile(srcStreamPath,f),destStreamPath), srcFile);
+                    for f = srcFile
+                        currDestStreamPath = destStreamPath;
+                        subDir = spm_file(f{1},'path');
+                        if ~isempty(subDir) % subdirectory detected
+                            for d = strsplit(subDir,filesep)
+                                currDestStreamPath = fullfile(currDestStreamPath,d{1});
+                                dirMake(currDestStreamPath);
+                            end
+                        end
+                        copyfile(fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1}));
+                    end
                 end
             end
 
