@@ -4,6 +4,11 @@ function [val, index] = getSetting(rap,settingstring,varargin)
 % [val, index] = getSetting(rap,settingstring,index);
 % [val, index] = getSetting(rap,settingstring,'subject',subj);
 % [val, index] = getSetting(rap,settingstring,'fmrirun',[subj, run]);
+    if ~isfield(rap.tasklist.currenttask,'settings')
+        logging.warning('No setting is not specified.');
+        val = [];
+        return
+    end
 
     % Parse setting path
     settingpath = strsplit(settingstring,'.');
@@ -16,10 +21,11 @@ function [val, index] = getSetting(rap,settingstring,varargin)
         else
             logging.warning('Setting <%s> is not specified.',settingstring);
             val = [];
+            return
         end
     end
 
-    if ~isempty(val) && (nargin > 2) % index
+    if nargin > 2 % index
         if numel(varargin) == 1
             index = varargin{1};
             if ischar(val)

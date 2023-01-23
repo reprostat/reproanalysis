@@ -1,5 +1,5 @@
 % Get file(s) from input- or outputstream
-%  function getFileByStream(rap,domain,indices,streamName,['streamType','input'|'output'],['isProbe',false|true])
+%  function getFileByStream(rap,domain,indices,streamName,['streamType','input'|'output'],['checkHash',false|true],['isProbe',false|true])
 %  e.g.,
 %   getFileByStream(rap,'subject',[1],'structural')
 %   getFileByStream(rap,'fmrirun',[1,1],'fmri','output')
@@ -8,11 +8,14 @@
 % File names may be provided in a cell array or as a character matrix.
 % File names may either be specified using a relative to task path or absolute path. If the latter, the path is converted to relative.
 % By default, it tries to locate the inputstream then the outputstream. If stream type is specified, then it tries to locate only the specified stream type.
+% It returns all stream relevant for the specified domain
 
 function fileList = getFileByStream(rap,domain,indices,streamName,varargin)
 
     argParse = inputParser;
     argParse.addParameter('streamType',{'input' 'output'},@(x) ischar(x) & any(strcmp({'input','output'},x)));
+    argParse.addParameter('checkHigherDomain',false,@islogical);
+    argParse.addParameter('checkHash',true,@islogical);
     argParse.addParameter('isProbe',false,@islogical);
     argParse.parse(varargin{:});
 
@@ -66,7 +69,7 @@ function fileList = getFileByStream(rap,domain,indices,streamName,varargin)
             descHash = descHash{1};
             fileList = [fileList; reshape(inStream(2:end-1),[],1)]; % last is newline
             fileHash = getHashByFiles(fileList,'localroot',taskPath);
-            if ~strcmp(descHash,fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
+            if argParse.Results.checkHash && ~strcmp(descHash,fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
             fileList = fullfile(taskPath,fileList);
         else
             if ~argParse.Results.isProbe, logging.error('\t%s stream %s is empty',io{1},streamName);

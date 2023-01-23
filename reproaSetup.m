@@ -1,5 +1,8 @@
 function reproaSetup()
 % Reproducible Analysis - wrapper around reproaClass to ensure clean start with toolboxes in path
+    REQUIREDOCTAVEPACKAGES = {...
+        'video','creating videos for checking registrations';...
+        };
 
     global reproacache
 
@@ -18,6 +21,28 @@ function reproaSetup()
 
     reproa = reproaClass();
     reproacache('reproa') = reproa;
+
+    % Check Octave depedencies
+    if isOctave()
+        logging.info('Checking required Octave packages...');
+        [~,pkgInfo] = pkg('list');
+        for indP = 1:size(REQUIREDOCTAVEPACKAGES,1)
+            pkgName = REQUIREDOCTAVEPACKAGES{indP,1};
+            logging.info('\t%s\t- %s',REQUIREDOCTAVEPACKAGES{indP,:});
+            selP = cellfun(@(p) strcmp(p.name,pkgName), pkgInfo);
+            if any(selP)
+                toLoad = ~pkgInfo{selP}.loaded;
+            else
+                logging.info('\t\tInstalling...');
+                pkg('install','-forge',pkgName);
+                toLoad = true;
+            end
+            if toLoad
+                logging.info('\t\tLoading...');
+                pkg('load',pkgName);
+            end
+        end
+    end
 
 end
 

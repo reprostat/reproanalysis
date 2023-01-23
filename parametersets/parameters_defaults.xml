@@ -48,7 +48,7 @@
         <autoidentifystructural desc="Automatically identify structurals?" options="none|choosefirst|chooselast|average|multiple" ui="optionlist">choosefirst</autoidentifystructural>
         <autoidentifyt2 desc="Automatically identify T2?" options="none|choosefirst|chooselast|average|multiple" ui="optionlist">choosefirst</autoidentifyt2>
         <autoidentifyfieldmaps desc="Positive or negatve number indicates fieldmap after or before EPI, respectively. 0 means no fieldmaps" ui="yesno">0</autoidentifyfieldmaps>
-        <diagnosticvideos desc="Enable diagnostic videos (matlab not stable on some platforms)" ui="yesno">0</diagnosticvideos>
+        <diagnosticvideoframestep desc="Capture every [diagnosticvideoframestep]th slice on diagnostic videos. If 0, diagnostic videos are disabled" ui="double">0</diagnosticvideoframestep>
         <garbagecollection desc="Perform garbage collection after the analysis" ui="yesno">0</garbagecollection>
         <restorepath desc="Restore linux and MATLAB path upon closing" ui="yesno">0</restorepath>
         <minver desc="Minimum allowed version" ui="double">5.0.0</minver>
