@@ -4,6 +4,8 @@
     <local>
         <directoryconventions>
             <rawdatadir desc="Directory to find raw MRI data" ui="dir_list">D:/Download/data</rawdatadir>
+            <T1template desc="Location of T1 template, now relative to SPM path" ui="dir">toolbox\OldNorm\T1.nii</T1template>
+            <mailerserver desc="Path to file containing E-mail address and password for the mailer account for sending notifications (empty means sending no emails)" ui="text">$HOME\.reproa\mailerserver</mailerserver>
             <toolbox desc="Toolbox with implemented interface in extrafunctions/toolboxes" ui="custom">
                 <name desc="Name corresponding to the name of the interface without the 'Class' suffix" ui="text">spm</name>
                 <dir ui="dir">D:/Programs/spm12</dir>
