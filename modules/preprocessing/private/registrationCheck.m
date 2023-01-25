@@ -1,6 +1,6 @@
 % FSL-like overlay + SPM orthview video for registration diagnostics
 %
-% registrationCheck(rap,domain,indices,background,output1,...)
+% registrationCheck(rap,domain,indices,background,output1,...[,'mode','seperate'|'combined'])
 %
 % domain and indices MUST correspond to the stream input at the lower domain
 % images (backgroud and output(s)) can be:
@@ -12,6 +12,11 @@
 function registrationCheck(rap,domain,indices,background,varargin)
 
     output = varargin;
+    mode = 'separate';
+    if (numel(varargin) >= 2) && strcmp(varargin{end-1}, 'mode') % minimum 1 outputs + parameter-value pair
+        output = varargin(1:end-2);
+        mode = varargin{end};
+    end
 
     % backgroud
     if ~exist(background,'file'), background = getFileByStream(rap,domain,indices,background,'checkHash',false); end
@@ -40,30 +45,38 @@ function registrationCheck(rap,domain,indices,background,varargin)
         windowSize = [50 50 H H]; %windowSize(3) windowSize(4)];
         set(fig,'Position', windowSize)
 
-        %         spm_check_registration(background);
-        %         spm_orthviews('addcolouredimage',1,image{1}(i,:), OVERcolours{i})
-        spm_check_registration(char(background,output{:}));
-
-        % Contours
         global st;
-        switch spm('ver')
-            case {'SPM12b' 'SPM12'}
-                for v = 1:2 % show contours only of the background and the first output
-                    [h f] = getContextmenuCallback(st.vols{v}.ax{1}.ax,'Contour|Display|all but');
-                    f(h,[]);
-                    hM = getContextmenuCallback(st.vols{v}.ax{1}.ax,'Contour');
-                    UDc = get(hM,'UserData'); UDc.nblines = 1; set(hM,'UserData',UDc); % narrow
-                    spm_ov_contour('redraw',v,{});
+        switch mode
+            case 'separate'
+                spm_check_registration(char(background,output{:}));
+
+                % Contours
+                switch spm('ver')
+                    case {'SPM12b' 'SPM12'}
+                        for v = 1:2 % show contours only of the background and the first output
+                            [h f] = getContextmenuCallback(st.vols{v}.ax{1}.ax,'Contour|Display|all but');
+                            f(h,[]);
+                            hM = getContextmenuCallback(st.vols{v}.ax{1}.ax,'Contour');
+                            UDc = get(hM,'UserData'); UDc.nblines = 1; set(hM,'UserData',UDc); % narrow
+                            spm_ov_contour('redraw',v,{});
+                        end
                 end
+            case 'combined'
+                LUT = distinguishable_colors(numel(output),[0 0 0; 0.5 0.5 0.5; 1 1 1]);
+                spm_check_registration(background);
+                for o = 1:numel(output)
+                    spm_orthviews('addcolouredimage',1,output{o},LUT(o,:));
+                end
+                spm_orthviews('Redraw');
         end
 
+        % Intialise slices
         for v = 1:numel(st.vols)
             if isempty(st.vols{v}), break; end
             bb(:,:,v) = spm_get_bbox(st.vols{v});
         end
         nVols = v-1;
 
-        % Intialise slices
         step = max([1, rap.options.diagnosticvideoframestep]);
         % slices{1} = -85:1:85; % sagittal
         % slices{2} = -120:1:90; % coronal
@@ -109,17 +122,18 @@ function registrationCheck(rap,domain,indices,background,varargin)
         % Video
         if rap.options.diagnosticvideoframestep == 0, logging.info('Diagnostic videos disabled. Check rap.options.diagnosticvideos!');
         else
-            movieFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s.mp4',rap.tasklist.currenttask.name));
+            movieFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s_%s.mp4',rap.tasklist.currenttask.name,spm_file(st.vols{v}.fname,'basename')));
             if exist(movieFilename,'file'), delete(movieFilename);  end
             video = VideoWriter(movieFilename); video.open();
+
+            for d = 1:size(slicesToVideo,2)
+                spm_orthviews('reposition', slicesToVideo(:,d));
+                video.writeVideo(getframe(fig));
+            end
+
+            video.close();
         end
 
-        for d = 1:size(slicesToVideo,2)
-            spm_orthviews('reposition', slicesToVideo(:,d));
-            video.writeVideo(getframe(fig));
-        end
-
-        video.close();
         close(spm_figure('GetWin','Graphics'));
     end
 

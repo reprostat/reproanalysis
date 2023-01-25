@@ -90,10 +90,10 @@ function rap = segment(rap, command, subj)
             job.warp = cfgNormalisation;
             if job.warp.samp < 2, logging.warning('Note that the sampling distance is small, which means this might take up to a couple of hours!'); end
 
-%            tic
-%            logging.info('Starting to segment');
-%            spm_preproc_run(job);
-%            logging.info('\tDone in %.1f minutes.', toc/60);
+            tic
+            logging.info('Starting to segment');
+            spm_preproc_run(job);
+            logging.info('\tDone in %.1f minutes.', toc/60);
 
             %% Prepare outputs
             % deformation fields (only one - named after the first channel)
@@ -192,7 +192,7 @@ function rap = segment(rap, command, subj)
             putFileByStream(rap,'subject',subj,'inverse_deformationfield', invFieldFn);
 
             %% Diagnostics
-%             diag(rap,subj);
+            diag(rap,subj);
 
         case 'checkrequirements'
             % Remove "input as output" stream not to be created
@@ -208,68 +208,32 @@ function rap = segment(rap, command, subj)
 end
 
 function diag(rap,subj) % [TA]
-% SPM, AA
-Simg = aas_getfiles_bystream(rap,subj,'structural');
-localpath = aas_getsubjpath(rap,subj);
-outSeg = char(...
-    aas_getfiles_bystream(rap,subj,'native_grey'),...
-    aas_getfiles_bystream(rap,subj,'native_white'),...
-    aas_getfiles_bystream(rap,subj,'native_csf'));
-outNSeg = char(...
-    aas_getfiles_bystream(rap,subj,'normalised_density_grey'),...
-    aas_getfiles_bystream(rap,subj,'normalised_density_white'),...
-    aas_getfiles_bystream(rap,subj,'normalised_density_csf'));
+    Simg = getFileByStream(rap,'subject',subj,'structural','streamType','input');
+    Timg = rap.directoryconventions.T1template;
+    if ~exist(Timg,'file'), Timg = fullfile(spm('dir'), Timg); end
+    if ~exist(Timg,'file'), logging.error('Couldn''t find template T1 image %s.', Timg); end
+    Timg = which(Timg);
 
-OVERcolours = {[1 0 0], [0 1 0], [0 0 1]};
+    nativeSeg = getFileByStream(rap,'subject',subj,'native_segmentations');
+    normSeg = getFileByStream(rap,'subject',subj,'normaliseddensity_segmentations');
 
-%% Draw native template
-spm_check_registration(Simg)
-% Add normalised segmentations...
-for r = 1:size(outSeg,1)
-    spm_orthviews('addcolouredimage',1,deblank(outSeg(r,:)), OVERcolours{r});
-end
+    % Only for GM WM
+    registrationCheck(rap,'subject',1,Simg{1},nativeSeg{1:2},'mode','combined');
+    registrationCheck(rap,'subject',1,Timg,normSeg{1:2},'mode','combined');
 
-spm_orthviews('reposition', [0 0 0])
+    %% Another diagnostic image, looking at how well the segmentation worked...
+    nSeg = 3; % Only for GM, WM, CSF
+    Pthresh = 0.95;
 
-try f = spm_figure('FindWin', 'Graphics'); catch; f = figure(1); end
-set(f,'Renderer','zbuffer');
-print('-djpeg','-r150',...
-    fullfile(localpath,['diagnostic_' rap.tasklist.main.module(rap.tasklist.currenttask.modulenumber).name '_N_blob.jpg']));
+    YS = spm_read_vols(spm_vol(Simg{1}));
+    YSeg = cellfun(@(seg) YS(spm_read_vols(spm_vol(seg))>=Pthresh), nativeSeg(1:nSeg),'UniformOutput',false);
+    hold on; LUT = distinguishable_colors(nSeg,[0 0 0; 0.5 0.5 0.5; 1 1 1]);
+    arrayfun(@(s) hist(YSeg{s}, 25, "facecolor", LUT(s,:), "edgecolor", "none"), 1:nSeg);
 
-%% Draw warped template
-tmpfile = aas_copy_t1_nii(rap, localpath);
+    [~, p, ~, stats] = ttest2(YSeg{1:2});
+    title(sprintf('GM vs WM... T(%d)=%0.1f, p=%1.3f', stats.df, stats.tstat, p))
 
-spm_check_registration(tmpfile)
-% Add normalised segmentations...
-for r = 1:size(outNSeg,1)
-    spm_orthviews('addcolouredimage',1,outNSeg(r,:), OVERcolours{r})
-end
-spm_orthviews('reposition', [0 0 0])
-
-try f = spm_figure('FindWin', 'Graphics'); catch; f = figure(1); end
-set(f,'Renderer','zbuffer');
-print('-djpeg','-r150',...
-    fullfile(localpath,['diagnostic_' rap.tasklist.main.module(rap.tasklist.currenttask.modulenumber).name '_W_blob.jpg']));
-
-close(f); clear global st;
-
-%% Another diagnostic image, looking at how well the segmentation worked...
-Pthresh = 0.95;
-
-ROIdata = roi2hist(Simg, outSeg, Pthresh);
-
-[junk, pv, junk, stats] = ttest2(ROIdata{2}, ROIdata{1});
-
-title(sprintf('GM vs WM... T(%d) = %0.2f, p = %1.4f', stats.df, stats.tstat, pv))
-
-set(2,'Renderer','zbuffer');
-print(2,'-djpeg','-r150',...
-    fullfile(localpath,['diagnostic_' rap.tasklist.main.module(rap.tasklist.currenttask.modulenumber).name '_Hist.jpg']));
-try close(2); catch; end
-
-%% Contours VIDEO of segmentations
-aas_checkreg(rap,subj,outSeg(1,:),Simg)
-aas_checkreg(rap,subj,outNSeg(1,:),tmpfile)
-
-delete(tmpfile);
+    print(gcf,'-djpeg','-r150',...
+        fullfile(getPathByDomain(rap,'subject',subj),['diagnostic_' rap.tasklist.currenttask.name '_histogram.jpg']));
+    close(gcf);
 end
