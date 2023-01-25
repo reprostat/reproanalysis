@@ -15,9 +15,9 @@
     </settings>
     
     <outputstreams>
-        <stream isessential='0'>structural</stream>
-        <stream isessential='0'>structural_header</stream>
-        <stream isessential='0'>t2</stream>
-        <stream isessential='0'>t2_header</stream>
+        <stream isrenameable='1'>structural</stream>
+        <stream isrenameable='1'>structural_header</stream>
+        <stream isrenameable='1'>t2</stream>
+        <stream isrenameable='1'>t2_header</stream>
     </outputstreams>
 </rap>
