@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='subject' desc='SPM "Unified Segmentation and Normalisation' modality='MRI'/>
+            
+    <hpc>
+        <timeBase>10</timeBase>
+        <memoryBase>2</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>2</permanenceofoutput>
+    
+    <settings>
+        <biascorrection>
+            <biasfwhm desc='FWHM of the bias field'>60</biasfwhm>
+            <biasreg desc='Regularization for the bias field'>.001</biasreg>
+            <write desc='Write out bias correction [biasfield bias-corrected image]?'>0 0</write>
+        </biascorrection>
+
+        <segmentation>
+            <tpm desc='Path to tissue probability map file, if empty SPM defaults will be used'></tpm>
+            <ngaus desc='Number of gaussians for each tissue class'>2 2 2 3 4 2</ngaus>
+        </segmentation>
+
+        <normalisation>
+            <vox desc='Voxel size of segmented images'>1.5</vox>
+            <affreg desc='Initial affine registration, it can be a regularisation type (see spm_maff8) or a 1-6 transformation parameters corresponding to the rigid-body movement (3x translation, 3x rotation)'>mni</affreg>
+            <samp desc='Sampling distance (mm)'>1</samp>
+            <mrf desc='Markov Random Field argument'>1</mrf>
+            <write desc='Write out deformation fields [forward inverse]?'>1 1</write>
+            <cleanup desc='Extracting the brain from segmented images'>0</cleanup>
+        </normalisation>        
+        
+        <writecombined desc='Write outputs masked with a (combination of) thresholded tissue probabilities, [1x6] array of thresholds, negative threshold means upper threshold, zero means exclusion'></writecombined>
+        <writenormalised>
+            <method desc="Normalisation method to apply, 'none' omits this step, 'push' and 'pull are only interpreted SPM12 (they give the same output in SPM8)" options='push|pull|none' ui='optionlist'>pull</method>
+            <fwhm desc='FWHM to apply after normalisation? - only for SPM12'>0.5 0.5 0.5</fwhm>
+            <preserve desc='0 = preserve concentration (unmodulated), 1 = preserved total (modulated) - only for SPM12/push'>1</preserve>
+        </writenormalised>
+    </settings>
+    
+    <inputstreams>
+        <stream domain="subject" diagnostic="1">structural</stream>
+        <stream domain="subject" isessential="0">t2</stream> 
+    </inputstreams>
+    
+    <outputstreams>
+        <stream domain="subject" isrenameable="1">structural</stream>
+        <stream domain="subject" isrenameable="1">t2</stream>
+        
+        <stream domain="subject">segmentation_estimates</stream>
+        <stream domain="subject">forward_deformationfield</stream>
+        <stream domain="subject">inverse_deformationfield</stream>
+        
+        <stream domain="subject">native_segmentations</stream>
+        <stream domain="subject">dartelimported_segmentations</stream>
+        <stream domain="subject">normaliseddensity_segmentations</stream>
+        <stream domain="subject">normalisedvolume_segmentations</stream>
+    </outputstreams>
+</rap>
