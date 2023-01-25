@@ -37,9 +37,9 @@ function rap = renameStream(rap,taskName,streamType,originalStream,newStream)
                 newStreamSpec.(spec{1}) = str2double(spec{2});
             end
         end
+        rap.tasklist.main(selectTask).([streamType 'streams'])(selectStream) = newStreamSpec;
     else
-        newStreamSpec = [];
+        rap.tasklist.main(selectTask).([streamType 'streams']) = rap.tasklist.main(selectTask).([streamType 'streams'])(~selectStream);
     end
 
-    rap.tasklist.main(selectTask).([streamType 'streams'])(selectStream) = newStreamSpec;
 end
