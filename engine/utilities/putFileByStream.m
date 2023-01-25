@@ -9,8 +9,11 @@
 
 function  putFileByStream(rap,domain,indices,streamName,fileNames)
 
-    % If fully specified
-    streamName = strsplit(streamName,'.'); streamName = streamName{end};
+    % locate stream
+    selectStream = arrayfun(@(s) any(strcmp(s.name,streamName)), rap.tasklist.currenttask.outputstreams);
+    if ~any(selectStream), logging.error('Task %s has not output %s',rap.tasklist.currenttask.name,streamName); end
+    stream = rap.tasklist.currenttask.outputstreams(selectStream);
+    streamName = stream.name; if iscell(streamName), streamName = streamName{1}; end
 
     taskPath = getPathByDomain(rap,domain,indices);
 
