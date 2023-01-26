@@ -16,6 +16,10 @@ function rap = segment(rap, command, subj)
     %            rap = aas_report_add(rap,subj,'</td></tr></table>');
     %        end
         case 'doit'
+            global reproacache
+            SPM = reproacache('toolbox.spm');
+            SPM.reload(true); % update defaults
+
             %% Options
             cfgBiascorrection = getSetting(rap,'biascorrection');
 

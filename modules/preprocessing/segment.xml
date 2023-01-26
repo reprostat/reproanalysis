@@ -39,8 +39,8 @@
     </settings>
     
     <inputstreams>
-        <stream domain="subject" diagnostic="1">structural</stream>
-        <stream domain="subject" isessential="0">t2</stream> 
+        <stream domain="subject" tobemodified="0">structural</stream>
+        <stream domain="subject" tobemodified="0" isessential="0">t2</stream> 
     </inputstreams>
     
     <outputstreams>

@@ -19,6 +19,9 @@ function rap = coregextended(rap,command,subj)
     %            aap = aas_report_add(aap,subj,'</td></tr></table>');
     %        end
         case 'doit'
+            global reproacache
+            SPM = reproacache('toolbox.spm');
+            SPM.reload(true); % update defaults
 
             % Check the template
             % - T1 template
