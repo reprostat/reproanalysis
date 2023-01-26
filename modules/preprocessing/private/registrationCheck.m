@@ -41,8 +41,8 @@ function registrationCheck(rap,domain,indices,background,varargin)
         % Resize slice display for optimal fit
         fig = spm_figure('GetWin','Graphics');
         windowSize = get(0,'ScreenSize');
-        H = windowSize(4) - windowSize(2) - 50 - 50; % 50 for system menu and statusbar, 50 for figure menu
-        windowSize = [50 50 H H]; %windowSize(3) windowSize(4)];
+        windowSize(4) = windowSize(4) - windowSize(2) - 50 - 50; % 50 for system menu and statusbar, 50 for figure menu
+        windowSize(2) = 50;
         set(fig,'Position', windowSize)
 
         global st;
