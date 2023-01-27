@@ -22,7 +22,7 @@ function rap = renameStream(rap,taskName,streamType,originalStream,newStream)
     else
         selectStream = strcmp({rap.tasklist.main(selectTask).([streamType 'streams']).name},originalStream);
         if ~any(selectStream), logging.error('%s stream %s of task %s not found',streamType,originalStream,rap.tasklist.main(selectTask).name); end
-        if ~rap.tasklist.main(selectTask).([streamType 'streams'])(selectStream).isrenameable, logging.error('%s stream %s of task %s is not renameable',streamType,originalStream,rap.tasklist.main(selectTask).name); end
+        if ~rap.tasklist.main(selectTask).([streamType 'streams'])(selectStream).isrenameable && ~rap.tasklist.main(selectTask).([streamType 'streams'])(selectStream).isessential, logging.error('%s stream %s of task %s is not renameable and cannot be missed',streamType,originalStream,rap.tasklist.main(selectTask).name); end
         newStreamSpec = rap.tasklist.main(selectTask).([streamType 'streams'])(selectStream);
     end
 
