@@ -32,8 +32,10 @@ end
 end
 
 function validateParameters(paramroot,parameters,schema)
+    if isfield(schema,'ATTRIBUTE') && isfield(schema.ATTRIBUTE,'ignorecheck') && schema.ATTRIBUTE.ignorecheck, return; end % ignore parameter
+
     fieldsToCheck = intersect(fieldnames(parameters),fieldnames(schema));
-    fieldsMissing = setdiff(fieldnames(schema),[fieldnames(parameters)' {'ATTRIBUTE'}],'stable'); % ignore ATTRIBUTE
+    fieldsMissing = setdiff(fieldnames(schema),[fieldnames(parameters)' {'ATTRIBUTE' 'CONTENT'}],'stable'); % ignore ATTRIBUTE and CONTENT
     fieldsExtra = setdiff(fieldnames(parameters),fieldnames(schema),'stable');
 
     if ~isempty(fieldsMissing), logging.error(['Missing field(s) in ' paramroot ': ' strjoin(fieldsMissing,',')]); end
