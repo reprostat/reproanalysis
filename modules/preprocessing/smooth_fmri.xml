@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <!--  The domain and the modality of a generic module is determined by the main input, which is expected to be the last inputstream -->
+    <header mfile='smooth' domain='fmrirun' desc='SPM smooth' modality='FMRI'/>
+            
+    <hpc>
+        <timeBase>0.5</timeBase>
+        <memoryBase>1</memoryBase>
+    </hpc>
+    
+    <permanenceofoutput>2</permanenceofoutput>
+    
+    <settings>
+        <FWHM>5</FWHM>
+    </settings>
+    
+    <inputstreams>
+        <stream domain='fmrirun' tobemodified='0'>fmri</stream>
+    </inputstreams>
+    
+    <outputstreams>
+        <stream domain='fmrirun'>fmri</stream>
+    </outputstreams>    
+</rap>
