@@ -18,9 +18,9 @@
     </settings>
             
     <inputstreams>
-        <stream domain='subject' ismodified='0'>forward_deformationfield</stream>
-        <stream domain='subject' ismodified='0' isrenameable='1'>structural</stream> 
-        <stream domain='fmrirun' ismodified='0'>fmri</stream>
+        <stream domain='subject' tobemodified='0'>forward_deformationfield</stream>
+        <stream domain='subject' tobemodified='0' isrenameable='1'>structural</stream> 
+        <stream domain='fmrirun' tobemodified='0'>fmri</stream>
     </inputstreams>
             
     <outputstreams>
