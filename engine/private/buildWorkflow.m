@@ -90,7 +90,7 @@ function rap = buildWorkflow(rap,varargin)
 
         % update domain and modality of generic modules based on the main input, which is expected to be the last inputstream
         if strcmp(rap.tasklist.main(indTask).header.domain, '?')
-            rap.tasklist.main(indTask).header.domain = rap.tasklist.main(indTask).inputstreams(end).domain;
+            rap.tasklist.main(indTask).header.domain = rap.tasklist.main(indTask).inputstreams(end).streamdomain;
             rap.tasklist.main(indTask).header.modality = rap.tasklist.main(indTask).inputstreams(end).modality;
         end
     end
