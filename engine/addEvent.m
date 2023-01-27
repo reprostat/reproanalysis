@@ -46,7 +46,7 @@ else
 end
 
 if ~exist('parametric','var')
-    parametric=[];
+    parametric = [];
 end
 
 % sort the onsets, and apply same reordering to dur & parametric
@@ -54,35 +54,36 @@ end
 if numel(dur)>1
     dur=dur(ind);
 end;
-if ~isempty(parametric)
-    for p = 1:numel(parametric)
-        if strcmp(parametric(p).name,'time') && isempty(parametric(p).P) % automatic temporal modulation
-            parametric(p).name = 'time_tosc'; % to scale
-            parametric(p).P = ons;
-        else
-            parametric(p).P = parametric(p).P(ind);
-        end
+for p = 1:numel(parametric)
+    if strcmp(parametric(p).name,'time') && isempty(parametric(p).P) % automatic temporal modulation
+        parametric(p).name = 'time_tosc'; % to scale
+        parametric(p).P = ons;
+    else
+        parametric(p).P = parametric(p).P(ind);
     end
 end
 
 % find models that corresponds and add events if they exist
 for mInd = moduleindex
 
-    whichmodel=[strcmp({rap.tasksettings.(modulename)(mInd).model.subject},subject)] & [strcmp({rap.tasksettings.(modulename)(mInd).model.run},run)];
+    % clear empty model (first call)
+    if isempty(rap.tasksettings.(modulename)(mInd).model.subject), rap.tasksettings.(modulename)(mInd).model(1) = []; end
+
+    whichmodel=[strcmp({rap.tasksettings.(modulename)(mInd).model.subject},subject)] & [strcmp({rap.tasksettings.(modulename)(mInd).model.fmrirun},run)];
     if ~any(whichmodel)
         emptymod=[];
         emptymod.subject=subject;
-        emptymod.run=run;
+        emptymod.fmrirun=run;
         emptymod.event.name=eventname;
         emptymod.event.ons=ons;
         emptymod.event.dur=dur;
-        emptymod.event.parametric=parametric;
+        emptymod.event.modulation=parametric;
         rap.tasksettings.(modulename)(mInd).model(end+1)=emptymod;
     else
         rap.tasksettings.(modulename)(mInd).model(whichmodel).event(end+1).name=eventname;
         rap.tasksettings.(modulename)(mInd).model(whichmodel).event(end).ons=ons;
         rap.tasksettings.(modulename)(mInd).model(whichmodel).event(end).dur=dur;
-        rap.tasksettings.(modulename)(mInd).model(whichmodel).event(end).parametric=parametric;
+        rap.tasksettings.(modulename)(mInd).model(whichmodel).event(end).modulation=parametric;
     end
 
 end

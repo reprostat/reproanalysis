@@ -175,7 +175,11 @@ for subj = SUBJ
                     % locate firstlevelmodel modules
                     indModel = [];
                     for stageInd = find(strcmp({rap.tasklist.main.name},'firstlevelmodel'))
-                        runs = textscan(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedruns,'%s'); runs = runs{1};
+                        if isstruct(rap.tasklist.main(stageInd).extraparameters)
+                            runs = strsplit(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedruns,' ');
+                        else
+                            runs = {rap.acqdetails.fmriruns.name};
+                        end
                         if any(strcmp(runs,'*')) || any(strcmp(runs,taskname)), indModel(end+1) = rap.tasklist.main(stageInd).index; end
                     end
 
@@ -209,7 +213,7 @@ for subj = SUBJ
                         for m = indModel
                             for e = 1:numel(eventNames)
                                 if BIDSsettings.omitNullEvents && strcmpi(eventNames{e},'null'), continue; end
-                                rap = addEvent(rap,sprintf('%s_%05d',firstlevelmodel,m),subjname,taskname,eventNames{e},eventOnsets{e}-tDummies,eventDurations{e});
+                                rap = addEvent(rap,sprintf('firstlevelmodel_%05d',m),subjname,taskname,eventNames{e},eventOnsets{e}-tDummies,eventDurations{e});
                             end
                         end
                     end
