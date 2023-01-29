@@ -40,12 +40,12 @@ function [val, index] = getSetting(rap,settingstring,varargin)
                     index = [];
                     if ~isfield(val,'subject'), logging.warning('There is no subject-specific setting.');
                     else
-                        index = find(strcmp({val.subject},rap.acqdetails.subject(varargin{2}).subjname));
+                        index = find(strcmp({val.subject},rap.acqdetails.subject(varargin{2}).subjname) | strcmp({val.subject},'*'));
                     end
                     if isempty(index)
                         logging.warning('Setting <%s> for %s is not specified.',settingstring,rap.acqdetails.subject(varargin{2}).subjname);
-                        val = {[]};
-                        index = 1;
+                        val = [];
+                        return
                     end
                     if numel(index) > 1
                         logging.warning('More than 1 setting <%s> for %s is specified -> only the first will be returned.',settingstring,rap.acqdetails.subject(varargin{2}).subjname);
@@ -55,12 +55,13 @@ function [val, index] = getSetting(rap,settingstring,varargin)
                     index = [];
                     if ~isfield(val,varargin{1}), logging.warning('There is no %s-specific setting.',varargin{1});
                     else
-                        index = find(strcmp({val.subject},rap.acqdetails.subject(varargin{2}(1)).subjname) & strcmp({val.(varargin{1})},getRunName(rap,varargin{2}(2))));
+                        index = find((strcmp({val.subject},rap.acqdetails.subjects(varargin{2}(1)).subjname) | strcmp({val.subject},'*')) &...
+                            (strcmp({val.(varargin{1})},getRunName(rap,varargin{2}(2))) | strcmp({val.(varargin{1})},'*')));
                     end
                     if isempty(index)
                         logging.warning('Setting <%s> for %s is not specified!',settingstring,getRunName(rap,varargin{2}(2)));
-                        val = {[]};
-                        index = 1;
+                        val = [];
+                        return
                     end
             end
             val = num2cell(val);

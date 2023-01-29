@@ -41,7 +41,7 @@ switch domain
             end
         end
 
-        % Parse selected_runs if necessary
+        % Parse selected_runs if necessary (it is a bit redundant but avoids infinite recursivity with parseSelectedruns)
         rap = parseSelectedruns(rap,runs,0);
         I = intersect(rap.acqdetails.selectedruns,I);
         N = numel(I);
