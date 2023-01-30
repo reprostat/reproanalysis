@@ -4,9 +4,16 @@ argParse = inputParser;
 argParse.addRequired('sIn',@isstruct);
 argParse.addRequired('sUpd',@isstruct);
 argParse.addParameter('Mode','',@(x) ischar(x) & any(strcmp({'update','extend',''},x)));
+argParse.addParameter('ignoreEmpty',false,@(x) islogical(x) | isnumeric(x));
 argParse.parse(varargin{:});
 sIn = argParse.Results.sIn;
 sUpd = argParse.Results.sUpd;
+
+if argParse.Results.ignoreEmpty
+    fields = fieldnames(sUpd);
+    isEmpty = cellfun(@(f) isempty(sUpd.(f)), fields);
+    sUpd = rmfield(sUpd,fields(isEmpty));
+end
 
 % Nested structs
 fields = fieldnames(sIn);
