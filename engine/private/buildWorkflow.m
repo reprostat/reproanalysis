@@ -102,9 +102,11 @@ function rap = buildWorkflow(rap,varargin)
         end
         fprintf(pfid,'}');
         fclose(pfid);
-        % - create provenance image (only in unix, requires dot)
-        if ~unix('which dot')
-            unix(sprintf('dot %s -Grankdir=TB -Tpng -o %s',provfn,strrep(provfn,'dot','png')));
+        % - create provenance image (requires Graphviz/dot)
+        if ~system('which dot')
+            system(sprintf('dot %s -Grankdir=TB -Tpng -o %s',provfn,strrep(provfn,'dot','png')));
+        else
+            logging.warning('Drawing the provenance graph requires Graphviz added to the system path.');
         end
 
         fclose(cfid);
