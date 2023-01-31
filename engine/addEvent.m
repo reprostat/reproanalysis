@@ -56,7 +56,7 @@ if numel(dur)>1
 end;
 for p = 1:numel(parametric)
     if strcmp(parametric(p).name,'time') && isempty(parametric(p).P) % automatic temporal modulation
-        parametric(p).name = 'time_tosc'; % to scale
+        parametric(p).name = 'time_toScale'; % to scale
         parametric(p).P = ons;
     else
         parametric(p).P = parametric(p).P(ind);
