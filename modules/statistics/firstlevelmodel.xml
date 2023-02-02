@@ -59,14 +59,14 @@
     </settings>
             
     <inputstreams>
-        <stream domain='fmrirun' isrenameable='1' tobemodified='0'>fmri</stream>
-        <stream domain='fmrirun' isessential='0'>fmri_header</stream>
-        <stream domain='fmrirun' isessential='0'>ppi</stream>
-        <stream domain='fmrirun' isessential='0'>sliceorder</stream>
-        <stream domain='fmrirun' isessential='0'>realignment_parameter</stream>                
-        <stream domain='fmrirun' isessential='0'>compartment_signal</stream>
-        <stream domain='fmrirun' isessential='0'>spikes</stream>
-        <stream domain='fmrirun' isessential='0'>denoising_regressors</stream>
+        <stream domain='fmrirun' tobemodified='0'>fmri</stream>
+        <stream domain='fmrirun' isessential='0' tobemodified='0'>fmri_header</stream>
+        <stream domain='fmrirun' isessential='0' tobemodified='0'>ppi</stream>
+        <stream domain='fmrirun' isessential='0' tobemodified='0'>sliceorder</stream>
+        <stream domain='fmrirun' isessential='0' tobemodified='0'>realignment_parameter</stream>                
+        <stream domain='fmrirun' isessential='0' tobemodified='0'>compartment_signal</stream>
+        <stream domain='fmrirun' isessential='0' tobemodified='0'>spikes</stream>
+        <stream domain='fmrirun' isessential='0' tobemodified='0'>denoising_regressors</stream>
     </inputstreams>
     
     <outputstreams>
