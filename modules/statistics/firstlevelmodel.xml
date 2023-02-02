@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='subject' desc='First-level model' modality='FMRI'/>
+            
+    <hpc>
+        <timeBase>0.5</timeBase>
+        <memoryBase>2</memoryBase>
+    </hpc>
+    
+    <permanenceofoutput>3</permanenceofoutput>
+    
+    <settings>
+        <firstlevelmasking desc='0 - none, 1 - implicit, 0-1 - proportion of globals'>1</firstlevelmasking>
+        <globalscaling>0</globalscaling>
+        <highpassfilter desc='in seconds'>128</highpassfilter>
+        
+        <xBF>
+            <T></T>
+            <T0></T0>
+            <UNITS ui='optionlist' options='secs|scans'>secs</UNITS>
+            <Volterra>1</Volterra>
+            <name desc="It can also be a custom basis function specified as a full path to the mat-file containing a structure named 'customBF' with fields 'fs' (sampling frequency in seconds) and 'bf' (NxM matrix, where N is the number of samples and M is the number of basis functions)" ui='optionlist' options='see spm_get_bf.m'>hrf</name>
+            <length>32</length>
+            <order>1</order>
+        </xBF>
+
+        <model>
+            <subject></subject>
+            <fmrirun></fmrirun>
+            <event>
+                <name></name>
+                <ons></ons>
+                <dur></dur>
+                <modulation ignorecheck='1'></modulation>
+            </event>
+        </model>
+        
+        <modelC>
+            <subject></subject>
+            <fmrirun></fmrirun>
+            <covariate>
+                <name></name>
+                <vector></vector>
+                <HRF></HRF>
+                <interest></interest>
+            </covariate>
+        </modelC>
+        
+        <includerealignmentparameters desc='Realignment parameters (if included) to be (extended and) included, [MxN] binary matrix where M corresponds to order (identical, squared, cubed, etc.) and 1:N-1 corresponds to derivatives/gradients (identical, grad(), grad(grad()), etc.) of the desired extension, the Nth column corresponds to spin history'>[0 0 0; 0 0 0]</includerealignmentparameters>
+        <includecompartmentsignal desc='Compartment signals (if available) to be included, 1-D array with numbers 1 2 3 4 corresponds to GM WM CSF OOH'>[]</includecompartmentsignal>
+        <includespikes>0</includespikes>
+        <includedenoising>0</includedenoising>
+
+        <orthogonalisation desc='enable/disable orthogoanlisation (only for SPM12 and above)'>1</orthogonalisation>
+        <autocorrelation desc='(wls requires rWLS toolbox)' ui='optionlist' options='none|AR(1)|wls'>AR(1)</autocorrelation>
+
+        <writeresiduals desc='write residuals (only for SPM12 and above), [] - none, 0 - corrected for no effect, * - corrected for all effect'></writeresiduals>      
+
+    </settings>
+            
+    <inputstreams>
+        <stream domain='fmrirun' isrenameable='1' tobemodified='0'>fmri</stream>
+        <stream domain='fmrirun' isessential='0'>fmri_header</stream>
+        <stream domain='fmrirun' isessential='0'>ppi</stream>
+        <stream domain='fmrirun' isessential='0'>sliceorder</stream>
+        <stream domain='fmrirun' isessential='0'>realignment_parameter</stream>                
+        <stream domain='fmrirun' isessential='0'>compartment_signal</stream>
+        <stream domain='fmrirun' isessential='0'>spikes</stream>
+        <stream domain='fmrirun' isessential='0'>denoising_regressors</stream>
+    </inputstreams>
+    
+    <outputstreams>
+        <stream domain='subject'>firstlevel_spm</stream>
+        <stream domain='subject'>firstlevel_betas</stream>
+        <stream domain='subject'>firstlevel_brainmask</stream>
+        <stream domain='fmrirun' isrenameable='1'>fmri</stream>
+    </outputstreams>
+            
+</rap>
+
