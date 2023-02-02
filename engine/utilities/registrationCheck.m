@@ -1,6 +1,6 @@
 % FSL-like overlay + SPM orthview video for registration diagnostics
 %
-% registrationCheck(rap,domain,indices,background,output1,...[,'mode','seperate'|'combined'])
+% registrationCheck(rap,domain,indices,background,output1,...[,'mode','seperate'|'combined'][,'prefix',pfx])
 %
 % domain and indices MUST correspond to the stream input at the lower domain
 % images (backgroud and output(s)) can be:
@@ -11,15 +11,23 @@
 
 function registrationCheck(rap,domain,indices,background,varargin)
 
+    % Parse
     output = varargin;
     mode = 'separate';
-    if (numel(varargin) >= 2) && strcmp(varargin{end-1}, 'mode') % minimum 1 outputs + parameter-value pair
-        output = varargin(1:end-2);
-        mode = varargin{end};
+    if any(strcmp(output, 'mode'))
+        iPar = find(strcmp(output, 'mode'));
+        mode = output{iPar+1};
+        output(iPar:iPar+1) = [];
+    end
+    pfx = '';
+    if any(strcmp(output, 'prefix'))
+        iPar = find(strcmp(output, 'prefix'));
+        pfx = output{iPar+1};
+        output(iPar:iPar+1) = [];
     end
 
     % backgroud
-    if ~exist(background,'file'), background = getFileByStream(rap,domain,indices,background,'checkHash',false); end
+    if ~exist(background,'file') && ~exist(spm_file(background,'number',''),'file'), background = getFileByStream(rap,domain,indices,background,'checkHash',false); end
     toExcl = [];
     for o = 1:numel(output)
         testO = strsplit(output{o},','); testO = testO{1}; % volume might be selected
@@ -108,7 +116,7 @@ function registrationCheck(rap,domain,indices,background,varargin)
 
         % - create image
         for v = 1:numel(slicesSummary)
-            slicesFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s_%s.jpg',rap.tasklist.currenttask.name,spm_file(st.vols{v}.fname,'basename')));
+            slicesFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s%s_%s.jpg',rap.tasklist.currenttask.name,pfx,spm_file(st.vols{v}.fname,'basename')));
             img = slicesSummary{v}{3};
             img(1:size(slicesSummary{v}{2},1),end+1:end+size(slicesSummary{v}{2},2),:) = slicesSummary{v}{2};
             img(1:size(slicesSummary{v}{1},1),end+1:end+size(slicesSummary{v}{1},2),:) = slicesSummary{v}{1};
@@ -122,7 +130,7 @@ function registrationCheck(rap,domain,indices,background,varargin)
         % Video
         if rap.options.diagnosticvideoframestep == 0, logging.info('Diagnostic videos disabled. Check rap.options.diagnosticvideos!');
         else
-            movieFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s_%s.mp4',rap.tasklist.currenttask.name,spm_file(st.vols{v}.fname,'basename')));
+            movieFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s%s_%s.mp4',rap.tasklist.currenttask.name,pfx,spm_file(st.vols{v}.fname,'basename')));
             if exist(movieFilename,'file'), delete(movieFilename);  end
             video = VideoWriter(movieFilename); video.open();
 
