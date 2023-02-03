@@ -17,6 +17,15 @@
 % Examples
 %  rap=addEvent(rap,'firstlevelmodel','*','*','listening',ons,dur);
 %  rap=addEvent(rap,'firstlevelmodel','01','audio','listening',ons,dur,parametric);
+%
+% Notes
+% 1) Avoid the use of spaces or special characters (~!@#$%^&*()_+}{|: etc)
+%    in event names. Specifically, avoid the use of >,< and * in the event name.
+%    Addtionally, while run and/or event names are not requiredto be in
+%    uppercase, it is generally good programming practice to always use
+%    uppercase for run and event names.
+% 2) Avoid event names ending with m<N> and p<N> becasue they will be parsed and
+%    interpreted as main and parametric order. See addContrast.m
 
 function rap = addEvent(rap,modulename,subject,run,eventname,ons,dur,parametric)
 
