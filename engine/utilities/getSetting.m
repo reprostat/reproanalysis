@@ -40,15 +40,15 @@ function [val, index] = getSetting(rap,settingstring,varargin)
                     index = [];
                     if ~isfield(val,'subject'), logging.warning('There is no subject-specific setting.');
                     else
-                        index = find(strcmp({val.subject},rap.acqdetails.subject(varargin{2}).subjname) | strcmp({val.subject},'*'));
+                        index = find(strcmp({val.subject},rap.acqdetails.subjects(varargin{2}).subjname) | strcmp({val.subject},'*'));
                     end
                     if isempty(index)
-                        logging.warning('Setting <%s> for %s is not specified.',settingstring,rap.acqdetails.subject(varargin{2}).subjname);
+                        logging.warning('Setting <%s> for %s is not specified.',settingstring,rap.acqdetails.subjects(varargin{2}).subjname);
                         val = [];
                         return
                     end
                     if numel(index) > 1
-                        logging.warning('More than 1 setting <%s> for %s is specified -> only the first will be returned.',settingstring,rap.acqdetails.subject(varargin{2}).subjname);
+                        logging.warning('More than 1 setting <%s> for %s is specified -> only the first will be returned.',settingstring,rap.acqdetails.subjects(varargin{2}).subjname);
                         index = index(1);
                     end
                  case {'fmrirun' 'specialrun'}
