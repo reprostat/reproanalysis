@@ -83,7 +83,18 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                                 dirMake(currDestStreamPath);
                             end
                         end
-                        copyfile(fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1}));
+                        if s.tobemodified || ~rap.options.hardlinks
+                            copyfile(fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1}));
+                        else
+                            if isOctave(), link(fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1}));
+                            else
+                                if ispc()
+                                    shell(sprintf('mklink /H %s %s', fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1})));
+                                else
+                                    shell(sprintf('ln %s %s', fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1})));
+                                end
+                            end
+                        end
                     end
                 end
             end
