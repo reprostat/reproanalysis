@@ -198,19 +198,21 @@ function rap = addContrast(rap, modulename, subjname, runspec, conspec, conname,
     run.weights = [];
 
     runspec = strsplit(runspec,':');
-    if numel(runspec) == 2 % 'runs'
-        for runspec = strsplit(runspec{2},'|')
-            specs = strsplit(runspec{1},'*');
-            run.names = [run.names specs(end)];
-            if numel(specs) == 2
-                run.weights = [run.weights str2double(specs{1})];
-            else
-                run.weights = [run.weights 1];
+    format = runspec{1};
+    switch format
+        case 'runs'
+            for runspec = strsplit(runspec{2},'|')
+                specs = strsplit(runspec{1},'*');
+                run.names = [run.names specs(end)];
+                if numel(specs) == 2
+                    run.weights = [run.weights str2double(specs{1})];
+                else
+                    run.weights = [run.weights 1];
+                end
             end
-        end
-    elseif strcmp(runspec{1},'*')
-        run.names = {rap.acqdetails.fmriruns.name};
-        run.weights = ones(1,numel(run.names));
+        case '*'
+            run.names = {rap.acqdetails.fmriruns.name};
+            run.weights = ones(1,numel(run.names));
     end
 
     if ischar(conspec)
@@ -251,14 +253,14 @@ function rap = addContrast(rap, modulename, subjname, runspec, conspec, conname,
                 % The first one is usually empty, makes for a good template in case the structure changes
                 emptycon=[];
                 emptycon.subject=subj{1};
-                emptycon.con.format=runspec;
+                emptycon.con.format=format;
                 emptycon.con.vector=conspec;
                 emptycon.con.fmrirun=run;
                 emptycon.con.type=contype;
                 emptycon.con.name=conname;
                 rap.tasksettings.(modulename)(mInd).contrast(end+1)=emptycon;
             else
-                rap.tasksettings.(modulename)(mInd).contrast(whichcontrast).con(end+1).format=runspec;
+                rap.tasksettings.(modulename)(mInd).contrast(whichcontrast).con(end+1).format=format;
                 rap.tasksettings.(modulename)(mInd).contrast(whichcontrast).con(end).vector=conspec;
                 rap.tasksettings.(modulename)(mInd).contrast(whichcontrast).con(end).fmrirun=run;
                 rap.tasksettings.(modulename)(mInd).contrast(whichcontrast).con(end).type=contype;
