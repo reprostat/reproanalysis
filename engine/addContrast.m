@@ -29,7 +29,7 @@
 %
 %   See examples below
 %
-%   condef - contrast definition. Two options are recognized:
+%   conspec - contrast specification. Two options are recognized:
 %
 %   1) (numeric) vector. This will be zero padded to the number of columns
 %   in each run, or to the number of columns in the design matrix
@@ -48,22 +48,22 @@
 %
 %   that is:
 %
-%       <weight>x<event name>[<main ('m') or parametric ('p')><number of basis/parametric function>]
+%       <weight>x<event name>[<basis ('b') or modulator ('m')><number of basis/modulator function>]
 %
 %   for example:
 %
-%       '+1*ENC_DISPLm1|-1*ENC_FIXATp3')
+%       '+1*ENC_DISPLb1|-1*ENC_FIXATm3')
 %
-%   where the number of basis/parametric functions can be, e.g.:
+%   where the number of basis/modulator functions can be, e.g.:
 %
-%     - "m2": 2nd order of the basis function (e.g. temporal derivative of canocical hrf) of the main event
-%     - "p3": depending on the number of basis functions and the order of expansions of parametric modulators
-%         - dispersion derivative of the 1st order polynomial expansion of the first parametric modulator
-%         - 2nd order polynomial expansion of the first parametric modulator
-%         - 3rd order polynomial expansion of the first parametric modulator
-%         - 1st order polynomial expansion of the second parametric modulator
-%         - 2nd order polynomial expansion of the second parametric modulator
-%         - 1st order polynomial expansion of the third parametric modulator
+%     - "b2": 2nd order of the basis function (e.g. temporal derivative of canocical hrf) of the main event
+%     - "m3": depending on the number of basis functions and the order of expansions of modulators
+%         - dispersion derivative of the 1st order polynomial expansion of the first modulator
+%         - 2nd order polynomial expansion of the first modulator (with hrf + temporal derivative)
+%         - 3rd order polynomial expansion of the first modulator (with hrf or no convolution)
+%         - 1st order polynomial expansion of the second modulator
+%         - 2nd order polynomial expansion of the second modulator
+%         - 1st order polynomial expansion of the third modulator
 %
 %   N.B.: Any combination of m<N> and p<N> in the contrast definition will be parsed; therefore, normal event names MUST NOT end with them.
 %
@@ -86,9 +86,11 @@
 % 3) Note the standard first-level contrast module is named firstlevelcontrasts
 %    (plural), not firstlevelcontrast (singular)
 %
-% 5) As a rule, differential contrasts should sum to zero with positive and
+% 4) As a rule, differential contrasts should sum to zero with positive and
 %    negative terms summing to 1 and -1, respectively, to avoid scaline issues.
 %    See any good text on the contrasts for details.
+%
+% 5) F-contrast can be specified with multi-line numeric vector or cell of strings.
 %
 % ------------------------------------------------------------------------------------------------------------------------------------
 %
@@ -213,20 +215,6 @@ function rap = addContrast(rap, modulename, subjname, runspec, conspec, conname,
         case '*'
             run.names = {rap.acqdetails.fmriruns.name};
             run.weights = ones(1,numel(run.names));
-    end
-
-    if ischar(conspec)
-        con.eventnames = {};
-        con.weights = [];
-        for conspec = strsplit(conspec,'|')
-            specs = strsplit(conspec{1},'*');
-            con.eventnames = [con.eventnames specs(end)];
-            if numel(specs) == 2
-                con.weights = [con.weights str2double(specs{1})];
-            else
-                con.weights = [con.weights 1];
-            end
-        end
     end
 
     if ~iscell(subjname), subjname = {subjname}; end
