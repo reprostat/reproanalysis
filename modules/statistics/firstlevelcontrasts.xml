@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='subject' desc='First-level contrasts' modality='FMRI'/>
+            
+    <hpc>
+        <timeBase>0.5</timeBase>
+        <memoryBase>0.5</memoryBase>
+    </hpc>
+    
+    <permanenceofoutput>3</permanenceofoutput>
+    
+    <settings>
+        <eachagainstbaseline desc='Automatic contrasts for each regressor (of interest) vs baseline for each run or by combining them' options="none|eachrun|combineruns" ui="optionlist">0</eachagainstbaseline>
+
+        <scalebynumberofruns desc='Scale the contrast by the number of runs'>0</scalebynumberofruns>
+        
+        <contrast>
+            <subject></subject>
+            <con>
+                <name/>
+                <format/>
+                <vector ignorecheck='1'></vector>
+                <fmrirun ignorecheck='1'></fmrirun>
+                <type/>
+            </con>
+        </contrast>
+
+        <diagnostics>
+            <estimateefficiency>1</estimateefficiency>
+            <histogram desc='Create histogram(s) of the contrast estimates' ui='yesno'>1</histogram>
+        </diagnostics>
+    </settings>            
+
+    <inputstreams>
+        <stream domain='subject'>firstlevel_spm</stream>
+        <stream domain='subject' tobemodified='0'>firstlevel_betas</stream>
+        <stream domain='subject' tobemodified='0'>firstlevel_msres</stream>        
+    </inputstreams>
+    <outputstreams>
+        <stream domain='subject'>firstlevel_spm</stream>
+        <stream domain='subject'>firstlevel_contrastmaps</stream>
+        <stream domain='subject'>firstlevel_statisticalmaps</stream>
+    </outputstreams>
+            
+</rap>
