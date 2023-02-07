@@ -376,6 +376,7 @@ switch command
         %% Describe outputs
         putFileByStream(rap,'subject',subj,'firstlevel_spm',fullfile(SPM.swd,'SPM.mat'));
         putFileByStream(rap,'subject',subj,'firstlevel_betas',spm_file({SPM.Vbeta.fname},'path',SPM.swd));
+        putFileByStream(rap,'subject',subj,'firstlevel_msres',spm_file(SPM.VResMS.fname,'path',SPM.swd));
         if getSetting(rap,'firstlevelmasking')
             putFileByStream(rap,'subject',subj,'firstlevel_brainmask',spm_file(SPM.VM.fname,'path',SPM.swd));
             registrationCheck(rap,'subject',subj,files{1}{1},'firstlevel_brainmask','prefix','_mask');

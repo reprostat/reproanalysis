@@ -72,6 +72,7 @@
     <outputstreams>
         <stream domain='subject'>firstlevel_spm</stream>
         <stream domain='subject'>firstlevel_betas</stream>
+        <stream domain='subject'>firstlevel_msres</stream>
         <stream domain='subject'>firstlevel_brainmask</stream>
         <stream domain='fmrirun' isrenameable='1'>fmri</stream>
     </outputstreams>
