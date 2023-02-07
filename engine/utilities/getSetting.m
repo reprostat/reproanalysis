@@ -15,7 +15,7 @@ function [val, index] = getSetting(rap,settingstring,varargin)
 
     % Obtain setting
     val = rap.tasklist.currenttask.settings;
-    for f = settingpath'
+    for f = settingpath
         if isfield(val,f{1})
             val = val.(f{1});
         else
