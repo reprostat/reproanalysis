@@ -27,7 +27,7 @@ classdef datasetClass
             if ~strcmp(this.type,'AWS')
                 tgz_filename = [tempname this.type];
                 options = weboptions; options.CertificateFilename = ('');
-                tgz_filename = websave(tgz_filename, this.URL, options);
+                tgz_filename = webSave(tgz_filename, this.URL, options);
             end
             switch this.type
                 case {'.zip'}
