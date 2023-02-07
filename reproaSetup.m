@@ -17,6 +17,7 @@ function reproaSetup()
         end
     end
 
+    addpath(fileparts([mfilename('fullpath') '.m']));
     addpath(fullfile(fileparts([mfilename('fullpath') '.m']),'engine'));
     addpath(fullfile(fileparts([mfilename('fullpath') '.m']),'external','toolboxes'));
 
