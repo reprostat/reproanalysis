@@ -196,7 +196,7 @@ function rap = segment(rap, command, subj)
             putFileByStream(rap,'subject',subj,'inverse_deformationfield', invFieldFn);
 
             %% Diagnostics
-            diag(rap,subj);
+            diagnostics(rap,subj);
 
         case 'checkrequirements'
             % Remove "input as output" stream not to be created
@@ -211,7 +211,7 @@ function rap = segment(rap, command, subj)
     end
 end
 
-function diag(rap,subj) % [TA]
+function diagnostics(rap,subj)
     Simg = getFileByStream(rap,'subject',subj,'structural','streamType','input');
     Timg = rap.directoryconventions.T1template;
     if ~exist(Timg,'file'), Timg = fullfile(spm('dir'), Timg); end
@@ -232,7 +232,7 @@ function diag(rap,subj) % [TA]
     YS = spm_read_vols(spm_vol(Simg{1}));
     YSeg = cellfun(@(seg) YS(spm_read_vols(spm_vol(seg))>=Pthresh), nativeSeg(1:nSeg),'UniformOutput',false);
     hold on; LUT = distinguishable_colors(nSeg,[0 0 0; 0.5 0.5 0.5; 1 1 1]);
-    arrayfun(@(s) hist(YSeg{s}, 25, "facecolor", LUT(s,:), "edgecolor", "none"), 1:nSeg);
+    arrayfun(@(s) hist(YSeg{s}, 100, "facecolor", LUT(s,:), "edgecolor", "none"), 1:nSeg);
 
     [~, p, ~, stats] = ttest2(YSeg{1:2});
     title(sprintf('GM vs WM... T(%d)=%0.1f, p=%1.3f', stats.df, stats.tstat, p))
