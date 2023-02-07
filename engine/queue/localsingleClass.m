@@ -6,7 +6,7 @@ classdef localsingleClass < queueClass
 
         % Run all tasks on the queue, single threaded
         function this = runall(this)
-            if ~isempty(this.taskQueue)
+            while ~isempty(this.taskQueue)
                 this.pStatus = this.STATUS('running');
                 nextTaskIndices = find(cellfun(@(t) t.isNext(), this.taskQueue));
                 for i = nextTaskIndices
@@ -17,9 +17,11 @@ classdef localsingleClass < queueClass
                 this.reportTasks('finished',doneTaskIndices);
                 if ~isequal(nextTaskIndices,doneTaskIndices)
                     this.reportTasks('failed',setdiff(nextTaskIndices,doneTaskIndices));
+                    break;
                 end
                 if ~isempty(doneTaskIndices), this.taskQueue(doneTaskIndices) = []; end
-            else
+            end
+            if ~strcmp(this.status,'error')
                 this.pStatus = this.STATUS('finished');
                 logging.info('Task queue is finished!');
             end
