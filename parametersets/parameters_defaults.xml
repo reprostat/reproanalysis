@@ -11,7 +11,7 @@
         <t2protocol ui="text">t2_spc</t2protocol>
         <dicomfilter ui="text">*.dcm</dicomfilter>
         <dicomconverter desc="Path to custom dicom converter MATLAB function and optional arguments (all separated with commas)" ui="text"></dicomconverter>
-        <T1template desc="Location of T1 template, now relative to SPM path" ui="dir">toolbox/OldNorm/T1.nii</T1template>
+        <SPMT1 desc="Location of SPM T1 template relative to SPM path" ui="dir">toolbox/OldNorm/T1.nii</SPMT1>
         <render desc="Location of Single subject render mash" ui="dir">rend/render_single_subj.mat</render>
         <subjectdirectoryformat desc="Format of subject directory" ui="optionlist" options="from subjectdirectorynames|from data|S#|manual">3</subjectdirectoryformat>
         <subjectdirectorynames desc="List of predefined subject names" ui="custom"></subjectdirectorynames>

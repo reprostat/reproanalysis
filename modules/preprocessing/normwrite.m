@@ -25,7 +25,7 @@ function rap = normwrite(rap,command,varargin)
     %            sname = basename(structdiag);
     %            structdiag = structdiag((sname(:,1)=='w') | (sname(:,2)=='w'),:);
     %            if isempty(structdiag) % probably due to structural input-output
-    %                structdiag = rap.directory_conventions.T1template;
+    %                structdiag = rap.directory_conventions.SPMT1;
     %                if ~exist(structdiag,'file'), structdiag = fullfile(spm('Dir'),structdiag); end
     %                structdiag = which(structdiag);
     %            end

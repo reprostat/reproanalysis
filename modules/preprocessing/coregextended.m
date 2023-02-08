@@ -25,7 +25,7 @@ function rap = coregextended(rap,command,subj)
 
             % Check the template
             % - T1 template
-            sTimg = rap.directoryconventions.T1template;
+            sTimg = rap.directoryconventions.SPMT1;
             if ~exist(sTimg,'file'), sTimg = fullfile(spm('dir'), sTimg); end
             if ~exist(sTimg,'file'), logging.error('Couldn''t find template T1 image %s.', sTimg); end
             sTimg = which(sTimg);

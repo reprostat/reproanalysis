@@ -213,7 +213,7 @@ end
 
 function diagnostics(rap,subj)
     Simg = getFileByStream(rap,'subject',subj,'structural','streamType','input');
-    Timg = rap.directoryconventions.T1template;
+    Timg = rap.directoryconventions.SPMT1;
     if ~exist(Timg,'file'), Timg = fullfile(spm('dir'), Timg); end
     if ~exist(Timg,'file'), logging.error('Couldn''t find template T1 image %s.', Timg); end
     Timg = which(Timg);
