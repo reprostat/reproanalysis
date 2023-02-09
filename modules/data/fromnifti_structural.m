@@ -69,22 +69,24 @@ function rap = fromnifti_structural(rap,command,subj)
 
                     %% header
                     header{s} = [];
-                    if ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'mat') % already processed by reproa
-                        tmp = load(hdrFile); header{s} = tmp.header;
-                    else
-                        if isstruct(hdrFile)
-                            header{s} = hdrFile;
-                        elseif ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'json') % BIDS
-                            header{s} = jsonread(hdrFile);
+                    if ~isempty(hdrFile)
+                        if ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'mat') % already processed by reproa
+                            tmp = load(hdrFile); header{s} = tmp.header;
+                        else
+                            if isstruct(hdrFile)
+                                header{s} = hdrFile;
+                            elseif ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'json') % BIDS
+                                header{s} = jsonread(hdrFile);
+                            end
+                            % convert timings to ms (consistent with DICOM)
+                            for f = fieldnames(header{s})'
+                                if strfind(f{1},'Time'), header{s}.(f{1}) = header{s}.(f{1})*1000; end
+                            end
+                            if isfield(header{s},'RepetitionTime'), header{s}.volumeTR = header{s}.RepetitionTime/1000; end
+                            if isfield(header{s},'EchoTime'), header{s}.volumeTE = header{s}.EchoTime/1000; end
                         end
-                        % convert timings to ms (consistent with DICOM)
-                        for f = fieldnames(header{s})'
-                            if strfind(f{1},'Time'), header{s}.(f{1}) = header{s}.(f{1})*1000; end
-                        end
-                        if isfield(header{s},'RepetitionTime'), header{s}.volumeTR = header{s}.RepetitionTime/1000; end
-                        if isfield(header{s},'EchoTime'), header{s}.volumeTE = header{s}.EchoTime/1000; end
                     end
-                    if isempty(header{s}), logging.warning('No header provided!'); end
+                    if isempty(header{s}), logging.warning('No header found!'); end
                 end
 
                 if doAverage
@@ -97,7 +99,7 @@ function rap = fromnifti_structural(rap,command,subj)
 
                 putFileByStream(rap,'subject',subj,stream,fn);
 
-                if ~all(@isempty,header)
+                if ~all(cellfun(@isempty,header))
                     hdrfn = fullfile(localPath,[stream '_header.mat']);
                     save(hdrfn,'header');
                     putFileByStream(rap,'subject',subj,[stream '_header'],hdrfn);

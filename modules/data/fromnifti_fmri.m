@@ -45,34 +45,36 @@ switch command
 
         % Header
         header = {};
-        if ischar(headerFile) && strcmp(spm_file(headerFile,'ext'),'mat') % already processed by reproa
-            load(headerFile,'header');
-        else
-            if isstruct(headerFile)
-                header{1} = headerFile;
-            elseif ischar(headerFile) && strcmp(spm_file(headerFile,'ext'),'json') % BIDS
-                header{1} = jsonread(headerFile);
-            end
-
-            % Check fields and convert timings to ms (consistent with DICOM)
-            if ~isfield(header{1},'RepetitionTime'), logging.error('RepetitionTime is required for fMRI'); end
-            header{1}.RepetitionTime = header{1}.RepetitionTime*1000;
-            for f = {'EchoTime' 'SliceTiming' 'EffectiveEchoSpacing'} % optional
-                if isfield(header{1},f{1}), header{1}.(f{1}) = header{1}.(f{1})*1000;
-                else, header{1}.(f{1}) = [];
+        if ~isempty(headerFile)
+            if ischar(headerFile) && strcmp(spm_file(headerFile,'ext'),'mat') % already processed by reproa
+                load(headerFile,'header');
+            else
+                if isstruct(headerFile)
+                    header{1} = headerFile;
+                elseif ischar(headerFile) && strcmp(spm_file(headerFile,'ext'),'json') % BIDS
+                    header{1} = jsonread(headerFile);
                 end
-            end
-            if isempty(header{1}.EchoTime), logging.warning('EchoTime is not provided -> calculating CNR is not possible'); end
-            if isempty(header{1}.SliceTiming), logging.warning('SliceTiming is not provided -> slicetime-correction is not possible'); end
-            if isempty(header{1}.EffectiveEchoSpacing), logging.warning('EffectiveEchoSpacing is not provided -> distortion-correction is not possible'); end
 
-            header{1}.volumeTR = header{1}.RepetitionTime/1000;
-            header{1}.volumeTE = header{1}.EchoTime/1000;
-            header{1}.slicetimes = header{1}.SliceTiming/1000;
-            [~, header{1}.sliceorder] = sort(header{1}.slicetimes);
-            header{1}.echospacing = header{1}.EffectiveEchoSpacing/1000;
+                % Check fields and convert timings to ms (consistent with DICOM)
+                if ~isfield(header{1},'RepetitionTime'), logging.error('RepetitionTime is required for fMRI'); end
+                header{1}.RepetitionTime = header{1}.RepetitionTime*1000;
+                for f = {'EchoTime' 'SliceTiming' 'EffectiveEchoSpacing'} % optional
+                    if isfield(header{1},f{1}), header{1}.(f{1}) = header{1}.(f{1})*1000;
+                    else, header{1}.(f{1}) = [];
+                    end
+                end
+                if isempty(header{1}.EchoTime), logging.warning('EchoTime is not provided -> calculating CNR is not possible'); end
+                if isempty(header{1}.SliceTiming), logging.warning('SliceTiming is not provided -> slicetime-correction is not possible'); end
+                if isempty(header{1}.EffectiveEchoSpacing), logging.warning('EffectiveEchoSpacing is not provided -> distortion-correction is not possible'); end
+
+                header{1}.volumeTR = header{1}.RepetitionTime/1000;
+                header{1}.volumeTE = header{1}.EchoTime/1000;
+                header{1}.slicetimes = header{1}.SliceTiming/1000;
+                [~, header{1}.sliceorder] = sort(header{1}.slicetimes);
+                header{1}.echospacing = header{1}.EffectiveEchoSpacing/1000;
+            end
         end
-        if isempty(header), logging.warning('No header provided!'); end
+        if isempty(header), logging.error('fMRI data MUST have header, but no header found!'); end
 
         % Image
         finalepis={};
