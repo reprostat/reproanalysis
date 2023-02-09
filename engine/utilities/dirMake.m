@@ -1,9 +1,9 @@
 % checks a directory is made - if not makes it
 
-function resp = dirMake(dirname)
+function [resp mkdirMsg] = dirMake(dirname)
     if ~exist(dirname,'dir')
         try
-            mkdir(dirname);
+           [mkdirStatus, mkdirMsg] = mkdir(dirname);
         catch
             logging.error(true,sprintf('Problem making directory %s',dirname));
         end
