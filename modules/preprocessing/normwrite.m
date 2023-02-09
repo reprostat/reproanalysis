@@ -80,7 +80,7 @@ function rap = normwrite(rap,command,varargin)
                 % save disc space when you reslice to a coarser voxel
                 for c = 1:numel(P)
                     thisfile = spm_file(P{c},'prefix',flags.prefix);
-%                    if exist(thisfile,'file'), delete(thisfile); end
+                    if exist(thisfile,'file'), delete(thisfile); end
                 end
 
                 % apply transformation
@@ -97,7 +97,7 @@ function rap = normwrite(rap,command,varargin)
                             job.subj.def = trans;
                             job.subj.resample = P;
                             job.woptions = flags;
-%                            spm_run_norm(job);
+                            spm_run_norm(job);
                         otherwise
                             logging.error('%s requires SPM8 or later.', mfilename);
                     end
