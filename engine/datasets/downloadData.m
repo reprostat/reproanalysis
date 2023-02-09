@@ -28,18 +28,23 @@
 %   @end itemize
 %
 % @end deftypefn
-function downloadData(rap, dataset_id, subset)
+function demoDir = downloadData(rap, dataset_id, subset)
 
 %% Inputs checking
-demodir = rap.directoryconventions.rawdatadir;
+demoDir = rap.directoryconventions.rawdatadir;
 % When used in aas_log messages, escape backward slashes from windows paths.
-logsafe_path = strrep(demodir, '\', '\\');
+logsafeDemoDir = strrep(demoDir, '\', '\\');
 
-% Check aap.directory_conventions.rawdatadir
-sources = strsplit(demodir, pathsep);
-if length(sources)>1
+% Check rap.directoryconventions.rawdatadir
+demoDir = strsplit(demoDir, pathsep);
+if numel(demoDir) > 1
     % only want one rawdatadir for downloadData
-    logging.error('For use with aa_downloadData, aap.directory_conventions.rawdatadir (%s) must specify exactly one directory.', logsafe_path);
+    demoDir = demoDir{1};
+    logsafeDemoDir = strrep(demoDir, '\', '\\');
+    logging.warning('Multiple directories are specified in rap.directoryconventions.rawdatadir.\n\%s will use the first: %s', mfilename, logsafeDemoDir);
+else
+    demoDir = demoDir{1};
+    logsafeDemoDir = strrep(demoDir, '\', '\\');
 end
 
 % Check dataset_id
@@ -58,19 +63,19 @@ end
 dataset = datasets{ID_ind};
 
 %% Download if not already has data
-if ~exist(fullfile(demodir),'dir') ... % Does not exist yet
-        || length(dir(demodir))<3 % Directory is empty (only . and .. entries in dir listing)
+if ~exist(demoDir,'dir') ... % Does not exist yet
+        || numel(dir(demoDir))<3 % Directory is empty (only . and .. entries in dir listing)
 
-    [mkdir_status, mkdir_msg] = mkdir(demodir); % Create if needed
-    if ~mkdir_status, logging.error('Failed to create directory %s, due to: %s', logsafe_dir, mkdir_msg); end
+    [~, mkdirMsg] = dirMake(demoDir); % Create if needed
+    if ~exist(demoDir, 'dir'), logging.error('Failed to create directory %s, due to: %s', logsafeDemoDir, mkdirMsg); end
 
-    logging.info('INFO: downloading demo data to %s', logsafe_path);
+    logging.info('INFO: downloading demo data to %s', logsafeDemoDir);
 
     % Download and unpack the data to a temp dir first
     if nargin == 3, dataset.subset = subset; end
-    dataset.download(demodir);
+    dataset.download(demoDir);
 else
-    logging.info('downloadData: Directory %s is already non-empty, skipping data download', logsafe_path);
+    logging.info('downloadData: Directory %s is already non-empty, skipping data download', logsafeDemoDir);
 end
 
 end
