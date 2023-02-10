@@ -1,9 +1,7 @@
 function pth = readLink(pth)
-    if isOctave()
-        jvFile = javaObject('java.io.File',pth);
+    if iscell(pth)
+        pth = cellfun(@which,pth,'UniformOutput',false);
     else
-        jvFile = java.io.File(pth);
+        pth = which(pth);
     end
-
-    pth = char(jvFile.getCanonicalPath());
 end
