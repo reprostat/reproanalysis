@@ -81,7 +81,7 @@ switch command
             schema = xml.settings.modelC.covariate;
 
             % - realignment parameter
-            if any(any(getSetting(rap,'includerealignmentparameters'))) && hasStream(rap,'fmrirun',[subj runInds(run)],'realignment_parameter')
+            if anyall(getSetting(rap,'includerealignmentparameters')) && hasStream(rap,'fmrirun',[subj runInds(run)],'realignment_parameter')
                 movRegNames = {'x' 'y' 'z' 'r' 'p' 'j'};
                 fn = getFileByStream(rap,'fmrirun',[subj runInds(run)], 'realignment_parameter');
                 rp = load(fn{1}); % expect text file
