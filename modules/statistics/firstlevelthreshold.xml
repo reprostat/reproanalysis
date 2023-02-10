@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='subject' desc='First-level thresholding' modality='FMRI'/>
+            
+    <hpc>
+        <timeBase>0.5</timeBase>
+        <memoryBase>0.75</memoryBase>
+    </hpc>
+    
+    <permanenceofoutput>3</permanenceofoutput>
+    
+    <settings>
+            <threshold>
+                <correction options='none|FDR|FWE|iTT' ui='optionlist'>none</correction>
+                <p>0.001</p>
+                <extent desc="cluster-extent threshold, in voxel [integer] or in (corrected) probability [correction:p]">0</extent>
+            </threshold>
+			
+            <cluster>
+                <method desc='clustering method' options='none|fusionwatershed' ui='optionlist'>none</method>
+                <options desc='method-specific options'>
+                    <fusionwatershed>
+                        <extentprethreshold desc='exclude clusters with extent below this threshold before clustering, in voxel'>0</extentprethreshold>
+                        <searchradius desc='search radius of the clusters, in voxel'></searchradius>
+                        <mergethreshold desc='merge generated clusters with extent below this threshold, in voxel'></mergethreshold>                        
+                    </fusionwatershed>
+                </options>
+            </cluster>
+            
+            <overlay>
+                <transparency>0</transparency>
+                <distancebetweenslices desc='in mm'>6</distancebetweenslices>
+                <background options='structural|FSLT1|SPMT1' ui='optionlist'>SPMT1</background>
+                <description desc='Text description to be included on the images'></description>
+            </overlay>
+	</settings>		
+
+    <inputstreams>
+        <stream domain='subject' tobemodified='0'>firstlevel_spm</stream>
+        <stream domain='subject' tobemodified='0'>firstlevel_statisticalmaps</stream>
+        <stream domain='subject' tobemodified='0' isessential='0'>structural</stream>
+    </inputstreams>
+    
+    <outputstreams>
+        <stream domain='subject'>firstlevel_thresholdedmaps</stream>
+        <stream domain='subject'>firstlevel_clusters</stream>
+    </outputstreams>
+</rap>
