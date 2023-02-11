@@ -10,7 +10,7 @@
 % By default, it tries to locate the inputstream then the outputstream. If stream type is specified, then it tries to locate only the specified stream type.
 % It returns all stream relevant for the specified domain
 
-function fileList = getFileByStream(rap,domain,indices,streamName,varargin)
+function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indices,streamName,varargin)
 
     argParse = inputParser;
     argParse.addParameter('streamType',{'input' 'output'},@(x) ischar(x) & any(strcmp({'input','output'},x)));
@@ -59,6 +59,7 @@ function fileList = getFileByStream(rap,domain,indices,streamName,varargin)
     end
 
     fileList = {};
+    hashList = {};
     for s = streamDescriptor'
         taskPath = spm_file(s{1},'path');
 
@@ -66,10 +67,10 @@ function fileList = getFileByStream(rap,domain,indices,streamName,varargin)
         inStream = strsplit(fileRetrieve(s{1},rap.options.maximumretry,'content'),'\n');
         descHash = regexp(inStream{1},'(?<=(#\t))[0-9a-f]*','match');
         if ~isempty(descHash)
-            descHash = descHash{1};
+            hashList = [hashList descHash(1)];
             fileList = [fileList; reshape(inStream(2:end-1),[],1)]; % last is newline
             fileHash = getHashByFiles(fileList,'localroot',taskPath);
-            if argParse.Results.checkHash && ~strcmp(descHash,fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
+            if argParse.Results.checkHash && ~strcmp(descHash{1},fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
             fileList = fullfile(taskPath,fileList);
         else
             if ~argParse.Results.isProbe, logging.error('\t%s stream %s is empty',io{1},streamName);
