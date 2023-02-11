@@ -1,8 +1,8 @@
 function nme = getRunName(rap,j)
-    sessions = rap.acqdetails.([getRunType(rap) 's']);
+    runs = rap.acqdetails.([getRunType(rap) 's']);
 
-    if ~isempty(sessions(j).name)
-        nme = sessions(j).name;
+    if ~isempty(runs(j).name)
+        nme = runs(j).name;
     else
         nme='(unknown)';
     end
