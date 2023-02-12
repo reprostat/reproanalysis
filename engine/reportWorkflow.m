@@ -28,6 +28,7 @@ function reportWorkflow(study,tasksToReport)
     % Init report
     if isfield(rap,'report'), rap = rmfield(rap,'report'); end
     rap.report.style = 'reportstyles.css';
+    rap.report.attachment = {};
     rap.prov = reproaProv(rap);
     rap.prov.doNotCheckInput = doNotCheckInput;
 
@@ -90,13 +91,13 @@ function reportWorkflow(study,tasksToReport)
 
             % Report for runs (if any)
             if inRun
-                if depInd == 1, rap = addReport(rap,reportStore,'<table><tr>'); end % Open session
-                rap = addReport(rap,reportStore,'<td valign="top">');
-                rap = addReport(rap,reportStore,['<h3>Run: ' getRunName(setCurrenttask(rap,'task',indTask),deps(depInd,2)) '</h3>']);
+                if depInd == 1, addReport(rap,reportStore,'<table><tr>'); end % Open session
+                addReport(rap,reportStore,'<td valign="top">');
+                addReport(rap,reportStore,['<h3>Run: ' getRunName(setCurrenttask(rap,'task',indTask),deps(depInd,2)) '</h3>']);
                 if size(deps,2) >= 3 % Sub-run level
                     logging.error('NYI');
 %                    descSubSession = strrep(domaintree{3},'_',' '); descSubSession(1) = upper(descSubSession(1));
-%                    rap = addReport(rap,reportStore,sprintf('<h4>%s: %d</h4>',descSubSession,dep{d}{2}(3)));
+%                    addReport(rap,reportStore,sprintf('<h4>%s: %d</h4>',descSubSession,dep{d}{2}(3)));
                 end
             end
 
@@ -104,13 +105,13 @@ function reportWorkflow(study,tasksToReport)
             if task.isDone()
                 rap = runModule(rap,indTask,'report',deps(depInd,:));
             else
-                rap = addReport(rap,reportStore,'<h3>Not finished yet!</h3>');
+                addReport(rap,reportStore,'<h3>Not finished yet!</h3>');
             end
 
             % Report for runs (if any)
             if inRun
-                rap = addReport(rap,reportStore,'</td>');
-                if depInd == size(deps,1), rap = addReport(rap,reportStore,'</tr></table>'); end % Close session
+                addReport(rap,reportStore,'</td>');
+                if depInd == size(deps,1), addReport(rap,reportStore,'</tr></table>'); end % Close session
             end
         end
     end
