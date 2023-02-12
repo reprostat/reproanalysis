@@ -53,10 +53,12 @@ function rap = addReport(rap,varargin)
         fprintf(rap.report.(reportStore).fid,'<a href="%s" target=_top>Subject list</a> &nbsp;-&nbsp;',rap.report.sub0.fname);
 
         % Summaries
-        for s = 1:size(rap.report.summaries,1)-1
-            fprintf(rap.report.(reportStore).fid,'<a href="%s" target=_top>%s</a> &nbsp;-&nbsp;',rap.report.(rap.report.summaries{s,1}).fname,rap.report.summaries{s,2});
+        if size(rap.report.summaries,1)
+            for s = 1:size(rap.report.summaries,1)-1
+                fprintf(rap.report.(reportStore).fid,'<a href="%s" target=_top>%s</a> &nbsp;-&nbsp;',rap.report.(rap.report.summaries{s,1}).fname,rap.report.summaries{s,2});
+            end
+            fprintf(rap.report.(reportStore).fid,'<a href="%s" target=_top>%s</a>',rap.report.(rap.report.summaries{s+1,1}).fname,rap.report.summaries{s+1,2});
         end
-        fprintf(rap.report.(reportStore).fid,'<a href="%s" target=_top>%s</a>',rap.report.(rap.report.summaries{s+1,1}).fname,rap.report.summaries{s+1,2});
 
         fprintf(rap.report.(reportStore).fid,'\n<hr class="rounded">\n');
 
