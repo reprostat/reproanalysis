@@ -9,15 +9,27 @@ function rap = coregextended(rap,command,subj)
 
     switch command
         case 'report' % [TA]
-    %        if ~exist(fullfile(aas_getsubjpath(aap,subj),['diagnostic_' aap.tasklist.main.module(aap.tasklist.currenttask.modulenumber).name '_structural2meanepi.jpg']),'file')
-    %%             aas_fsl_coreg_diag(aap,subj);
-    %        end
-    %        fdiag = dir(fullfile(aas_getsubjpath(aap,subj),'diagnostic_*.jpg'));
-    %        for d = 1:numel(fdiag)
-    %            aap = aas_report_add(aap,subj,'<table><tr><td>');
-    %            aap=aas_report_addimage(aap,subj,fullfile(aas_getsubjpath(aap,subj),fdiag(d).name));
-    %            aap = aas_report_add(aap,subj,'</td></tr></table>');
-    %        end
+            reportStore = sprintf('sub%d',subj);
+            imgToReport = {...
+                'Mean fMRI to structural' spm_file(getFileByStream(rap,'subject',subj,'structural','checkHash',false),'basename'); ...
+                'Structural to mean fMRI' spm_file(getFileByStream(rap,'subject',subj,'meanfmri','checkHash',false),'basename') ...
+                };
+
+            fdiag = spm_select('FPList', getPathByDomain(rap,'subject',subj),['^diagnostic_.*.mp4$']);
+            if ~isempty(fdiag)
+                imgToReport = [imgToReport; ...
+                    'Video' {spm_file(getFileByStream(rap,'subject',subj,'fmri','checkHash',false),'basename')} ...
+                ];
+            end
+
+            for r = 1:size(imgToReport,1)
+                if contains(imgToReport{r,1},'Video'), ext = 'mp4'; else, ext = 'jpg'; end
+                fdiag = spm_select('FPList', getPathByDomain(rap,'subject',subj),['^diagnostic_.*' imgToReport{r,2}{1} '.' ext '$']);
+                addReport(rap,reportStore,'<table><tr><td>');
+                addReport(rap,reportStore,['<h4>' imgToReport{r,1} '</h4>']);
+                rap = addReportMedia(rap,reportStore,fdiag);
+                addReport(rap,reportStore,'</td></tr></table>');
+            end
         case 'doit'
             global reproacache
             SPM = reproacache('toolbox.spm');
