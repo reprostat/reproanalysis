@@ -69,8 +69,10 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
         if ~isempty(descHash)
             hashList = [hashList descHash(1)];
             fileList = [fileList; reshape(inStream(2:end-1),[],1)]; % last is newline
-            fileHash = getHashByFiles(fileList,'localroot',taskPath);
-            if argParse.Results.checkHash && ~strcmp(descHash{1},fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
+            if argParse.Results.checkHash
+                fileHash = getHashByFiles(fileList,'localroot',taskPath);
+                if ~strcmp(descHash{1},fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
+            end
             fileList = fullfile(taskPath,fileList);
         else
             if ~argParse.Results.isProbe, logging.error('\t%s stream %s is empty',io{1},streamName);
