@@ -132,7 +132,7 @@ function registrationCheck(rap,domain,indices,background,varargin)
         else
             movieFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s%s_%s.mp4',rap.tasklist.currenttask.name,pfx,spm_file(st.vols{v}.fname,'basename')));
             if exist(movieFilename,'file'), delete(movieFilename);  end
-            video = VideoWriter(movieFilename); video.open();
+            video = VideoWriter(movieFilename); video.open(); % TODOD: reduce FrameRate (currently not supported in OCTAVE - 12/02/23)
 
             for d = 1:size(slicesToVideo,2)
                 spm_orthviews('reposition', slicesToVideo(:,d));
