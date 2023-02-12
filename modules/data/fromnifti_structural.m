@@ -2,10 +2,7 @@
 
 function rap = fromnifti_structural(rap,command,subj)
 
-    doAverage = false;
-
     switch command
-        case 'report'
         case 'doit'
             allseries = getSeries(rap.acqdetails.subjects(subj).structural);
             allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(contains(allstreams,'header')) = [];
@@ -13,6 +10,8 @@ function rap = fromnifti_structural(rap,command,subj)
 
             for m = 1:numel(sfxs)
                 stream = allstreams{m};
+
+                doAverage = false;
 
                 % Select
                 series = allseries(cellfun(@(x) ~isempty(x), strfind({allseries.fname},sfxs{m})));
