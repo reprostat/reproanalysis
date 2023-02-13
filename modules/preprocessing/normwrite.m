@@ -2,57 +2,8 @@ function rap = normwrite(rap,command,varargin)
 
     switch command
         case 'report'
-    %        subj = varargin{1};
-    %        if nargin == 4
-    %            sess = varargin{2};
-    %            localpath = aas_getpath_bydomain(rap,rap.tasklist.currenttask.domain,[subj,sess]);
-    %        else % subject
-    %            localpath = aas_getpath_bydomain(rap,'subject',subj);
-    %        end
-    %
-    %        % find out what streams we should normalise
-    %		streams=aas_getstreams(rap,'output');
-    %        if isfield(rap.tasklist.currenttask.settings,'diagnostic') && isstruct(rap.tasklist.currenttask.settings.diagnostic)
-    %            inds = rap.tasklist.currenttask.settings.diagnostic.streamInd;
-    %        else
-    %            inds = 1:length(streams);
-    %        end
-    %        % determine normalised struct
-    %        [inp, inpattr] = aas_getstreams(rap,'input');
-    %        streamStruct = inp{cellfun(@(a) isfield(a,'diagnostic') && a.diagnostic, inpattr)}; streamStruct = strsplit(streamStruct,'.');
-    %        structdiag = aas_getfiles_bystream_dep(rap,'subject',varargin{1},streamStruct{end});
-    %        if size(structdiag,1) > 1
-    %            sname = basename(structdiag);
-    %            structdiag = structdiag((sname(:,1)=='w') | (sname(:,2)=='w'),:);
-    %            if isempty(structdiag) % probably due to structural input-output
-    %                structdiag = rap.directory_conventions.SPMT1;
-    %                if ~exist(structdiag,'file'), structdiag = fullfile(spm('Dir'),structdiag); end
-    %                structdiag = which(structdiag);
-    %            end
-    %        end
-    %        for streamInd = inds
-    %            streamfn = aas_getfiles_bystream(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),streams{streamInd},'output');
-    %            streamfn = streamfn(1,:);
-    %            streamfn = strtok_ptrn(basename(streamfn),'-0');
-    %            fn = ['diagnostic_aas_checkreg_slices_' streamfn '_1.jpg'];
-    %            if ~exist(fullfile(localpath,fn),'file')
-    %                aas_checkreg(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),streams{streamInd},structdiag);
-    %            end
-    %            % Single-subject
-    %            fdiag = dir(fullfile(localpath,'diagnostic_*.jpg'));
-    %            for d = 1:numel(fdiag)
-    %                rap = aas_report_add(rap,subj,'<table><tr><td>');
-    %                imgpath = fullfile(localpath,fdiag(d).name);
-    %                rap=aas_report_addimage(rap,subj,imgpath);
-    %                [p, f] = fileparts(imgpath); avipath = fullfile(p,[strrep(f(1:end-2),'slices','avi') '.avi']);
-    %                if exist(avipath,'file'), rap=aas_report_addimage(rap,subj,avipath); end
-    %                rap = aas_report_add(rap,subj,'</td></tr></table>');
-    %            end
-    %            % Study summary
-    %            rap = aas_report_add(rap,'reg',...
-    %                ['Subject: ' basename(aas_getsubjpath(rap,subj)) '; Session: ' aas_getdirectory_bydomain(rap,rap.tasklist.currenttask.domain,varargin{end}) ]);
-    %            rap=aas_report_addimage(rap,'reg',fullfile(localpath,fdiag(1).name));
-    %        end
+            rap = registrationReport(rap,varargin{:},'addToSummary');
+
         case 'doit'
             global reproacache
             SPM = reproacache('toolbox.spm');
@@ -120,14 +71,22 @@ function rap = normwrite(rap,command,varargin)
                     end
                 end
 
-                % describe outputs with diagnostic
+                % describe outputs
                 putFileByStream(rap,rap.tasklist.currenttask.domain,indices,streams{streamInd},wimgs);
 
-                if ~isfield(rap.tasklist.currenttask.settings,'diagnostic') ||... % do it by default
-                        (~isstruct(rap.tasklist.currenttask.settings.diagnostic) && rap.tasklist.currenttask.settings.diagnostic) ||... % general
-                        (isstruct(rap.tasklist.currenttask.settings.diagnostic) && streamInd == rap.tasklist.currenttask.settings.diagnostic.streamInd) % selective
-                    registrationCheck(rap,rap.tasklist.currenttask.domain,indices,'structural',spm_file(wimgs{1},'number',',1'));
+            end
+
+            % diagnostic
+            cfgDiag = getSetting(rap,'diagnostic');
+            if isempty(cfgDiag) ||... % do it by default
+                (~isstruct(cfgDiag) && cfgDiag) ||... % general
+                (isstruct(cfgDiag) && cfgDiag.streamInd)
+                streamToReport = {rap.tasklist.currenttask.outputstreams.name};
+                if isstruct(cfgDiag) && cfgDiag.streamInd
+                    streamToReport = streamToReport(cfgDiag.streamInd);
                 end
+                fnImg = spm_file(cellfun(@(s) getFileByStream(rap,rap.tasklist.currenttask.domain,indices,s), streamToReport,'UniformOutput',false),'number',',1');
+                registrationCheck(rap,rap.tasklist.currenttask.domain,indices,'structural',fnImg{:});
             end
 
         case 'checkrequirements'

@@ -44,6 +44,7 @@ function reportWorkflow(study,tasksToReport)
     end
     if any(contains(tasksToReport,'normwrite'))
         rap.report.norm.fname = spm_file(rap.report.main.fname,'suffix','_norm');
+        rap.report.norm.tasks = {};
         rap.report.summaries = [rap.report.summaries; {'norm' 'Registration summary'}];
     end
     if hasFirstlevelMaps
