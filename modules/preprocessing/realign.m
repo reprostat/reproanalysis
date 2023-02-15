@@ -3,123 +3,99 @@
 function rap = realign(rap,command,subj)
 
 switch command
-%    case 'report'
-%        if subj == 1 % init summary
-%            rap.report.(mfilename).selectedruns = zeros(1,0);
-%            rap.report.(mfilename).mvmax = nan(getNByDomain(rap,'subject'),getNByDomain(rap,'fmrirun',1),6);
-%        end
-%        rap.report.(mfilename).selectedruns = union(rap.report.(mfilename).selectedruns,rap.acqdetails.selectedruns);
-%
-%        mvmean=[];
-%        mvmax=[];
-%        mvstd=[];
-%        mvall=[];
-%        nrun=numel(rap.acqdetails.selectedruns);
-%
-%        qq=[];
-%
-%        rap = aas_report_add(rap,subj,'<table><tr>');
-%        for run=rap.acqdetails.selectedruns
-%%             if run > aas_getN_bydomain(rap,'run',subj), break; end
-%            rap = aas_report_add(rap,subj,'<td>');
-%            rap = aas_report_add(rap,subj,['<h3>Session: ' rap.acqdetails.fmriruns(run).name '</h3>']);
-%            fn = fullfile(aas_getsubjpath(rap,subj),['diagnostic_aamod_realign_' rap.acqdetails.fmriruns(run).name '.jpg']);
-%
-%            par = cellstr(aas_getfiles_bystream(rap,subj,run,'realignment_parameter'));
-%            parind = cell_index(par,'.txt');
-%            mv = load(par{parind});
-%
-%            if ~exist(fn,'file')
-%                if isfield(rap.tasklist.currenttask.settings,'mfp') && rap.tasklist.currenttask.settings.mfp.run
-%                    mw_mfp_show(aas_getrunpath(rap,subj,run));
-%                    movefile(...
-%                        fullfile(aas_getrunpath(rap,subj,run),'mw_motion.jpg'),fn);
-%                else
-%                    f = aas_realign_graph(par{parind});
-%                    print('-djpeg','-r150','-noui',...
-%                        fullfile(aas_getsubjpath(rap,subj),...
-%                        ['diagnostic_aamod_realignunwarp_' rap.acqdetails.fmriruns(run).name '.jpg'])...
-%                        );
-%                    close(f);
-%                end
-%            end
-%
-%            rap.report.(mfilename).mvmax(subj,run,:)=max(mv);
-%            % mvmean(run,:)=mean(mv);
-%            % mvstd(run,:)=std(mv);
-%            % mvall=[mvall;mv];
-%            rap=aas_report_addimage(rap,subj,fn);
-%
-%            rap = aas_report_add(rap,subj,'<h4>Movement maximums</h4>');
-%            rap = aas_report_add(rap,subj,'<table cellspacing="10">');
-%            rap = aas_report_add(rap,subj,sprintf('<tr><td align="right">Sess</td><td align="right">x</td><td align="right">y</td><td align="right">z</td><td align="right">rotx</td><td align="right">roty</td><td align="right">rotz</td></tr>',run));
-%            rap = aas_report_add(rap,subj,sprintf('<tr><td align="right">%d</td>',run));
-%            rap = aas_report_add(rap,subj,sprintf('<td align="right">%8.3f</td>',rap.report.(mfilename).mvmax(subj,run,:)));
-%            rap = aas_report_add(rap,subj,sprintf('</tr>',run));
-%            rap = aas_report_add(rap,subj,'</table>');
-%
-%            rap = aas_report_add(rap,subj,'</td>');
-%        end;
-%        rap = aas_report_add(rap,subj,'</tr></table>');
-%
-%        varcomp=mean((std(mvall).^2)./(mean(mvstd.^2)));
-%        rap = aas_report_add(rap,subj,'<h3>All variance vs. within run variance</h3><table><tr>');
-%        rap = aas_report_add(rap,subj,sprintf('<td>%8.3f</td>',varcomp));
-%        rap = aas_report_add(rap,subj,'</tr></table>');
-%
-%		% Summary in case of more subjects [TA]
-%        if (subj > 1) && (subj == numel(rap.acqdetails.subjects)) % last subject
-%            meas = {'Trans - x','Trans - y','Trans - z','Pitch','Roll','Yaw'};
-%
-%            stagerepname = rap.tasklist.currenttask.name;
-%            if ~isempty(rap.tasklist.currenttask.extraparameters)
-%                stagerepname = [stagerepname rap.tasklist.currenttask.extraparameters.rap.directory_conventions.analysisid_suffix];
-%            end
-%            rap = aas_report_add(rap,'moco',['<h2>Stage: ' stagerepname '</h2>']);
-%            rap = aas_report_add(rap,'moco','<table><tr>');
-%
-%            for run=rap.report.(mfilename).selectedruns
-%				fn = fullfile(aas_getstudypath(rap),['diagnostic_aamod_realign_' rap.acqdetails.fmriruns(run).name '.jpg']);
-%
-%                mvmax = squeeze(rap.report.(mfilename).mvmax(:,run,:));
-%
-%                jitter = 0.1; % jitter around position
-%                jitter = (...
-%                    1+(rand(size(mvmax))-0.5) .* ...
-%                    repmat(jitter*2./[1:size(mvmax,2)],size(mvmax,1),1)...
-%                    ) .* ...
-%                    repmat([1:size(mvmax,2)],size(mvmax,1),1);
-%
-%                f = figure; hold on;
-%                boxplot(mvmax,'label',meas);
-%                for s = 1:size(mvmax,2)
-%                    scatter(jitter(:,s),mvmax(:,s),'k','filled','MarkerFaceAlpha',0.4);
-%                end
-%
-%                boxValPlot = getappdata(getappdata(gca,'boxplothandle'),'boxvalplot');
-%                set(f,'Renderer','zbuffer');
-%                if ~exist(fn,'file'), print(f,'-djpeg','-r150',fn); end
-%                close(f);
-%
-%                rap = aas_report_add(rap,'moco','<td valign="top">');
-%                rap = aas_report_add(rap,'moco',['<h3>Session: ' rap.acqdetails.fmriruns(run).name '</h3>']);
-%                rap=aas_report_addimage(rap,'moco',fn);
-%
+    case 'report'
+        reportStore = sprintf('sub%d',subj);
+
+        if subj == 1 % init summary
+            rap.report.(mfilename).selectedruns = zeros(1,0);
+            rap.report.(mfilename).mvmax = nan(getNByDomain(rap,'subject'),getNByDomain(rap,'fmrirun'),6);
+        end
+        rap.report.(mfilename).selectedruns = union(rap.report.(mfilename).selectedruns,rap.acqdetails.selectedruns);
+
+        mvmean=[];
+        mvmax=[];
+        mvstd=[];
+        mvall=[];
+
+        addReport(rap,reportStore,'<table><tr>');
+        for run=rap.acqdetails.selectedruns
+            runName = rap.acqdetails.fmriruns(run).name;
+            addReport(rap,reportStore,'<td>');
+            addReport(rap,reportStore,['<h3>Run: ' runName '</h3>']);
+            fn = spm_select('FPListRec',getPathByDomain(rap,'subject',subj),['^diagnostic_.*' runName '\.jpg']);
+            rap = addReportMedia(rap,reportStore,fn,0.5);
+
+            parFn = getFileByStream(rap,'fmrirun',[subj run],'realignment_parameter');
+            mv = load(parFn{1});
+
+            rap.report.(mfilename).mvmax(subj,run,:) = max(mv);
+            mvstd(end+1,:) = std(mv);
+            mvall = [mvall; mv];
+
+            addReport(rap,reportStore,'<h3>Movement maximums</h3>');
+            addReport(rap,reportStore,'<table cellspacing="10">');
+            addReport(rap,reportStore,sprintf('<tr><td align="right">Run</td><td align="right">x</td><td align="right">y</td><td align="right">z</td><td align="right">rotx</td><td align="right">roty</td><td align="right">rotz</td></tr>',run));
+            addReport(rap,reportStore,sprintf('<tr><td align="right">%s</td>',runName));
+            addReport(rap,reportStore,sprintf('<td align="right">%8.3f</td>',rap.report.(mfilename).mvmax(subj,run,:)));
+            addReport(rap,reportStore,'</tr>');
+            addReport(rap,reportStore,'</table>');
+
+            addReport(rap,reportStore,'</td>');
+        end
+        addReport(rap,reportStore,'</tr></table>');
+
+        varcomp = mean((std(mvall).^2)./(mean(mvstd.^2)));
+        addReport(rap,reportStore,'<h3>All variance vs. within run variance</h3><table><tr>');
+        addReport(rap,reportStore,sprintf('<td>%8.3f</td>',varcomp));
+        addReport(rap,reportStore,'</tr></table>');
+
+		% Summary in case of more subjects
+        if getNByDomain(rap,'subject') == 1
+            addReport(rap,'moco','<h4>No summary is generated: there is only one subject in the pipeline</h4>');
+        elseif subj == numel(rap.acqdetails.subjects) % last subject
+            meas = {'Trans - x','Trans - y','Trans - z','Pitch','Roll','Yaw'};
+
+            addReport(rap,'moco',['<h2>Task: ' getTaskDescription(rap,subj,'taskname') '</h2>']);
+            addReport(rap,'moco','<table><tr>');
+
+            for run = rap.report.(mfilename).selectedruns
+				fn = fullfile(getPathByDomain(rap,'study',[]),['diagnostic_' mfilename '_' rap.acqdetails.fmriruns(run).name '.jpg']);
+
+                mvmax = squeeze(rap.report.(mfilename).mvmax(:,run,:));
+
+                jitter = 0.1; % jitter around position
+                jitter = (...
+                    1+(rand(size(mvmax))-0.5) .* ...
+                    repmat(jitter*2./[1:size(mvmax,2)],size(mvmax,1),1)...
+                    ) .* ...
+                    repmat([1:size(mvmax,2)],size(mvmax,1),1);
+
+                fig = figure; hold on;
+                for s = 1:size(mvmax,2), scatter(jitter(:,s),mvmax(:,s),'k','filled','MarkerFaceAlpha',0.4); end
+                boxplot(mvmax,'Labels',meas);
+
+                boxValPlot = getappdata(getappdata(gca,'boxplothandle'),'boxvalplot');
+                if ~exist(fn,'file'), print(fig,'-djpeg','-r150',fn); end
+                close(fig);
+
+                addReport(rap,'moco','<td valign="top">');
+                addReport(rap,'moco',['<h3>Session: ' rap.acqdetails.fmriruns(run).name '</h3>']);
+                rap = addReportMedia(rap,'moco',fn);
+
+%                % Only in MATLAB
 %                for ibp = 1:numel(meas)
 %                    bp = boxValPlot(ibp,:);
 %                    subjs = ' None';
 %                    if bp.numFiniteHiOutliers
 %                        subjs = [' ' num2str(sort(cell2mat(bp.outlierrows)'))];
 %                    end
-%                    rap = aas_report_add(rap,'moco',sprintf('<h4>Outlier(s) in %s:%s</h4>',meas{ibp},subjs));
+%                    addReport(rap,'moco',sprintf('<h4>Outlier(s) in %s:%s</h4>',meas{ibp},subjs));
 %                end
-%
-%                rap = aas_report_add(rap,'moco','</td>');
-%            end
-%            rap = aas_report_add(rap,'moco','</tr></table>');
-%        elseif numel(rap.acqdetails.subjects) == 1
-%            rap = aas_report_add(rap,'moco','<h4>No summary is generated: there is only one subject in the pipeline</h4>');
-%        end
+
+                addReport(rap,'moco','</td>');
+            end
+            addReport(rap,'moco','</tr></table>');
+        end
     case 'doit'
 
         % Get realignment defaults from the XML!
