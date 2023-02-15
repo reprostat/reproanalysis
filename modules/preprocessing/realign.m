@@ -63,34 +63,49 @@ switch command
 
                 mvmax = squeeze(rap.report.(mfilename).mvmax(:,run,:));
 
+                % Boxplot implementation is different in MATLAB and OCATVE -> manual approach
+                whisker = 1.5; % Q3+1.5*IQR (we care only for extra large outliers)
                 jitter = 0.1; % jitter around position
+                barWidth = 0.5;
                 jitter = (...
                     1+(rand(size(mvmax))-0.5) .* ...
                     repmat(jitter*2./[1:size(mvmax,2)],size(mvmax,1),1)...
                     ) .* ...
                     repmat([1:size(mvmax,2)],size(mvmax,1),1);
 
-                fig = figure; hold on;
-                for s = 1:size(mvmax,2), scatter(jitter(:,s),mvmax(:,s),'k','filled','MarkerFaceAlpha',0.4); end
-                boxplot(mvmax,'Labels',meas);
+                bpstat = prctile(mvmax,[75 50 25]);
+                thrOut = bpstat(1,:)+whisker*(bpstat(1,:) - bpstat(3,:));
+                selOut = mvmax > repmat(thrOut,getNByDomain(rap,'subject'),1);
+                outVal = mvmax(selOut);
+                [~, outMeas] = ind2sub(size(mvmax),find(selOut));
+                mvmax(selOut) = NaN;
 
-                boxValPlot = getappdata(getappdata(gca,'boxplothandle'),'boxvalplot');
+                fig = figure; hold on;
+                for s = 1:size(mvmax,2)
+                    % - data
+                    scatter(jitter(:,s),mvmax(:,s),'k','filled','SizeData',20,'MarkerFaceAlpha',0.4);
+                    % - Q2 (median)
+                    plot([s-(barWidth/2) s+(barWidth/2)],[bpstat(2,s) bpstat(2,s)],'b');
+                    % - Q1, Q3
+                    plot([s-(barWidth/2) s+(barWidth/2) s+(barWidth/2) s-(barWidth/2) s-(barWidth/2)],[bpstat(1,s) bpstat(1,s) bpstat(3,s) bpstat(3,s) bpstat(1,s)],'k');
+                    % - whisker
+                    plot([s s],[bpstat(1,s) thrOut(s)],'--g')
+                    plot([s-(barWidth/4) s+(barWidth/4)],[thrOut(s) thrOut(s)],'g');
+                end
+                % - outliers
+                plot(outMeas,outVal,'*r');
+
                 if ~exist(fn,'file'), print(fig,'-djpeg','-r150',fn); end
                 close(fig);
 
                 addReport(rap,'moco','<td valign="top">');
-                addReport(rap,'moco',['<h3>Session: ' rap.acqdetails.fmriruns(run).name '</h3>']);
+                addReport(rap,'moco',['<h3>Run: ' rap.acqdetails.fmriruns(run).name '</h3>']);
                 rap = addReportMedia(rap,'moco',fn);
 
-%                % Only in MATLAB
-%                for ibp = 1:numel(meas)
-%                    bp = boxValPlot(ibp,:);
-%                    subjs = ' None';
-%                    if bp.numFiniteHiOutliers
-%                        subjs = [' ' num2str(sort(cell2mat(bp.outlierrows)'))];
-%                    end
-%                    addReport(rap,'moco',sprintf('<h4>Outlier(s) in %s:%s</h4>',meas{ibp},subjs));
-%                end
+                % Outliers
+                for m = unique(outMeas)'
+                    addReport(rap,'moco',['<h4>Outlier(s) in ' meas{m} ':' sprintf(' %s',rap.acqdetails.subjects(selOut(:,m)).subjname) '</h4>']);
+                end
 
                 addReport(rap,'moco','</td>');
             end
