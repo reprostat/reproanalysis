@@ -57,8 +57,7 @@ function rap = registrationReport(rap,varargin)
             rap.report.norm.tasks{end+1} = taskReportName;
             addReport(rap,'norm',['<h2>Task: ' taskReportName '</h2>']);
         end
-        desc = regexp(getTaskDescription(rap,indices),'(?<= - ).*','match');
-        addReport(rap,'norm',['<h3>' desc{1} '</h3>']);
+        addReport(rap,'norm',['<h3>' getTaskDescription(rap,indices,'indices') '</h3>']);
         rap = addReportMedia(rap,'norm',spm_select('FPList', getPathByDomain(rap,domain,indices),imgToReport{1,2}));
     end
 end
