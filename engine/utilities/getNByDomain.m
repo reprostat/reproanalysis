@@ -5,6 +5,8 @@
 
 function [N, I] = getNByDomain(rap,domain,indices)
 
+if nargin < 3, indices = []; end
+
 switch domain
     case 'diffusionrunpedir'
         N=2;
