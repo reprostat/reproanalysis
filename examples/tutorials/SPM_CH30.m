@@ -145,6 +145,12 @@ rap.tasksettings.firstlevelmodel.xBF.UNITS = 'secs';
 % Include realignement parameters extended to the first and second orders and derivatives
 rap.tasksettings.firstlevelmodel.includerealignmentparameters = [1 1 0; 1 1 0];
 
+% Set threshold uncorrected voxelwise p=0.001 (~Z=3.1) cluster-forming threshold 
+% with p=0.05 (FWE-corrected) cluster extent threshold
+rap.tasksettings.firstlevelthreshold.threshold.correction = 'none';
+rap.tasksettings.firstlevelthreshold.threshold.p = 0.001;
+rap.tasksettings.firstlevelthreshold.threshold.extent = 'FWE:0.05';
+
 % -------------------------------------------------------------------------
 % 5) process BIDS input
 % -------------------------------------------------------------------------
