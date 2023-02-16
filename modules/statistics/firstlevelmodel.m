@@ -1,19 +1,13 @@
 function rap = firstlevelmodel(rap,command,subj)
 
 switch command
-    case 'report' % [TA]
-%        if ~exist(fullfile(aas_getsubjpath(rap,subj),'diagnostic_aamod_firstlevel_model_design.jpg'),'file')
-%            load(aas_getfiles_bystream(rap,subj,rap.tasklist.currenttask.outputstreams.stream{1}));
-%            spm_DesRep('DesOrth',SPM.xX);
-%            saveas(spm_figure('GetWin','Graphics'),fullfile(aas_getsubjpath(rap,subj),'diagnostic_aamod_firstlevel_model_design.jpg'));
-%            close all;
-%        end
-%        fdiag = dir(fullfile(aas_getsubjpath(rap,subj),'diagnostic_*.jpg'));
-%        for d = 1:numel(fdiag)
-%            rap = aas_report_add(rap,subj,'<table><tr><td>');
-%            rap=aas_report_addimage(rap,subj,fullfile(aas_getsubjpath(rap,subj),fdiag(d).name));
-%            rap = aas_report_add(rap,subj,'</td></tr></table>');
-%        end
+    case 'report'
+        reportStore = sprintf('sub%d',subj);
+        addReport(rap,reportStore,'<h4>Masking</h4>');
+        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_mask_' spm_file(char(getFileByStream(rap,'fmrirun',[subj 1],'fmri','checkHash',false)),'basename') '.*\.jpg$']));
+
+        addReport(rap,reportStore,'<h4>Model</h4>');
+        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*design\.jpg$']));
 
     case 'doit'
         %% Init

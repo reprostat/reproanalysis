@@ -1,16 +1,19 @@
 function rap = firstlevelcontrasts(rap,command,subj)
 
     switch command
-        case 'report' % [TA]
-    %        if ~exist(fullfile(aas_getsubjpath(aap,subj),['diagnostic_' mfilename '.jpg']),'file')
-    %            diag(aap,subj);
-    %        end
-    %        fdiag = dir(fullfile(aas_getsubjpath(aap,subj),'diagnostic_*.jpg'));
-    %        for d = 1:numel(fdiag)
-    %            aap = aas_report_add(aap,subj,'<table><tr><td>');
-    %            aap=aas_report_addimage(aap,subj,fullfile(aas_getsubjpath(aap,subj),fdiag(d).name));
-    %            aap = aas_report_add(aap,subj,'</td></tr></table>');
-    %        end
+        case 'report'
+            reportStore = sprintf('sub%d',subj);
+            addReport(rap,reportStore,'<h4>Contrasts</h4>');
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*contrasts\.jpg$']));
+
+            if getSetting(rap,'diagnostics.histogram')
+                addReport(rap,reportStore,'<h4>Histograms</h4>');
+                for fn = cellstr(spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*histogram.*\.jpg$']))
+                    conName = regexp(fn{1},'(?<=histogram_)[a-zA-Z-_]*','match');
+                    addReport(rap,reportStore,['<h5>' conName{1} '</h5>']);
+                    rap = addReportMedia(rap,reportStore,fn{1});
+                end
+            end
 
         case 'doit'
             %% Init
@@ -218,7 +221,7 @@ function h = diagnostics(rap,subj)
             hist(YT(YT~=0), 100, "facecolor", [0 0 1], "edgecolor", "none");
             title(c.name,'Interpreter','none');
             print(gcf,'-djpeg','-r150', fullfile(getPathByDomain(rap,'subject',subj), ...
-                ['diagnostic_' mfilename '_histogram_' strreps(c.name,{' ' ':' '>'},{'' '_' '-'}) '.jpg'])); % remove "unconventional" characters
+                ['diagnostic_' rap.tasklist.currenttask.name '_histogram_' strreps(c.name,{' ' ':' '>'},{'' '_' '-'}) '.jpg'])); % remove "unconventional" characters
             close(gcf);
         end
     end
@@ -287,7 +290,7 @@ function h = diagnostics(rap,subj)
         set(gca, 'Xtick', efficiencyVals, 'XtickLabel', sprintf('%1.1f|',exp(efficiencyVals)))
     end
 
-    fname = fullfile(getPathByDomain(rap,'subject',subj),['diagnostic_' mfilename '_contrasts.jpg']);
+    fname = fullfile(getPathByDomain(rap,'subject',subj),['diagnostic_' rap.tasklist.currenttask.name '_contrasts.jpg']);
     print(fig,'-djpeg','-r150',fname);
     close(fig);
 end

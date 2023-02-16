@@ -2,19 +2,16 @@ function rap = segment(rap, command, subj)
 
     switch command
         case 'report'
-    %        fdiag = dir(fullfile(aas_getsubjpath(rap,subj),'diagnostic_*.jpg'));
-    %        if isempty(fdiag)
-    %            diag(rap,subj);
-    %            fdiag = dir(fullfile(aas_getsubjpath(rap,subj),'diagnostic_*.jpg'));
-    %        end
-    %        for d = 1:numel(fdiag)
-    %            rap = aas_report_add(rap,subj,'<table><tr><td>');
-    %            imgpath = fullfile(aas_getsubjpath(rap,subj),fdiag(d).name);
-    %            rap=aas_report_addimage(rap,subj,imgpath);
-    %            [p, f] = fileparts(imgpath); avipath = fullfile(p,[strrep(f(1:end-2),'slices','avi') '.avi']);
-    %            if exist(avipath,'file'), rap=aas_report_addimage(rap,subj,avipath); end
-    %            rap = aas_report_add(rap,subj,'</td></tr></table>');
-    %        end
+            reportStore = sprintf('sub%d',subj);
+            addReport(rap,reportStore,'<h4>Separation of tissues</h4>');
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_histogram\.jpg$']));
+
+            addReport(rap,reportStore,'<h4>Segmentation</h4>');
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_' spm_file(char(getFileByStream(rap,'subject',subj,'structural','checkHash',false)),'basename') '.*\.jpg$']));
+
+            addReport(rap,reportStore,'<h4>Segmentation and normalisation</h4>');
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*T1\.jpg$']));
+
         case 'doit'
             global reproacache
             SPM = reproacache('toolbox.spm');
