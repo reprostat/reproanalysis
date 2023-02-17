@@ -85,7 +85,7 @@ function rap = normwrite(rap,command,varargin)
                 if isstruct(cfgDiag) && cfgDiag.streamInd
                     streamToReport = streamToReport(cfgDiag.streamInd);
                 end
-                fnImg = spm_file(cellfun(@(s) getFileByStream(rap,rap.tasklist.currenttask.domain,indices,s), streamToReport,'UniformOutput',false),'number',',1');
+                fnImg = spm_file(cellfun(@(s) char(getFileByStream(rap,rap.tasklist.currenttask.domain,indices,s)), streamToReport,'UniformOutput',false),'number',',1');
                 registrationCheck(rap,rap.tasklist.currenttask.domain,indices,'structural',fnImg{:});
             end
 

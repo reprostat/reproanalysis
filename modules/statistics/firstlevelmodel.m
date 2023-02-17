@@ -95,7 +95,8 @@ switch command
                                 end
                             end
                             for b = 1:min(numel(movRegNames),size(movReg,2))
-                                modelC{run}(end+1) = schema;
+                                if isempty(modelC{run}), modelC{run} = schema;
+                                else, modelC{run}(end+1) = schema; end
                                 modelC{run}(end).name = sprintf(regNameFormat,movRegNames{b});
                                 modelC{run}(end).vector = movReg(:,b);
                                 modelC{run}(end).HRF = false;
@@ -113,7 +114,8 @@ switch command
                 for c = getSetting(rap,'includecompartmentsignal')
                     % containes signal
                     signal = load(fn{c}); % expect text file
-                    modelC{run}(end+1) = schema;
+                    if isempty(modelC{run}), modelC{run} = schema;
+                    else, modelC{run}(end+1) = schema; end
                     modelC{run}(end).name = CNames{c};
                     modelC{run}(end).vector = signal;
                     modelC{run}(end).HRF = false;
@@ -130,7 +132,8 @@ switch command
                 spikes = union(spikes{:});
                 for s = spikes
                     vec = zeros(1,numel(files{run})); vec(s) = 1;
-                    modelC{run}(end+1) = schema;
+                    if isempty(modelC{run}), modelC{run} = schema;
+                    else, modelC{run}(end+1) = schema; end
                     modelC{run}(end).name = sprintf('SpikeMov%03d', s);
                     modelC{run}(end).vector = vec;
                     modelC{run}(end).HRF = false;
@@ -143,7 +146,8 @@ switch command
                 fn = getFileByStream(rap,'fmrirun',[subj runInds(run)],'denoising_regressors');
                 regressors = load(fn{1}); % expect text file
                 for r = 1:size(regressors,2)
-                    modelC{run}(end+1) = schema;
+                    if isempty(modelC{run}), modelC{run} = schema;
+                    else, modelC{run}(end+1) = schema; end
                     modelC{run}(end).name = sprintf('Denoising%02d', r);
                     modelC{run}(end).vector = regressors(:,r);
                     modelC{run}(end).HRF = false;

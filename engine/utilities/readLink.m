@@ -1,7 +1,12 @@
 function pth = readLink(pth)
     if iscell(pth)
-        pth = cellfun(@which,pth,'UniformOutput',false);
+        pth = cellfun(@wrapperwhich,pth,'UniformOutput',false);
     else
-        pth = which(pth);
+        pth = wrapperwhich(pth);
     end
+end
+
+% TODO - make MATLAB's wich handle absolute path
+function pth = wrapperwhich(pth)
+    if isOctave || ~isAbsolutePath(pth), pth = which(pth); end
 end

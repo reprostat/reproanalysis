@@ -4,6 +4,11 @@ function out = contains(str,pttrn,varargin)
     argParse.addParameter('regularExpression',false,@islogical);
     argParse.parse(varargin{:});
 
+    if ~ischar(pttrn) % MATLAB's advanced pattern
+        out = false;
+        return;
+    end
+
     if ~argParse.Results.regularExpression
         pttrn = ['.*' strrep(pttrn,'\','\\') '.*'];
     end

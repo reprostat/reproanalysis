@@ -55,12 +55,3 @@ function  putFileByStream(rap,domain,indices,streamName,fileNames)
     logsafe_path = strrep(streamDescriptor, '\', '\\');
     logging.info('\toutput stream %s %s written with %d file(s)',streamName,logsafe_path,numel(fileNames));
 end
-
-function resp = isAbsolutePath(pth)
-    if isOctave
-        resp = is_absolute_filename(pth);
-    else
-        jvFile = java.io.File(pth);
-        resp = jvFile.isAbsolute();
-    end
-end

@@ -40,7 +40,9 @@ function registrationCheck(rap,domain,indices,background,varargin)
         end
     end
     output(toExcl) = [];
-    output = cellstr(output);
+    for oInd = 1:numel(output)
+        if iscell(output{oInd}), output{oInd} = output{oInd}{1}; end
+    end
 
     diag = getSetting(rap,'diagnostics');
     if ~isempty(diag) && ((~isstruct(diag) && ~diag) || (isstruct(diag) && ~diag.streamindex))
@@ -56,13 +58,13 @@ function registrationCheck(rap,domain,indices,background,varargin)
         global st;
         switch mode
             case 'separate'
-                spm_check_registration(char(background,output{:}));
+                spm_check_registration(char([background,output]));
 
                 % Contours
                 switch spm('ver')
                     case {'SPM12b' 'SPM12'}
                         for v = 1:2 % show contours only of the background and the first output
-                            [h f] = getContextmenuCallback(st.vols{v}.ax{1}.ax,'Contour|Display|all but');
+                            [h, f] = getContextmenuCallback(st.vols{v}.ax{1}.ax,'Contour|Display|all but');
                             f(h,[]);
                             hM = getContextmenuCallback(st.vols{v}.ax{1}.ax,'Contour');
                             UDc = get(hM,'UserData'); UDc.nblines = 1; set(hM,'UserData',UDc); % narrow

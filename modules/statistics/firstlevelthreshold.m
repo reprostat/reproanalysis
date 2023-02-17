@@ -586,7 +586,7 @@ function print_table(F,fname)
     opt = 'jpg';
 
     %-Make print-friendly
-    set(findall(F,'Type','text'),'FontUnits','normalized','FontSize',0.05);
+    set(findall(F,'Type','text'),'FontUnits','normalized','FontSize',0.025);
     set(F,'PaperUnits','inches','PaperPosition',[0 0 5 4]);
 
     %-See if window has paging controls
