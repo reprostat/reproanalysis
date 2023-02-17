@@ -13,6 +13,9 @@ function reportWorkflow(study,tasksToReport)
             end
         otherwise, logging.error('First input MUST be the rap structure or the study path.');
     end
+    if ~isfield(rap.internal,'matlabversion') % reload processsed rap
+        load(fullfile(getPathByDomain(rap,'study',[]),'rap.mat'),'rap')
+    end
 
     % Tasks to report
     if nargin < 2
