@@ -2,16 +2,24 @@ function rap = firstlevelcontrasts(rap,command,subj)
 
     switch command
         case 'report'
+            contrasts = getSetting(rap,'contrast','subject',subj);
+            conNames = {contrasts.con.name};
+            load(char(getFileByStream(rap,'subject',subj,'firstlevel_spm','streamType','output')),'SPM');
+            missingCon = setdiff(conNames,{SPM.xCon.name});
+            extraCon = setdiff({SPM.xCon.name},conNames);
+            if ~isempty(missingCon), logging.error('Missing contrast(s):%s',sprintf(' %s',missingCon{:})); end
+            if ~isempty(missingCon), logging.error('Unspecified contrast(s):%s',sprintf(' %s',extraCon{:})); end
+
             reportStore = sprintf('sub%d',subj);
             addReport(rap,reportStore,'<h4>Contrasts</h4>');
-            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*contrasts\.jpg$']));
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*contrasts\.jpg$']),'displayFileName',false);
 
             if getSetting(rap,'diagnostics.histogram')
                 addReport(rap,reportStore,'<h4>Histograms</h4>');
                 for fn = cellstr(spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*histogram.*\.jpg$']))
                     conName = regexp(fn{1},'(?<=histogram_)[a-zA-Z-_]*','match');
                     addReport(rap,reportStore,['<h5>' conName{1} '</h5>']);
-                    rap = addReportMedia(rap,reportStore,fn{1});
+                    rap = addReportMedia(rap,reportStore,fn{1},'displayFileName',false);
                 end
             end
 
