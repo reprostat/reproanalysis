@@ -123,8 +123,8 @@ function reportWorkflow(study,tasksToReport)
     for subj = 1:getNByDomain(rap,'subject'), rap = addReport(rap,sprintf('sub%d',subj),'EOF'); end
     for s = 1:size(rap.report.summaries,1), rap = addReport(rap,rap.report.summaries{s,1},'EOF'); end
     if hasFirstlevelMaps
-        conReports = fieldnames(rap.report); conReports = conReports(startsWith(fieldnames(rap.report),'con') && ~strcmp(fieldnames(rap.report),'con0'));
-        for con = reshape(conReports,1,[]), rap = addReport(rap,con,'EOF'); end
+        conReports = fieldnames(rap.report); conReports = conReports(contains(conReports,'con[1-9]','regularExpression',true));
+        for con = reshape(conReports,1,[]), rap = addReport(rap,con{1},'EOF'); end
     end
 
     % Provenance
