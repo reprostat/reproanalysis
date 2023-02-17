@@ -3,15 +3,45 @@ function rap = firstlevelthreshold(rap,command,subj)
     switch command
 
         case 'report'
-            contrasts = getSetting(setCurrenttask(rap,'task',rap.tasklist.currenttask.inputstreams(1).taskindex),'contrasts','subject',subj);
-            conNames = {contrasts.con.name};
+            reportStore = sprintf('sub%d',subj);
+
+            load(char(getFileByStream(rap,'subject',subj,'firstlevel_spm')),'SPM');
+            conNames = {SPM.xCon.name};
+
+            % Prepare summary
+            if subj == 1 % first
+                for conInd = 1:numel(conNames)
+                    if  ~isfield(rap.report,sprintf('con%d',conInd))
+                        rap.report.(sprintf('con%d',conInd)).fname = fullfile(rap.report.conDir,[sprintf('con-%02d.html',conInd)]);
+                        addReport(rap,'con0',sprintf('<a href="%s" target=_top>%s</a><br>',...
+                            rap.report.(sprintf('con%d',conInd)).fname,...
+                            ['Contrast: ' conNames{conInd}]...
+                            ));
+                        rap = addReport(rap,sprintf('con%d',conInd),['HEAD=Contrast: ' conNames{conInd}]);
+                    end
+                    if ~isempty(rap.tasklist.currenttask.extraparameters)
+                        aadReport(rap,sprintf('con%d',conInd),sprintf('<h2>Branch: %s</h2>',...
+                            rap.tasklist.currenttask.extraparameters.rap.directoryconventions.analysisidsuffix(2:end)...
+                            ));
+                    end
+                end
+            end
+
+            for conInd = 1:numel(conNames)
+                addReport(rap,reportStore,sprintf('<h4>%02d. %s</h4>',conInd,conNames{conInd}));
+                conFiles = cellstr(spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' rap.tasklist.currenttask.name '.*' conNames{conInd} '.*$']));
+                if isempty(conFiles{1}), continue; end
+                statMinMax = dlmread(conFiles{endsWith(conFiles,'txt')});
+                addReport(rap,reportStore,sprintf('Range of statistics: %1.3f - %1.3f',statMinMax));
+                rap = addReportMedia(rap,reportStore,conFiles(contains(conFiles,'table')),'scaling',1/3,'displayFileName',false);
+                rap = addReportMedia(rap,reportStore,conFiles(contains(conFiles,'overlay')),'scaling',1/3,'displayFileName',false);
+
+                % Summary - axial and table(s)
+                addReport(rap,sprintf('con%d',conInd),rap.acqdetails.subjects(subj).subjname);
+                addReportMedia(rap,sprintf('con%d',conInd),conFiles(contains(conFiles,'overlay_3') | contains(conFiles,'table')),'scaling',1/3,'displayFileName',false);
+            end
 
 %            % collect contrast names and prepare summary
-%            contrasts = aas_getsetting(aas_setcurrenttask(rap,rap.internal.inputstreamsources{rap.tasklist.currenttask.modulenumber}.stream(1).sourcenumber),'contrasts');
-%            cons = [contrasts(2:end).con];
-%            conNames = {cons.name};
-%            [~,a] = unique(conNames,'first');
-%            conNames = conNames(sort(a));
 %
 %            if subj == 1 % first
 %                for C = 1:numel(conNames)
