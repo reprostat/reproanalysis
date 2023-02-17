@@ -4,13 +4,13 @@ function rap = segment(rap, command, subj)
         case 'report'
             reportStore = sprintf('sub%d',subj);
             addReport(rap,reportStore,'<h4>Separation of tissues</h4>');
-            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_histogram\.jpg$']));
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_histogram\.jpg$']),'displayFileName',false);
 
             addReport(rap,reportStore,'<h4>Segmentation</h4>');
-            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_' spm_file(char(getFileByStream(rap,'subject',subj,'structural','checkHash',false)),'basename') '.*\.jpg$']));
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_' spm_file(char(getFileByStream(rap,'subject',subj,'structural','checkHash',false)),'basename') '.*\.jpg$']),'displayFileName',false);
 
             addReport(rap,reportStore,'<h4>Segmentation and normalisation</h4>');
-            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*T1\.jpg$']));
+            rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*T1\.jpg$']),'displayFileName',false);
 
         case 'doit'
             global reproacache

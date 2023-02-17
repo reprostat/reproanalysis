@@ -23,7 +23,7 @@ switch command
             addReport(rap,reportStore,'<td>');
             addReport(rap,reportStore,['<h3>Run: ' runName '</h3>']);
             fn = spm_select('FPListRec',getPathByDomain(rap,'subject',subj),['^diagnostic_.*' runName '\.jpg']);
-            rap = addReportMedia(rap,reportStore,fn,0.5);
+            rap = addReportMedia(rap,reportStore,fn,'scaling',0.5,'displayFileName',false);
 
             parFn = getFileByStream(rap,'fmrirun',[subj run],'realignment_parameter');
             mv = load(parFn{1});
@@ -100,7 +100,7 @@ switch command
 
                 addReport(rap,'moco','<td valign="top">');
                 addReport(rap,'moco',['<h3>Run: ' rap.acqdetails.fmriruns(run).name '</h3>']);
-                rap = addReportMedia(rap,'moco',fn);
+                rap = addReportMedia(rap,'moco',fn,'displayFileName',false);
 
                 % Outliers
                 for m = unique(outMeas)'

@@ -4,10 +4,10 @@ switch command
     case 'report'
         reportStore = sprintf('sub%d',subj);
         addReport(rap,reportStore,'<h4>Masking</h4>');
-        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_mask_' spm_file(char(getFileByStream(rap,'fmrirun',[subj 1],'fmri','checkHash',false)),'basename') '.*\.jpg$']));
+        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_mask_' spm_file(char(getFileByStream(rap,'fmrirun',[subj 1],'fmri','checkHash',false)),'basename') '.*\.jpg$']),'displayFileName',false);
 
         addReport(rap,reportStore,'<h4>Model</h4>');
-        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*design\.jpg$']));
+        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*design\.jpg$']),'displayFileName',false);
 
     case 'doit'
         %% Init
