@@ -48,8 +48,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                 for d = 1:size(deps,1)
                     % Source
                     srcStreamPath = getPathByDomain(srcrap,s.streamdomain,deps(d,:));
-                    % - make sure the path is canonical
-                    srcStreamPath = readLink(srcStreamPath);
+                    srcStreamPath = readLink(srcStreamPath); % make sure the path is canonical
                     srcStreamDescriptor = fullfile(srcStreamPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name));
                     srcStream = strsplit(fileRetrieve(srcStreamDescriptor,rap.options.maximumretry,'content'),'\n');
                     srcHash = regexp(srcStream{1},'(?<=(#\t))[0-9a-f]*','match'); srcHash = srcHash{1};
@@ -58,9 +57,9 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     % Destination
                     destStreamPath = getPathByDomain(rap,s.streamdomain,deps(d,:));
                     destStreamName = sprintf('stream_%s_inputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name);
-                    % - make sure the path is canonical
-                    destStreamPath = readLink(destStreamPath);
-                    dirMake(destStreamPath);
+                    if exist(destStreamPath,'dir'), destStreamPath = readLink(destStreamPath); % make sure the path is canonical
+                    else, dirMake(destStreamPath);
+                    end
                     destStreamDescriptor = fullfile(destStreamPath,destStreamName);
 
                     logging.info('Input - %s',destStreamName);
@@ -89,7 +88,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                             if isOctave(), link(fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1}));
                             else
                                 if ispc()
-                                    shell(sprintf('mklink /H %s %s', fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1})));
+                                    shell(sprintf('mklink /H %s %s',fullfile(destStreamPath,f{1}), fullfile(srcStreamPath,f{1})));
                                 else
                                     shell(sprintf('ln %s %s', fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1})));
                                 end
