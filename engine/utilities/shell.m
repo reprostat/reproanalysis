@@ -23,7 +23,7 @@ function [s,w] = shell(cmd,varargin)
                 case {'csh' 'tcsh'}
                     prefix = 'setenv TERM dumb;';
                 otherwise
-                    logging.error('unknown shell: %s', w);
+                    logging.error('unknown shell: %s', strrep(w,'\','\\'));
             end
         end
 
@@ -32,7 +32,7 @@ function [s,w] = shell(cmd,varargin)
     end
 
     % Run
-    if ~quiet, logging.info('Running: %s', strrep([prefix cmd],'\','/')); end
+    if ~quiet, logging.info('Running: %s', strrep([prefix cmd],'\','\\')); end
     [s, w]=system([prefix cmd]);
 
     % Special cases
@@ -45,15 +45,15 @@ function [s,w] = shell(cmd,varargin)
 
     if ~s
         %% Process output if we're in non-quiet mode
-        if ~isempty(w) && ~quiet, logging.info(w); end
+        if ~isempty(w) && ~quiet, logging.info(strrep(w,'\','\\')); end
     else
         %% Process error if we're in non-quiet mode OR if we want to stop for errors
         if ~ignoreerrors
             logging.error('***LINUX ERROR FROM SHELL %s\n***WHILE RUNNING COMMAND\n%s***WITH ENVIRONMENT VARIABLES\n%s',...
-                w,[prefix cmd],getenvall());
+                strrep(w,'\','\\'),strrep([prefix cmd],'\','\\'),getenvall());
         elseif ~quiet
             logging.warning('***LINUX ERROR FROM SHELL %s\n***WHILE RUNNING COMMAND\n%s***WITH ENVIRONMENT VARIABLES\n%s',...
-                w,[prefix cmd],getenvall());
+                strrep(w,'\','\\'),strrep([prefix cmd],'\','\\'),getenvall());
         end
     end
 
