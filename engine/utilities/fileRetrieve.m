@@ -5,7 +5,6 @@ function resp = fileRetrieve(fname,varargin)
     argParse.addOptional('toRespond','state',@(x) ischar(x) & any(strcmp({'state','content'},x)));
     argParse.parse(varargin{:});
 
-    resp = '';
     for r = 0:argParse.Results.maximumRetry
         resp = exist(fname,'file');
         if resp
@@ -14,11 +13,13 @@ function resp = fileRetrieve(fname,varargin)
                     resp = true;
                     break
                 case 'content'
-                    try, resp = fileread(fname); catch, end
+                    try resp = fileread(fname); catch, resp = ''; end
                     if ~isempty(resp), break; end
             end
+        else
+            resp = '';
         end
         pause(1);
     end
-    if isempty(resp) || ~resp, logging.error('Could not find or read %s - Are you sure it is in your path?', fname); end
+    if isempty(resp), logging.error('Could not find or read %s - Are you sure it is in your path?', fname); end
 end
