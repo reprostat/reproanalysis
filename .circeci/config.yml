@@ -1,0 +1,81 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+version: 2.1
+orbs:
+  matlab: mathworks/matlab@0
+  aws-cli: circleci/aws-cli@3
+
+executors:
+  ubuntu:
+    machine:
+      image: 'ubuntu-2204:2022.04.1'
+      resource_class: medium
+
+    environment:
+      GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
+      AWS_DEFAULT_REGION: eu-west-2
+      AWS_EC2_METADATA_DISABLED: true
+
+commands:
+  testubuntumatlab:
+    description: "Testing on Ubuntu using MATLAB"
+    parameters:
+      parameter_xml: 
+        type: string
+        default: parameters_circleci.xml
+      load_fsl:
+        type: integer
+        default: 0
+      load_freesurfer:
+        type: integer
+        default: 0
+      command:
+        type: string
+        default: reproaClose()
+    steps:
+      - checkout
+      - matlab/install:
+          release: R2020a # comes with Python 2.7
+
+      - run:
+          name: Install tools and configure aa
+          command: |
+            mv ~/project $GITHUB_WORKSPACE
+            mkdir ~/.reproa
+            cd $GITHUB_WORKSPACE/.github/workflows
+            cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
+            python trigger_install.py
+          environment:
+            LOAD_FSL: << parameters.load_fsl >>
+            LOAD_FREESURFER: << parameters.load_freesurfer >>
+            PARAMETER_XML: << parameters.parameter_xml >>
+
+      - aws-cli/setup:
+          profile-name: example
+
+      - matlab/run-command:
+          command: addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); <<parameters.command>>
+          no-output-timeout: 3h
+      
+      - run:
+          name: Prepare artifacts
+          command: |
+            mkdir /tmp/output
+            cp $GITHUB_WORKSPACE/tests/reproa.log /tmp/output
+            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
+      - store_artifacts:
+          destination: report
+          path: /tmp/output
+
+jobs:
+  usecase_SPM:
+    executor: ubuntu
+    steps:
+      - testubuntumatlab:
+          parameter_xml: parameters_circleci_minimal_ubuntu.xml
+          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
+
+workflows:
+  build:
+    jobs:
+      - usecase_SPM:
+          context: aws
