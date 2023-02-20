@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap xmlns:xi="http://www.w3.org/2001/XInclude">
-    <xi:include href="/home/circleci/reproanalysis/parametersets/parameters_defaults.xml" parse="xml"/>
+    <xi:include href="/home/circleci/tools/reproanalysis/parametersets/parameters_defaults.xml" parse="xml"/>
     <local>
         <directoryconventions>
             <rawdatadir desc="Directory to find raw MRI data" ui="dir_list">/home/circleci/data</rawdatadir>
