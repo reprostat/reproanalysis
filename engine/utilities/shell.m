@@ -16,6 +16,7 @@ function [s,w] = shell(cmd,varargin)
             prefix = '';
         else
             [~,w]=system('ps -p $$');
+            disp(w)
             w = regexp(w,'(?<= )[a-z]*$','match'); w = w{1}; % select  last word
             switch w
                 case {'sh' 'bash'}
