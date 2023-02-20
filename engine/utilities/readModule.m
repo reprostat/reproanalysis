@@ -1,6 +1,4 @@
 function module = readModule(moduleFile)
-    logging.info('Processing %s',moduleFile);
-
     module = struct('name',spm_file(moduleFile,'basename'),'aliasfor','','index',[],'branchid',[],'extraparameters',[],'header',[],'hpc',[],'permanenceofoutput',[],'settings',[],'inputstreams',[],'outputstreams',[]);
 
     xml = readxml(moduleFile);
@@ -27,11 +25,10 @@ if isstruct(node)
         end
     end
     for f = fieldnames(node)'
-        logging.info('\tProcessing %s',f{1});
         params = arrayfun(@(x) processAttributes(x), node.(f{1}), 'UniformOutput', false);
-        if any(cellfun(@(p) iscell(p) | isobject(p), params))
+        if any(cellfun(@iscell, params))
             logging.info('%s has nested cell or object',f{1});
-            disp(params);
+            cellfun(@disp,params);
         end
         node.(f{1}) = cell2mat(params); % deal with arrays
     end
