@@ -18,19 +18,14 @@ if isstruct(node)
         if isfield(node,'CONTENT')
             attr = node.ATTRIBUTE;
             node = node.CONTENT;
-            if isa(node,'char') && contains(node,pathsep), node = strsplit(node,pathsep); end
+            %if isa(node,'char') && contains(node,':'), node = strsplit(node,':'); end % TODO central handling while avoiding processing paths
             return
         else
             node = rmfield(node,'ATTRIBUTE');
         end
     end
     for f = fieldnames(node)'
-        params = arrayfun(@(x) processAttributes(x), node.(f{1}), 'UniformOutput', false);
-        if any(cellfun(@iscell, params))
-            logging.info('%s has nested cell or object',f{1});
-            cellfun(@disp,params);
-        end
-        node.(f{1}) = cell2mat(params); % deal with arrays
+        node.(f{1}) = cell2mat(arrayfun(@(x) processAttributes(x), node.(f{1}), 'UniformOutput', false)); % deal with arrays
     end
 end
 end
