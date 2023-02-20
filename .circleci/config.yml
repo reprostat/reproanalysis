@@ -44,7 +44,7 @@ commands:
           name: Install tools and configure aa
           command: |
             mkdir /home/circleci/tools
-            mv ~/project $GITHUB_WORKSPACE
+            mv ~/project/reproanalysis $GITHUB_WORKSPACE
             mkdir ~/.reproa
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
