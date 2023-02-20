@@ -13,6 +13,8 @@ executors:
 
     environment:
       GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
+      AWS_ACCESS_KEY_ID: anonymus
+      AWS_SECRET_ACCESS_KEY: anonymus
       AWS_DEFAULT_REGION: eu-west-2
       AWS_EC2_METADATA_DISABLED: true
 
