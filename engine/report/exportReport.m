@@ -18,10 +18,25 @@ function exportReport(studyPath, target)
         dirMake(fullfile(strrep(rap.report.(repDir{1}),oldRoot,target)));
     end
 
-    for html = setdiff(reportFields,{'style' 'attachment' 'conDir' 'fbase' 'subjDir' 'summaries' 'realign'})'
+    % top-level HTMLs
+    topHMLSs = ['main' 'sub0' rap.report.summaries(:,1)'];
+
+    % HTMLs in subfolders
+    subHTMLs = reportFields(contains(reportFields,'(con[1-9])|(sub[1-9])','regularExpression',true))';
+
+    for html = [topHMLSs subHTMLs]
+        switch html{1}
+            case topHMLSs
+                relTarget = '.';
+                relMedia = './media/';
+            case subHTMLs
+                relTarget = '..';
+                relMedia = '../media/';
+        end
+
         content = strrep(fileread(rap.report.(html{1}).fname),'\','/');
-        content = regexprep(content,['(?<=href=")' strrep(oldRoot,'\','/')],strrep(target,'\','/'));
-        content = regexprep(content,'(?<=src=")[a-zA-Z0-9-_:\\/]*(?=diagnostic)',[strrep(mediaDir,'\','/') '/']);
+        content = regexprep(content,['(?<=href=")' strrep(oldRoot,'\','/')],relTarget);
+        content = regexprep(content,'(?<=src=")[a-zA-Z0-9-_:\\/]*(?=diagnostic)',relMedia);
 
         newFn = strrep(rap.report.(html{1}).fname,oldRoot,target);
         fid = fopen(newFn,'w');
