@@ -11,20 +11,21 @@ function [s,w] = shell(cmd,varargin)
     if isa(reproacache,'cacheClass') && reproacache.isKey('shellprefix')
         prefix = reproacache('shellprefix');
     else
-        % determine active shell
+        % determine active shell (based on https://uk.mathworks.com/help/matlab/ref/system.html#btnr3fv-1)
         if ispc()
             prefix = '';
         else
-            [~,w]=system('ps -p $$');
-            disp(w)
-            w = regexp(w,'(?<= )[a-z]*$','match'); w = w{1}; % select  last word
-            switch w
+            sh = getenv('MATLAB_SHELL');
+            if isempty(sh), sh = getenv('SHELL'); end
+            if isempty(sh), sh = '/bin/sh'; end
+            sh = spm_file(sh,'basename');
+            switch sh
                 case {'sh' 'bash'}
                     prefix = 'export TERM=dumb;';
                 case {'csh' 'tcsh'}
                     prefix = 'setenv TERM dumb;';
                 otherwise
-                    logging.error('unknown shell: %s', strrep(w,'\','\\'));
+                    logging.error('unknown shell: %s', strrep(sh,'\','\\'));
             end
         end
 
