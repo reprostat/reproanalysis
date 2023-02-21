@@ -128,10 +128,11 @@ classdef reproaClass < toolboxClass
             assignin('base','reproacache',reproacache);
             reproacache('doneflag') = this.DONEFLAG;
 
-            % Sub-toolboxes
-            rap = readParameterset(this.getUserParameterFile);
-            reproaworker.logLevel = rap.options.loglevel;
             logging.info('Starting reproa');
+
+            rap = readParameterset(this.getUserParameterFile);
+
+            % Sub-toolboxes
             for tbx = reshape(rap.directoryconventions.toolbox,1,[])
                 if isempty(tbx.dir), continue; end % unspecified
 
@@ -152,6 +153,19 @@ classdef reproaClass < toolboxClass
                 if strcmp(tbx.name,'spm'), T.setAutoLoad(); end % SPM is auto-loaded with ReproA
                 this.addToolbox(T);
                 reproacache(['toolbox.' tbx.name]) = T;
+            end
+
+            % Cleanup - OCTAVE only
+            if ~isempty(rap.options.parallelcleanup)
+                parallelDirs = cellstr(spm_select('FPList',this.configdir,'dir','^queue_[0-9]{14}$'));
+                if ~isempty(parallelDirs{1})
+                    for d = parallelDirs'
+                        tDir = regexp(d{1},'(?<=queue_)[0-9]{14}','match');
+                        if isOctave()
+                            if sscanf(datetime() - datetime(tDir{1},'yyyymmddHHMMSS'),'%d') >= rap.options.parallelcleanup, rmdir(d{1}); end
+                        end
+                    end
+                end
             end
 
             load@toolboxClass(this);
