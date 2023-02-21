@@ -8,8 +8,8 @@ function exportReport(studyPath, target)
     load(fullfile(studyPath,'rap_reported.mat'),'rap');
     oldRoot = fullfile(rap.acqdetails.root,rap.directoryconventions.analysisid);
 
-    for fn = rap.report.attachment
-        copyfile(fn,mediaDir);
+    for fn = reshape(rap.report.attachment,1,[])
+        copyfile(fn{1},mediaDir);
     end
 
     reportFields = fieldnames(rap.report);
