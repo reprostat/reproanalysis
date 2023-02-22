@@ -8,7 +8,7 @@ orbs:
 executors:
   ubuntu:
     machine:
-      image: 'ubuntu-2204:2022.04.1'
+      image: 'ubuntu-2204:2022.04.1' # if you change version you may need to update the command installing OCTAVE dependencies
       resource_class: medium
 
     environment:
@@ -19,6 +19,70 @@ executors:
       AWS_EC2_METADATA_DISABLED: true
 
 commands:
+  testubuntuoctave:
+    description: "Testing on Ubuntu using OCTAVE"
+    parameters:
+      parameter_xml: 
+        type: string
+        default: parameters_circleci.xml
+      load_fsl:
+        type: integer
+        default: 0
+      load_freesurfer:
+        type: integer
+        default: 0
+      command:
+        type: string
+        default: reproaClose()
+    steps:
+      - run: 
+          name: Checkout with submodules
+          command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
+
+      - run: 
+          name: Build and install OCTAVE
+          command: |
+            mkdir ~/tools
+            sudo apt install gcc g++ autoconf automake bison dvipng epstool fig2dev flex gfortran gnuplot-x11 gperf gzip icoutils libarpack2-dev libbison-dev libopenblas-dev libcurl4-gnutls-dev libfftw3-dev libfltk1.3-dev libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libgl2ps-dev libglpk-dev libgraphicsmagick++1-dev libhdf5-dev liblapack-dev libosmesa6-dev libpcre3-dev libqhull-dev libqscintilla2-qt5-dev libqrupdate-dev libreadline-dev librsvg2-bin libsndfile1-dev libsuitesparse-dev libsundials-dev libtool libxft-dev make openjdk-8-jdk perl portaudio19-dev pstoedit qtbase5-dev qttools5-dev qttools5-dev-tools rapidjson-dev rsync tar texinfo texlive-latex-extra zlib1g-dev           
+            mkdir ~/install-octave
+            cd ~/install-octave
+            wget https://ftp.gnu.org/gnu/octave/octave-7.3.0.tar.gz
+            tar -xzf octave-7.3.0.tar.gz                               && \
+            rm octave-7.3.0.tar.gz
+            cd octave-7.3.0
+            mkdir .build
+            cd .build
+            ./../configure --prefix=$HOME/tools/octave
+            make -j2
+            make check
+            make install
+
+      - run:
+          name: Install tools and configure aa
+          command: |          
+            mkdir ~/.reproa
+            cd $GITHUB_WORKSPACE/.circleci
+            cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
+            sudo apt install python2
+            ln /usr/bin/python2 /usr/bin/python
+            python trigger_install.py
+            sudo apt install ffmpeg libavformat58 libavcodec58 libavutil56
+            sudo apt install libswscale5
+            sudo apt install liboctave-dev
+            cd ~/tools/spm12/src
+            make PLATFORM=octave
+            make PLATFORM=octave install
+          environment:
+            LOAD_FSL: << parameters.load_fsl >>
+            LOAD_FREESURFER: << parameters.load_freesurfer >>
+            PARAMETER_XML: << parameters.parameter_xml >>      
+
+      - run:
+          name: Run test
+          command: |
+            echo "addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
+            $HOME/tools/octave/bin/octave-cli ~/test_run.m
+
   testubuntumatlab:
     description: "Testing on Ubuntu using MATLAB"
     parameters:
@@ -37,7 +101,7 @@ commands:
     steps:
       - run: 
           name: Checkout with submodules
-          command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL"
+          command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
       - matlab/install:
           release: R2020a # comes with Python 2.7
@@ -45,8 +109,6 @@ commands:
       - run:
           name: Install tools and configure aa
           command: |
-            mkdir /home/circleci/tools
-            mv ~/project/reproanalysis $GITHUB_WORKSPACE
             mkdir ~/.reproa
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
@@ -60,7 +122,7 @@ commands:
           profile-name: example
 
       - matlab/run-command:
-          command: addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); <<parameters.command>>
+          command: addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>
           no-output-timeout: 3h
       
       - run:
@@ -78,7 +140,7 @@ jobs:
   usecase_SPM:
     executor: ubuntu
     steps:
-      - testubuntumatlab:
+      - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
           command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
