@@ -155,7 +155,7 @@ classdef reproaClass < toolboxClass
                 reproacache(['toolbox.' tbx.name]) = T;
             end
 
-            % Cleanup - OCTAVE only
+            % Cleanup
             if ~isempty(rap.options.parallelcleanup)
                 parallelDirs = cellstr(spm_select('FPList',this.configdir,'dir','^queue_[0-9]{14}$'));
                 if ~isempty(parallelDirs{1})
@@ -163,6 +163,8 @@ classdef reproaClass < toolboxClass
                         tDir = regexp(d{1},'(?<=queue_)[0-9]{14}','match');
                         if isOctave()
                             if sscanf(datetime() - datetime(tDir{1},'yyyymmddHHMMSS'),'%d') >= rap.options.parallelcleanup, rmdir(d{1}); end
+                        else
+                            if days(datetime() - datetime(tDir{1},'InputFormat','yyyyMMddHHmmss')) >= rap.options.parallelcleanup, rmdir(d{1}); end
                         end
                     end
                 end
