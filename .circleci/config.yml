@@ -84,7 +84,7 @@ commands:
           command: |
             echo "addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
             $HOME/tools/octave/bin/octave-cli ~/test_run.m
-          no-output-timeout: 3h
+          no_output_timeout: 3h
 
       - run:
           name: Prepare artifacts
