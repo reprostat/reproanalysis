@@ -67,7 +67,7 @@ commands:
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
             sudo apt-get update
             sudo apt install python2
-            ln -s /usr/bin/python2 /usr/bin/python
+            sudo ln -s /usr/bin/python2 /usr/bin/python
             python trigger_install.py
             sudo apt install ffmpeg libavformat58 libavcodec58 libavutil56
             sudo apt install libswscale5
