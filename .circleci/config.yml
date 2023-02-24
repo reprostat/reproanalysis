@@ -52,6 +52,7 @@ commands:
             cd ~/tools/spm12/src
             make PLATFORM=octave
             make PLATFORM=octave install
+            sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev
           environment:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
@@ -151,17 +152,24 @@ jobs:
             make -j2
             make check
             make install
-            sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev
+            tar -czf /home/circleci/tools/octave.tar.gz /home/circleci/tools/octave
 
       - persist_to_workspace:
           root: /home/circleci/tools
-          path: octave
+          paths: octave.tar.gz
   
   usecase_octave_SPM:
     executor: ubuntu    
     steps:
       - attach_workspace:
-          at: /home/circleci/tools/built
+          at: /home/circleci/tools/build
+      
+      - run:
+          name: Extract OCTAVE
+          command: |
+            mkdir $HOME/tools
+            cd $HOME/tools
+            tar -xzf $HOME/tools/build/octave.tar.gz
 
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
