@@ -167,9 +167,7 @@ jobs:
       - run:
           name: Extract OCTAVE
           command: |
-            mkdir $HOME/tools
-            cd $HOME/tools
-            tar -xzf $HOME/tools/build/octave.tar.gz
+            tar -xzf $HOME/tools/build/octave.tar.gz --directory $HOME/tools
 
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
