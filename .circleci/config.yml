@@ -57,6 +57,7 @@ commands:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
             PARAMETER_XML: << parameters.parameter_xml >>      
+          no_output_timeout: 1h
 
       - run:
           name: Run test
