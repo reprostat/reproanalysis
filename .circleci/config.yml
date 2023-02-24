@@ -46,13 +46,13 @@ commands:
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
             sudo apt update
+            sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev
             sudo apt install python2
             sudo ln -s /usr/bin/python2 /usr/bin/python
             python trigger_install.py            
             cd ~/tools/spm12/src
             make PLATFORM=octave
-            make PLATFORM=octave install
-            sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev
+            make PLATFORM=octave install            
           environment:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
