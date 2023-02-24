@@ -154,14 +154,14 @@ jobs:
             sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev
 
       - persist_to_workspace:
-          root: $HOME/tools
+          root: /home/circleci/tools
           path: octave
   
   usecase_octave_SPM:
     executor: ubuntu    
     steps:
       - attach_workspace:
-          at: $HOME/tools/built
+          at: /home/circleci/tools/built
 
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
