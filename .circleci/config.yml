@@ -138,27 +138,27 @@ jobs:
       - run: 
           name: Build and install OCTAVE
           command: |           
+            mkdir ~/build
+            cd ~/build
             export DEBIAN_FRONTEND=noninteractive
             sudo apt remove needrestart
             sudo apt update
             sudo apt install gcc g++ autoconf automake bison dvipng epstool fig2dev flex gfortran gnuplot-x11 gperf gzip icoutils libarpack2-dev libbison-dev libopenblas-dev libcurl4-gnutls-dev libfftw3-dev libfltk1.3-dev libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libgl2ps-dev libglpk-dev libgraphicsmagick++1-dev libhdf5-dev liblapack-dev libosmesa6-dev libpcre3-dev libqhull-dev libqscintilla2-qt5-dev libqrupdate-dev libreadline-dev librsvg2-bin libsndfile1-dev libsuitesparse-dev libsundials-dev libtool libxft-dev make openjdk-8-jdk perl portaudio19-dev pstoedit qtbase5-dev qttools5-dev qttools5-dev-tools rapidjson-dev rsync tar texinfo texlive-latex-extra zlib1g-dev -y
-            mkdir ~/install-octave
-            cd ~/install-octave
             wget https://ftp.gnu.org/gnu/octave/octave-7.3.0.tar.gz
             tar -xzf octave-7.3.0.tar.gz
             rm octave-7.3.0.tar.gz
-            cd octave-7.3.0
+            mv octave-7.3.0 octave
+            cd octave
             mkdir .build
             cd .build
             ./../configure --prefix=$HOME/tools/octave
             make -j2
             make check
-            make install
-            cd $HOME/tools
+            cd $HOME/build
             tar -czf $HOME/tools/octave.tar.gz octave
 
       - persist_to_workspace:
-          root: /home/circleci/tools
+          root: /home/circleci/build
           paths: octave.tar.gz
   
   usecase_octave_SPM:
@@ -171,10 +171,13 @@ jobs:
           name: Extract OCTAVE
           command: |
             if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
-            tar -xzf $HOME/build/octave.tar.gz --directory $HOME/tools
-            ls /home/circleci/tools
+            tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
+            cd $HOME/build/octave/.build
+            make install
+
+            ls $HOME/tools
             sudo apt install tree
-            tree -d -L 3 /home/circleci/tools
+            tree -d -L 3 $HOME/tools
 
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
