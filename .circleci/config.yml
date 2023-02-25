@@ -155,7 +155,7 @@ jobs:
             make -j2
             make check
             cd $HOME/build
-            tar -czf $HOME/tools/octave.tar.gz octave
+            tar -czf octave.tar.gz octave
 
       - persist_to_workspace:
           root: /home/circleci/build
