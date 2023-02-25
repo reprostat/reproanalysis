@@ -160,6 +160,10 @@ jobs:
       - persist_to_workspace:
           root: /home/circleci/build
           paths: octave.tar.gz
+    
+      - store_artifacts:
+          destination: octave
+          path: /home/circleci/build/octave.tar.gz
   
   usecase_octave_SPM:
     executor: ubuntu    
@@ -168,8 +172,12 @@ jobs:
           at: /home/circleci/build
       
       - run:
-          name: Extract OCTAVE
+          name: Install OCTAVE
           command: |
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt remove needrestart
+            sudo apt update
+            sudo apt install libqhull-dev -y
             if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
             tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
             cd $HOME/build/octave/.build
