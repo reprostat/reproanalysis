@@ -170,6 +170,9 @@ jobs:
           name: Extract OCTAVE
           command: |
             tar -xzf $HOME/tools/build/octave.tar.gz --directory $HOME/tools
+            ls /home/circleci/tools
+            sudo apt install tree
+            tree -d -L 3 /home/circleci/tools
 
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
