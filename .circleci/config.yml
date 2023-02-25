@@ -154,7 +154,8 @@ jobs:
             make -j2
             make check
             make install
-            tar -czf /home/circleci/tools/octave.tar.gz /home/circleci/tools/octave
+            cd $HOME/tools
+            tar -czf $HOME/tools/octave.tar.gz octave
 
       - persist_to_workspace:
           root: /home/circleci/tools
@@ -164,12 +165,13 @@ jobs:
     executor: ubuntu    
     steps:
       - attach_workspace:
-          at: /home/circleci/tools/build
+          at: /home/circleci/build
       
       - run:
           name: Extract OCTAVE
           command: |
-            tar -xzf $HOME/tools/build/octave.tar.gz --directory $HOME/tools
+            if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
+            tar -xzf $HOME/build/octave.tar.gz --directory $HOME/tools
             ls /home/circleci/tools
             sudo apt install tree
             tree -d -L 3 /home/circleci/tools
