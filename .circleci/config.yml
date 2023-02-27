@@ -173,7 +173,7 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             sudo apt remove needrestart
             sudo apt update
-            sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-8-jdk libgraphicsmagick++1-dev -y
+            sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-8-jdk libgraphicsmagick++1-dev libgl2ps-dev -y
             if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
             tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
             cd $HOME/build/octave/.build
