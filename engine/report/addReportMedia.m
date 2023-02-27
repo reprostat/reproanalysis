@@ -15,8 +15,11 @@ function rap = addReportMedia(rap,reportStore,fnAll,varargin)
     if nImg > 1, addReport(rap,reportStore,'<table><tr>'); end
 
     for fnMedium = reshape(fnAll,1,[])
+        if isempty(fnMedium{1}) || ~exist(fnMedium{1},'file')
+            logging.warning('Cannot find file %s',fnMedium{1});
+        end
         if ~startsWith(fnMedium{1},rap.acqdetails.root)
-            logging.error('Cannot relate file %s to directory root %s',fnMedium{1},rap.acqdetails.root);
+            logging.warning('Cannot relate file %s to directory root %s',fnMedium{1},rap.acqdetails.root);
         end
 
         [~, baseFn, ext] = fileparts(fnMedium{1});
