@@ -202,3 +202,5 @@ workflows:
           context: aws
           requires:
             - build_octave
+      - usecase_MATLAB_SPM:
+          context: aws
