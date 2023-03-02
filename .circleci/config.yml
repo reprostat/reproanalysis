@@ -160,6 +160,10 @@ jobs:
       - persist_to_workspace:
           root: /home/circleci/build
           paths: octave.tar.gz
+      
+      - store_artifacts:
+          destination: octave
+          path: /home/circleci/build/octave.tar.gz
     
   usecase_octave_SPM:
     executor: ubuntu    
@@ -195,7 +199,7 @@ jobs:
           command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
 workflows:
-  build:
+  test:
     jobs:
       - build_octave
       - usecase_octave_SPM:
