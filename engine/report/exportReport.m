@@ -8,6 +8,7 @@ function exportReport(studyPath, target)
     load(fullfile(studyPath,'rap_reported.mat'),'rap');
     oldRoot = fullfile(rap.acqdetails.root,rap.directoryconventions.analysisid);
 
+    copyfile(fullfile(oldRoot,'rap_*'),target);
     for fn = reshape(rap.report.attachment,1,[])
         copyfile(fn{1},mediaDir);
     end
