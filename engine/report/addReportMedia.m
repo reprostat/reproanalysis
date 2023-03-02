@@ -20,6 +20,7 @@ function rap = addReportMedia(rap,reportStore,fnAll,varargin)
         end
         if ~startsWith(fnMedium{1},rap.acqdetails.root)
             logging.warning('Cannot relate file %s to directory root %s',fnMedium{1},rap.acqdetails.root);
+            continue;
         end
 
         [~, baseFn, ext] = fileparts(fnMedium{1});
