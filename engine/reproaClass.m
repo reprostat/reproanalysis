@@ -162,9 +162,9 @@ classdef reproaClass < toolboxClass
                     for d = parallelDirs'
                         tDir = regexp(d{1},'(?<=queue_)[0-9]{14}','match');
                         if isOctave()
-                            if sscanf(datetime() - datetime(tDir{1},'yyyymmddHHMMSS'),'%d') >= rap.options.parallelcleanup, rmdir(d{1}); end
+                            if sscanf(datetime() - datetime(tDir{1},'yyyymmddHHMMSS'),'%d') >= rap.options.parallelcleanup, dirRemove(d{1}); end
                         else
-                            if days(datetime() - datetime(tDir{1},'InputFormat','yyyyMMddHHmmss')) >= rap.options.parallelcleanup, rmdir(d{1}); end
+                            if days(datetime() - datetime(tDir{1},'InputFormat','yyyyMMddHHmmss')) >= rap.options.parallelcleanup, dirRemove(d{1}); end
                         end
                     end
                 end
