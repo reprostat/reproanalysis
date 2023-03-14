@@ -173,7 +173,6 @@ switch command
             if rap.tasklist.currenttask.settings.reslicewhich ~= 0, rimgs = spm_file(rimgs,'prefix','r'); end
             putFileByStream(rap,'fmrirun',[subj run],'fmri',rimgs);
 
-            % Get the realignment parameters...
             outpars = spm_select('FPList',getPathByDomain(rap,'fmrirun',[subj,run]),'^rp_.*.txt$');
 
             % Sessionwise custom plot or MFP
@@ -190,7 +189,13 @@ switch command
 %                        );
 %                end
             else
-                f = realignPlot(outpars);
+                % Get the realignment transformations (it also includes between-run movement, unlike the rp-files)...
+                load(spm_file(imgs{rap.acqdetails.selectedruns==run},'ext','.mat'),'mat');
+                V1 = spm_vol(spm_file(imgs{1},'number',',1'));
+                for v = 2:size(mat,3), mocomat(v,:) = spm_imatrix(mat(:,:,v)/V1.mat); end
+                mocomat(:,7:end) = [];
+
+                f = realignPlot({mocomat});
                 print('-djpeg','-r150','-noui',...
                     fullfile(getPathByDomain(rap,'fmrirun',[subj,run]),...
                     ['diagnostic_aamod_realign_' rap.acqdetails.fmriruns(run).name '.jpg'])...
@@ -202,7 +207,7 @@ switch command
 
 			% FD
 			FD = [0;sum(abs(diff(load(outpars) * diag([1 1 1 50 50 50]))),2)];
-			fname = spm_file(imgs{rap.acqdetails.selectedruns==run},'prefix','fd_');
+			fname = spm_file(imgs{rap.acqdetails.selectedruns==run},'prefix','fd_','ext','.txt');
 			save(fname,'FD','-ascii');
             putFileByStream(rap,'fmrirun',[subj run],'fd', fname);
 
