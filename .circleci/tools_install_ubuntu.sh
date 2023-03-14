@@ -4,7 +4,7 @@ mkdir $TOOLDIR/config
 TEMPLATEDIR=$TOOLDIR/templates
 
 sudo apt update
-sudo apt install libtinfo5 libtinfo6 dc libxml2-utils
+sudo apt install libtinfo5 libtinfo6 dc libxml2-utils graphviz
 curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o $TOOLDIR/get-pip.py
 python $TOOLDIR/get-pip.py --force-reinstall
 
