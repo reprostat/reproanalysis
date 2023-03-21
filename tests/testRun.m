@@ -1,4 +1,4 @@
-function rap = testRun(testScript,taskList,varargin)
+function testRun(testScript,taskList,varargin)
 
     argParse = inputParser;
     argParse.addParameter('deletePrevious',false,@(x) islogical(x) || isnumeric(x));
