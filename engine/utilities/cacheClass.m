@@ -8,17 +8,45 @@ classdef cacheClass < containers.Map
     end
 
     methods
-        function this = cacheClass(hashFunc)
+        function this = cacheClass(inp)
             this = this@containers.Map();
 
-            if ~nargin, hashFunc='MD5'; end
-            assert(any(strcmp(strsplit(this.validHashFuncs,','),hashFunc)),'wrong hash function: %s\nvalid options are: %s', hashFunc, this.validHashFuncs);
-            this.hashFunc = hashFunc;
+            if ~nargin, inp='MD5'; end
+
+            if ischar(inp)
+                assert(any(strcmp(strsplit(this.validHashFuncs,','),inp)),'wrong hash function: %s\nvalid options are: %s', inp, this.validHashFuncs);
+                this.hashFunc = inp;
+            else % load from struct
+                this.hashFunc = inp.hashFunc;
+                idx.type = '()';
+                for m = inp.map
+                    if isstruct(m.data) && isfield(m.data,'className')
+                        constr = str2func(m.data.className);
+                        m.data = constr(m.data);
+                    end
+                    idx.subs{1} = m.call;
+                    this = this.subsasgn(idx, m.data);
+                end
+            end
+        end
+
+        function val = struct(this)
+            val.className = 'cacheClass';
+            val.hashFunc = this.hashFunc;
+            val.map = cell2mat(this.values());
+            for i = 1:numel(val.map)
+                if isobject(val.map(i).data)
+                    val.map(i).data = struct(val.map(i).data);
+                end
+            end
         end
 
         function this = subsasgn(this,idx,value)
             switch idx(1).type
                 case '()'
+                    v.call = idx.subs{1};
+                    v.data = value;
+                    value = v;
                     idx.subs{1} = doHash(this.hashFunc,idx.subs{1});
                 case '.' % access custom properties
                     switch idx.subs
@@ -35,8 +63,11 @@ classdef cacheClass < containers.Map
             switch idx(1).type
                 case '()'
                     idx.subs{1} = doHash(this.hashFunc,idx.subs{1});
+                    resp = subsref@containers.Map(this,idx);
+                    resp = resp.data;
+                otherwise
+                    resp = subsref@containers.Map(this,idx);
             end
-            resp = subsref@containers.Map(this,idx);
         end
 
         function resp = isKey(this,key)
