@@ -25,6 +25,11 @@ classdef reproaClass < toolboxClass
 
     methods
         function this = reproaClass(varargin) % optional parameters: nogreet, noload
+            if numel(varargin) && isstruct(varargin{1}) % load from struct
+                initStruct = varargin{1};
+                varargin = {'nogreet' 'noload' 'fromstruct'};
+            end
+
             reproafile = [mfilename('fullpath') '.m'];
             repropath = fileparts(fileparts(reproafile));
 
@@ -80,6 +85,22 @@ classdef reproaClass < toolboxClass
             if ~any(strcmp(varargin,'noload'))
                 this.load;
             end
+
+            % From struct
+            if any(strcmp(varargin,'fromstruct'))
+                this.toolInPath = initStruct.toolInPath;
+                this.configdir = initStruct.configdir;
+                % reset warnings
+                arrayfun(@(w) warning(w.state,w.identifier), initStruct.warnings);
+
+                this.reload();
+            end
+        end
+
+        function val = struct(this)
+            val = struct@toolboxClass(this);
+            val.warnings = this.warnings;
+            val.configdir = this.configdir;
         end
 
         function close(this,varargin)
