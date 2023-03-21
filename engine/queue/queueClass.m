@@ -66,7 +66,7 @@ classdef queueClass < statusClass
         end
 
         function reportTasks(this,status,queueIndices)
-            msg = cellfun(@(t) sprintf('%s - #%3d: %s\n',upper(status),t.indQueue,t.description), this.taskQueue(queueIndices),'UniformOutput',false);
+            msg = cellfun(@(t) sprintf('%s - #%3d: %s in %s\n',upper(status),t.indQueue,t.description,t.duration), this.taskQueue(queueIndices),'UniformOutput',false);
             logging.info('%s',sprintf('%s',msg{:}));
             switch status
                 case 'failed'

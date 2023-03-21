@@ -51,6 +51,15 @@ classdef reproaTaskClass
             resp = doneflagExists(this);
         end
 
+        function resp = duration(this)
+            resp = "";
+            if this.isDone()
+                fid = fopen(this.doneflag,'r');
+                resp = fgetl(fid);
+                fclose(fid);
+            end
+        end
+
     end
 
     methods (Access=private)

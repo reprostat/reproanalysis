@@ -110,10 +110,16 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     % run task
     if ~exist(spm_file(rap.tasklist.currenttask.mfile,'ext','.m'),'file'), logging.error('%s doesn''t appear to be a valid m file?',funcname); end
     ci = num2cell(indices);
+    t0 = datetime;
     rap = feval(rap.tasklist.currenttask.mfile,rap,command,ci{:});
+    eTime = char(datetime-t0);
 
     % flag done (not for initialisation)
-    if (indTask > 0) && strcmp(command,'doit'), fclose(fopen(fullfile(taskRoot,reproacache('doneflag')),'w')); end
+    if (indTask > 0) && strcmp(command,'doit')
+        fid = fopen(fullfile(taskRoot,reproacache('doneflag')),'w');
+        fprintf(fid,eTime);
+        fclose(fid);
+    end
 
     % reset rap
     rap = setCurrenttask(rap);
