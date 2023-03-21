@@ -4,12 +4,16 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     global reproacache
 
     argParse = inputParser;
-    argParse.addParameter('reproacache',reproacache,@(x) isa(x,'cacheClass'));
-    argParse.addParameter('reproaworker',reproaworker,@(x) isa(x,'workerClass'));
+    argParse.addParameter('reproacache',reproacache,@(x) isa(x,'cacheClass') || isstruct(x));
+    argParse.addParameter('reproaworker',reproaworker,@(x) isa(x,'workerClass') || isstruct(x));
     argParse.parse(varargin{:});
 
     reproaworker = argParse.Results.reproaworker;
     reproacache = argParse.Results.reproacache;
+
+    % if delpoyed -> load from struct
+    if isstruct(reproacache), reproacache = cacheClass(reproacache); end
+    if isstruct(reproaworker), reproaworker = workerClass(reproaworker); end
 
     if ~isa(reproacache,'cacheClass'), logging.error('Cannot find reproacache. When deployed, reproacache MUST be provided'); end
     if ~isa(reproaworker,'workerClass'), logging.error('Cannot find reproaworker. When deployed, reproaworker MUST be provided'); end
