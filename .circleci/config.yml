@@ -13,10 +13,6 @@ executors:
 
     environment:
       GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
-      AWS_ACCESS_KEY_ID: anonymus
-      AWS_SECRET_ACCESS_KEY: anonymus
-      AWS_DEFAULT_REGION: eu-west-2
-      AWS_EC2_METADATA_DISABLED: true
 
 commands:
   testubuntuoctave:
@@ -59,6 +55,11 @@ commands:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
             PARAMETER_XML: << parameters.parameter_xml >>      
+
+      - aws-cli/setup:
+          aws-region: AWS_REGION
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
 
       - run:
           name: Run test
@@ -114,7 +115,9 @@ commands:
             PARAMETER_XML: << parameters.parameter_xml >>
 
       - aws-cli/setup:
-          profile-name: example
+          aws-region: AWS_REGION
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
 
       - matlab/run-command:
           command: addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>
@@ -187,16 +190,18 @@ jobs:
             sudo apt install tree
             tree -d -L 3 $HOME/tools
 
+        # testRun('test_MoAEpilot_fmri','SPM_CH30')
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
+          command: test_downloadData
 
   usecase_MATLAB_SPM:
     executor: ubuntu    
     steps:
+      # testRun('test_MoAEpilot_fmri','SPM_CH30')
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
+          command: test_downloadData
 
 workflows:
   test:
