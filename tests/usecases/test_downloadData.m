@@ -21,3 +21,6 @@ downloadData(rap, 'LEMON_MRI',  'sub-032301/ses-01/anat');
 rap.directoryconventions.rawdatadir = fullfile(dataroot, 'ds000114');
 downloadData(rap, 'LEMON_EEG',  'sub-032301');
 
+%% Report
+global reproaworker
+copyfile(reproaworker.logFile,fileparts(fileparts(mfilename('fullpath'))));
