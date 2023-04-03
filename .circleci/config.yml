@@ -34,6 +34,21 @@ commands:
           name: Checkout with submodules
           command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
+      - attach_workspace:
+          at: /home/circleci/build
+
+      - run:
+          name: Install OCTAVE (from build in /home/circleci/build/octave)
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt remove needrestart
+            sudo apt update
+            sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-8-jdk libgraphicsmagick++1-dev libgl2ps-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev -y
+            if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
+            tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
+            cd $HOME/build/octave/.build
+            make install
+
       - run:
           name: Install tools and configure reproa
           command: |          
@@ -62,13 +77,13 @@ commands:
             $HOME/tools/octave/bin/octave-cli ~/test_run.m
           no_output_timeout: 1h
 
-#            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
+
       - run:
           name: Prepare artifacts
           command: |
             mkdir /tmp/output
             cp $GITHUB_WORKSPACE/tests/reproa.log /tmp/output
-            cp -R /home/circleci/data /tmp/output
+            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
             tar -czf /tmp/output.tar.gz /tmp/output
       - store_artifacts:
           destination: report
@@ -113,13 +128,12 @@ commands:
           command: addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>
           no-output-timeout: 1h
 
-#            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
       - run:
           name: Prepare artifacts
           command: |
             mkdir /tmp/output
             cp $GITHUB_WORKSPACE/tests/reproa.log /tmp/output
-            cp -R /home/circleci/data /tmp/output
+            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
             tar -czf /tmp/output.tar.gz /tmp/output
       - store_artifacts:
           destination: report
@@ -130,7 +144,7 @@ jobs:
     executor: ubuntu    
     steps:
       - run: 
-          name: Build and install OCTAVE
+          name: Build OCTAVE
           command: |           
             mkdir ~/build
             cd ~/build
@@ -162,37 +176,16 @@ jobs:
   usecase_octave_SPM:
     executor: ubuntu    
     steps:
-      - attach_workspace:
-          at: /home/circleci/build
-      
-      - run:
-          name: Install OCTAVE
-          command: |
-            export DEBIAN_FRONTEND=noninteractive
-            sudo apt remove needrestart
-            sudo apt update
-            sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-8-jdk libgraphicsmagick++1-dev libgl2ps-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev -y
-            if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
-            tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
-            cd $HOME/build/octave/.build
-            make install
-
-            ls $HOME/tools
-            sudo apt install tree
-            tree -d -L 3 $HOME/tools
-
-        # testRun('test_MoAEpilot_fmri','SPM_CH30')
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: test_downloadData
+          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
   usecase_MATLAB_SPM:
     executor: ubuntu    
     steps:
-      # testRun('test_MoAEpilot_fmri','SPM_CH30')
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: test_downloadData
+          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
 workflows:
   test:
