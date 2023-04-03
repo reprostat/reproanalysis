@@ -62,12 +62,12 @@ commands:
             $HOME/tools/octave/bin/octave-cli ~/test_run.m
           no_output_timeout: 1h
 
+#            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
       - run:
           name: Prepare artifacts
           command: |
             mkdir /tmp/output
             cp $GITHUB_WORKSPACE/tests/reproa.log /tmp/output
-#            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
             cp /home/circleci/data /tmp/output
             tar -czf /tmp/output.tar.gz /tmp/output
       - store_artifacts:
@@ -112,13 +112,13 @@ commands:
       - matlab/run-command:
           command: addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>
           no-output-timeout: 1h
-      
+
+#            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
       - run:
           name: Prepare artifacts
           command: |
             mkdir /tmp/output
             cp $GITHUB_WORKSPACE/tests/reproa.log /tmp/output
-#            cp -R $GITHUB_WORKSPACE/tests/report /tmp/output
             cp /home/circleci/data /tmp/output
             tar -czf /tmp/output.tar.gz /tmp/output
       - store_artifacts:
