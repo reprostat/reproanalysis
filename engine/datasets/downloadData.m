@@ -69,13 +69,13 @@ if ~exist(demoDir,'dir') ... % Does not exist yet
     [~, mkdirMsg] = dirMake(demoDir); % Create if needed
     if ~exist(demoDir, 'dir'), logging.error('Failed to create directory %s, due to: %s', logsafeDemoDir, mkdirMsg); end
 
-    logging.info('INFO: downloading demo data to %s', logsafeDemoDir);
+    logging.info('downloadData:downloading demo data to %s', logsafeDemoDir);
 
     % Download and unpack the data to a temp dir first
     if nargin == 3, dataset.subset = subset; end
     dataset.download(demoDir);
 else
-    logging.info('downloadData: Directory %s is already non-empty, skipping data download', logsafeDemoDir);
+    logging.info('downloadData:Directory %s is already non-empty, skipping data download', logsafeDemoDir);
 end
 
 end

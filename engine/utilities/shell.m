@@ -34,7 +34,7 @@ function [s,w] = shell(cmd,varargin)
     end
 
     % Run
-    if ~quiet, logging.info('Running: %s', strrep([prefix cmd],'\','\\')); end
+    if ~quiet, logging.info('shell:%s', strrep([prefix cmd],'\','\\')); end
     [s, w]=system([prefix cmd]);
 
     % Special cases
