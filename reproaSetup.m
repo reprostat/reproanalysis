@@ -1,12 +1,18 @@
-function reproaSetup()
+function reproaSetup(varargin)
 % Reproducible Analysis - wrapper around reproaClass to ensure clean start with toolboxes in path
+% 
+% reproaSetup(Name,Value)
+% INPUT
+%   Name - Value
+%       'extensions' - extensionList, a cell array of reproa extensions to add
+
+    % Check Octave depedencies
     REQUIREDOCTAVEPACKAGES = {...
         'io','Read and write parametersets and metadata';...
         'video','creating videos for checking registrations';...
         'statistics','stats on diagnostics';...
         };
 
-    % Check Octave depedencies
     if exist ('OCTAVE_VERSION', 'builtin')
         fprintf('Checking required Octave packages...\n');
         [~,pkgInfo] = pkg('list');
@@ -28,6 +34,11 @@ function reproaSetup()
         end
     end
 
+    % Parse input
+    argParse = inputParser;
+    argParse.addParameter('extensions',{},@iscell);
+    argParse.parse(varargin{:});
+
     global reproacache
 
     if isa(reproacache,'cacheClass')
@@ -45,6 +56,9 @@ function reproaSetup()
     addpath(fullfile(fileparts([mfilename('fullpath') '.m']),'external','toolboxes'));
 
     reproa = reproaClass();
+
+    cellfun(@(ext) reproa.addExtension(ext), argParse.Results.extensions);
+
     reproacache('reproa') = reproa;
 
 end

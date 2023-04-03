@@ -9,6 +9,8 @@ classdef reproaClass < toolboxClass
         configdir
         % user parameter file name
         parameterFile = 'reproa_parameters_user.xml';
+
+        extensions = {}
     end
 
     properties (SetAccess = private)
@@ -294,6 +296,52 @@ classdef reproaClass < toolboxClass
                     fprintf('\n%s\n',msg);
                 end
             end
+        end
+
+        function addExtension(this,extName)
+            if ~exist(fullfile(this.toolPath,'extensions'),'dir')
+                dirMake(fullfile(this.toolPath,'extensions'));
+            end
+
+            extDir = fullfile(this.toolPath,'extensions',extName);
+
+            % Install
+            if ~exist(extDir,'dir')
+                extURL = [fileparts(this.reproawiki) '-' lower(extName)];
+                if isOctave(), extJ = javaObject('java.net.URL',extURL);
+                else, extJ = java.net.URL(extURL);
+                end
+                if extJ.openConnection.getResponseCode ~= 200
+                    logging.error('Extension %s does not exist at %s',extName,extURL);
+                end
+                shell(sprintf('git clone %s %s',extURL,extDir));
+            end
+            
+            % Load
+            this.extensions{end+1} = extName;            
+            addpath([...
+                genpath(fullfile(extDir,'engine')) pathsep...
+                genpath(fullfile(extDir,'modules')) pathsep...
+                fullfile(extDir,'parametersets') pathsep...
+                genpath(fullfile(extDir,'examples')) pathsep ...
+                genpath(fullfile(extDir,'tests')) ...
+                ]);
+            p = strsplit(path,pathsep);
+            this.toolInPath = [this.toolInPath p(cellfun(@(x) ~isempty(strfind(x,extDir)), p))];
+        end
+
+        function rmExtension(this,extName)
+            if ~ismember(extName,this.extensions)
+                logging.error('Extension %s is not included in {%s }',extName,sprintf(' %s',this.extensions{:}));
+            end
+            
+            this.extensions = setdiff(this.extensions, extName);
+
+            extDir = fullfile(this.toolPath,'extensions',extName);
+            p = strsplit(path,pathsep);
+            extPath = p(cellfun(@(x) ~isempty(strfind(x,extDir)), p));
+            this.toolInPath = setdiff(this.toolInPath, extPath);
+            rmpath(strjoin(extPath,pathsep));
         end
     end
 end

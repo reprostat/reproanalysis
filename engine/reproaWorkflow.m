@@ -28,6 +28,15 @@ function rap = reproaWorkflow(varargin)
 
     % Read parameterset
     rap = readParameterset(parametersetFile);
+    % - extensions
+    for extName = reproa.extensions
+        paramExt = fullfile(reproa.toolPath,'extensions',extName{1},'parametersets',['parameters_' lower(extName{1}) '.xml']);
+        if exist(paramExt,'file')
+            rapExt = readParameterset(paramExt); 
+            rap = structUpdate(rap,rapExt,'Mode','extend');
+        end
+    end
+
     rap.internal.parametersetFile = parametersetFile;
     rap.internal.tasklistFile = tasklistFile;
 
