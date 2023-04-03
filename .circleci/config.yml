@@ -68,7 +68,7 @@ commands:
           command: |
             mkdir /tmp/output
             cp $GITHUB_WORKSPACE/tests/reproa.log /tmp/output
-            cp /home/circleci/data /tmp/output
+            cp -R /home/circleci/data /tmp/output
             tar -czf /tmp/output.tar.gz /tmp/output
       - store_artifacts:
           destination: report
@@ -119,7 +119,7 @@ commands:
           command: |
             mkdir /tmp/output
             cp $GITHUB_WORKSPACE/tests/reproa.log /tmp/output
-            cp /home/circleci/data /tmp/output
+            cp -R /home/circleci/data /tmp/output
             tar -czf /tmp/output.tar.gz /tmp/output
       - store_artifacts:
           destination: report
