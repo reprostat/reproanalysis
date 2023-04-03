@@ -3,13 +3,12 @@ version: 2.1
 
 orbs:
   matlab: mathworks/matlab@0
-  aws-cli: circleci/aws-cli@3
 
 executors:
   ubuntu:
     machine:
       image: 'ubuntu-2204:2022.04.1' # if you change version you may need to update the command installing OCTAVE dependencies
-      resource_class: medium
+    resource_class: medium
 
     environment:
       GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
@@ -55,11 +54,6 @@ commands:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
             PARAMETER_XML: << parameters.parameter_xml >>      
-
-      - aws-cli/setup:
-          aws-region: AWS_REGION
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
 
       - run:
           name: Run test
@@ -113,11 +107,6 @@ commands:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
             PARAMETER_XML: << parameters.parameter_xml >>
-
-      - aws-cli/setup:
-          aws-region: AWS_REGION
-          aws-access-key-id: AWS_ACCESS_KEY_ID
-          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
 
       - matlab/run-command:
           command: addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>
@@ -208,8 +197,6 @@ workflows:
     jobs:
       - build_octave
       - usecase_octave_SPM:
-          context: aws
           requires:
             - build_octave
-      - usecase_MATLAB_SPM:
-          context: aws
+      - usecase_MATLAB_SPM
