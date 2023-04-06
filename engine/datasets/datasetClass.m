@@ -35,7 +35,7 @@ classdef datasetClass
                 case {'.tar.gz', '.tar'}
                     untar(tgz_filename, this.tmpdir);
                 case {'AWS'}
-                    if shell('which aws','quiet','ignoreerror')
+                    if shell('which aws','quiet',true,'ignoreerror',true)
                         logging.error('AWS CLI is not installed. See <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI Installation</a>' );
                     end
                     % Retrieve common files (if exist)

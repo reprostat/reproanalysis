@@ -2,10 +2,19 @@
 %
 function [s,w] = shell(cmd,varargin)
 
+    argParse = inputParser;
+    argParse.addParameter('quiet',false,@(x) islogical(x) || isnumeric(x));
+    argParse.addParameter('ignoreerror',false,@(x) islogical(x) || isnumeric(x));
+    argParse.addParameter('shellprefix','',@ischar);
+    argParse.addParameter('environment',{},@iscell);
+
+    argParse.parse(varargin{:});
+
     global reproacache
 
-    quiet = any(strcmp(varargin,'quiet'));
-    ignoreerrors = any(strcmp(varargin,'ignoreerror'));
+    quiet = argParse.Results.quiet;
+    ignoreerror = argParse.Results.ignoreerror;
+    ENV = argParse.Results.environment;
 
     % Prepare
     if isa(reproacache,'cacheClass') && reproacache.isKey('shellprefix')
@@ -33,9 +42,22 @@ function [s,w] = shell(cmd,varargin)
         if isa(reproacache,'cacheClass'), reproacache('shellprefix') = prefix; end
     end
 
+    % Environment
+    if ~isempty(ENV)
+        if startsWith(prefix,'export')
+            for e = 1:size(ENV,1)
+                cmd = [sprintf('export %s=%s;',ENV{e,1},ENV{e,2}) cmd];
+            end
+        elseif startsWith(prefix,'setenv')
+            for e = 1:size(ENV,1)
+                cmd = [sprintf('setenv %s %s;',ENV{e,1},ENV{e,2}) cmd];
+            end
+        end
+    end
+
     % Run
-    if ~quiet, logging.info('shell:%s', strrep([prefix cmd],'\','\\')); end
-    [s, w]=system([prefix cmd]);
+    if ~quiet, logging.info('shell:%s', strrep([prefix argParse.Results.shellprefix cmd],'\','\\')); end
+    [s, w]=system([prefix argParse.Results.shellprefix cmd]);
 
     % Special cases
     % - ensure shell-init error to be handled
@@ -50,7 +72,7 @@ function [s,w] = shell(cmd,varargin)
         if ~isempty(w) && ~quiet, logging.info(strrep(w,'\','\\')); end
     else
         %% Process error if we're in non-quiet mode OR if we want to stop for errors
-        if ~ignoreerrors
+        if ~ignoreerror
             logging.error('***LINUX ERROR FROM SHELL %s\n***WHILE RUNNING COMMAND\n%s***WITH ENVIRONMENT VARIABLES\n%s',...
                 strrep(w,'\','\\'),strrep([prefix cmd],'\','\\'),getenvall());
         elseif ~quiet
