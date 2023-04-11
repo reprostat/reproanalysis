@@ -8,7 +8,7 @@ function testRun(testScript,taskList,varargin)
     rap = reproaWorkflow([taskList '.xml']);
 
     testInfo = strsplit(testScript,'_');
-    dataName = testInfo{2};
+    dataName = strjoin(testInfo(2:end-1),'_');
 
     rap.directoryconventions.rawdatadir = fullfile(rap.directoryconventions.rawdatadir, dataName);
     rap.directoryconventions.analysisid = testScript;
