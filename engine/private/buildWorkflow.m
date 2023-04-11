@@ -77,7 +77,9 @@ function rap = buildWorkflow(rap,varargin)
                 if ~isfield(rap.tasklist.main(indSource).outputstreams(selectOutput),'taskindex') % first update
                     rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex = indTask;
                 else
-                    rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex(end+1) = indTask;
+                    if ~any(rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex==indTask)
+                        rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex(end+1) = indTask;
+                    end
                 end
             elseif ~inputstream.isessential
                 inputToOmit(end+1) = indInput;
@@ -89,9 +91,27 @@ function rap = buildWorkflow(rap,varargin)
         rap.tasklist.main(indTask).inputstreams(inputToOmit) = [];
 
         % update domain and modality of generic modules based on the main input, which is expected to be the last inputstream
-        if strcmp(rap.tasklist.main(indTask).header.domain, '?')
+        if strcmp(rap.tasklist.main(indTask).header.domain, '?') && ~isempty(rap.tasklist.main(indTask).inputstreams)
             rap.tasklist.main(indTask).header.domain = rap.tasklist.main(indTask).inputstreams(end).streamdomain;
             rap.tasklist.main(indTask).header.modality = rap.tasklist.main(indTask).inputstreams(end).modality;
+            % update outputstreams' domain
+            for indOutput = find(strcmp({rap.tasklist.main(indTask).outputstreams.domain},'?'))
+                rap.tasklist.main(indTask).outputstreams(indOutput).domain = rap.tasklist.main(indTask).header.domain;
+            end
+        end
+    end
+
+    % Update domain and modality of generic modules (with no input, see line 92) backwards based on the main output, which is expected to be the first (valid) outputstream
+    for indTask = numel(rap.tasklist.main):-1:1
+        if strcmp(rap.tasklist.main(indTask).header.domain, '?')
+            outputTaskInds = [rap.tasklist.main(indTask).outputstreams.taskindex];
+            outputTask = rap.tasklist.main(outputTaskInds(1));
+            rap.tasklist.main(indTask).header.domain = outputTask.header.domain;
+            rap.tasklist.main(indTask).header.modality = outputTask.header.modality;
+            % update outputstreams' domain
+            for indOutput = find(strcmp({rap.tasklist.main(indTask).outputstreams.domain},'?'))
+                rap.tasklist.main(indTask).outputstreams(indOutput).domain = rap.tasklist.main(indTask).header.domain;
+            end
         end
     end
 
