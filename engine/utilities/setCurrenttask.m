@@ -74,7 +74,7 @@ if argParse.Results.task
         mod = readModule(spm_file(module.aliasfor,'ext','.xml'));
         if isfield(mod.header,'mfile'), funcname = mod.header.mfile; end
     else
-        logging.error('couldn not find m-file for module %s',module.name);
+        logging.error('could not find m-file for module %s',module.name);
     end
 
     % Collect task info
