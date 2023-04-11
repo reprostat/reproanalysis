@@ -63,7 +63,7 @@ function rap = addSubject(rap, varargin)
 % Specify fieldmap data (overwrites autoidentification).
 %
 % series        - for DICOM: numeric array of series numbers
-%               - for NIfTI: cell of structure with fields 'fname' (cell of 3 filenames - 2x magnitude + 1x phase), 'hdr' (header structure or path to header), and 'session' (cell of session names or '*' for all sessions)
+%               - for NIfTI: cell of structure with fields 'fname' (cell of 3 filenames - 2x magnitude + 1x phase or 2 filenames topup), 'hdr' (header structure or path to header), and 'run' (cell of run names or '*' for all sessions)
 %
 %
 % FORMAT function rap = addSubject(___,'specialseries', series)

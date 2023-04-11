@@ -103,7 +103,8 @@ if isempty(SUBJ), logging.error('no subjects found in directory %s', rap.directo
 SESS = bids.query(BIDS, 'sessions'); if isempty(SESS), SESS = {''}; end
 if ~isempty(rap.acqdetails.input.selectedsessions), SESS = intersect(SESS,rap.acqdetails.input.selectedsessions); end
 
-MOD = bids.query(BIDS, 'modalities');
+MODs = bids.query(BIDS, 'modalities');
+SFXs = bids.query(BIDS, 'suffixes');
 
 for subj = SUBJ
     if BIDSsettings.combinemultiple
@@ -121,100 +122,179 @@ for subj = SUBJ
     end
 
     % anat
-    for sfx = intersect(strsplit(rap.tasksettings.fromnifti_structural.sfxformodality,':'), bids.query(BIDS, 'suffixes', 'modality', 'anat'),'stable')
-        for sessInd = 1:numel(SESS)
-            image = bids.query(BIDS, 'data', 'sub',subj{1}, 'sess',SESS{sessInd}, 'suffix',sfx{1});
-            hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'sess',SESS{sessInd}, 'suffix',sfx{1});
-            if isempty(fieldnames(hdr)), hdr = [];
-            else, hdr = repmat({hdr},1,numel(image));
-            end
-            if BIDSsettings.combinemultiple
-                structuralimages = horzcat(structuralimages,struct('fname',image{1},'hdr',hdr));
-            else
-                structuralimages{sessInd} = horzcat(structuralimages{sessInd},struct('fname',image{1},'hdr',hdr));
+    if ismember('anat',MODs)
+        for sfx = intersect(strsplit(rap.tasksettings.fromnifti_structural.sfxformodality,':'), bids.query(BIDS, 'suffixes', 'modality', 'anat'),'stable')
+            for sessInd = 1:numel(SESS)
+                image = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix',sfx{1});
+                hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix',sfx{1});
+                if isempty(fieldnames(hdr)), hdr = [];
+                else, hdr = repmat({hdr},1,numel(image));
+                end
+                if BIDSsettings.combinemultiple
+                    structuralimages = horzcat(structuralimages,struct('fname',image{1},'hdr',hdr));
+                else
+                    structuralimages{sessInd} = horzcat(structuralimages{sessInd},struct('fname',image{1},'hdr',hdr));
+                end
             end
         end
     end
 
     % fmri
-    for task = bids.query(BIDS, 'tasks')
-        for sessInd = 1:numel(SESS)
-            RUNS = bids.query(BIDS, 'runs', 'sess', SESS{sessInd}, 'task', task{1}); if isempty(RUNS), RUNS = {''}; end
+    if ismember('func',MODs) && ismember('bold',SFXs)
+        for task = bids.query(BIDS, 'tasks')
+            for sessInd = 1:numel(SESS)
+                RUNS = bids.query(BIDS, 'runs', 'ses', SESS{sessInd}, 'task', task{1}); if isempty(RUNS), RUNS = {''}; end
 
-            for run = RUNS
-                if ~isempty(run{1})
-                    taskname = [task{1} '-' run{1}];
-                else
-                    taskname = task{1};
-                end
-                if BIDSsettings.combinemultiple && ~isempty(SESS{sessInd})
-                    taskname = [taskname '_' SESS{sessInd}];
-                end
-
-                % Skip?
-                if ~isempty(rap.acqdetails.selectedruns) && ~any(strcmp({rap.acqdetails.fmrirun(rap.acqdetails.selectedruns).name},taskname)), continue; end
-
-                rap = addRun(rap, 'fmri', taskname);
-
-                image = bids.query(BIDS, 'data', 'sub', subj{1}, 'sess',SESS{sessInd}, 'suffix', 'bold', 'task', task{1});
-                hdr = bids.query(BIDS, 'metadata', 'sub', subj{1}, 'sess',SESS{sessInd}, 'suffix', 'bold', 'task', task{1}); if isempty(fieldnames(hdr)), hdr = []; end
-                eventfile = bids.query(BIDS, 'data', 'sub', subj{1}, 'sess',SESS{sessInd}, 'suffix', 'events', 'task', task{1});
-
-                if BIDSsettings.combinemultiple
-                    fmriimages = horzcat(fmriimages,struct('fname',image{1},'hdr',hdr));
-                else
-                    fmriimages{sessInd} = horzcat(fmriimages{sessInd},struct('fname',image{1},'hdr',hdr));
-                end
-
-                if ~BIDSsettings.omitModeling
-                    subjname = subj{1};
-                    if ~BIDSsettings.combinemultiple && ~isempty(SESS{sessInd}), subjname = [subjname '_' SESS{sessInd}]; end
-
-                    TR = 0; if isfield(hdr,'RepetitionTime'), TR = hdr.RepetitionTime; end
-
-                    % locate firstlevelmodel modules
-                    indModel = [];
-                    for stageInd = find(strcmp({rap.tasklist.main.name},'firstlevelmodel'))
-                        if isstruct(rap.tasklist.main(stageInd).extraparameters)
-                            runs = strsplit(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedruns,' ');
-                        else
-                            runs = {rap.acqdetails.fmriruns.name};
-                        end
-                        if any(strcmp(runs,'*')) || any(strcmp(runs,taskname)), indModel(end+1) = rap.tasklist.main(stageInd).index; end
+                for run = RUNS
+                    if ~isempty(run{1})
+                        taskname = [task{1} '-' run{1}];
+                    else
+                        taskname = task{1};
+                    end
+                    if BIDSsettings.combinemultiple && ~isempty(SESS{sessInd})
+                        taskname = [taskname '_' SESS{sessInd}];
                     end
 
-                    if isempty(eventfile), logging.warning('No event found for subject %s task/run %s\n',subjname,taskname);
+                    % Skip?
+                    if ~isempty(rap.acqdetails.selectedruns) && ~any(strcmp({rap.acqdetails.fmrirun(rap.acqdetails.selectedruns).name},taskname)), continue; end
+
+                    rap = addRun(rap, 'fmri', taskname);
+
+                    image = bids.query(BIDS, 'data', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'bold', 'task', task{1});
+                    hdr = bids.query(BIDS, 'metadata', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'bold', 'task', task{1}); if isempty(fieldnames(hdr)), hdr = []; end
+                    eventfile = bids.query(BIDS, 'data', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'events', 'task', task{1});
+
+                    if BIDSsettings.combinemultiple
+                        fmriimages = horzcat(fmriimages,struct('fname',image{1},'hdr',hdr));
                     else
-                        if ~TR, logging.warning('No (RepetitionTime in) header found for subject %s task/run %s\n\tNo correction of EV onset for dummies is possible!',subjname,taskname); end
-                        tDummies = rap.acqdetails.input.correctEVfordummies*rap.tasksettings.fromnifti_fmri.numdummies*TR;
+                        fmriimages{sessInd} = horzcat(fmriimages{sessInd},struct('fname',image{1},'hdr',hdr));
+                    end
 
-                        % process events
-                        EVENTS = bids.util.tsvread(eventfile{1});
-                        allEvents = EVENTS.(BIDSsettings.regcolumn);
-                        eventNames = unique(allEvents);
-                        for n = 1:numel(eventNames)
-                            indEvent = strcmp(allEvents,eventNames{n});
-                            eventOnsets{n} = EVENTS.onset(indEvent);
-                            eventDurations{n} = EVENTS.duration(indEvent);
-                        end
+                    if ~BIDSsettings.omitModeling
+                        subjname = subj{1};
+                        if ~BIDSsettings.combinemultiple && ~isempty(SESS{sessInd}), subjname = [subjname '_' SESS{sessInd}]; end
 
-                        % - preprocess even names
-                        if BIDSsettings.stripEventNames
-                            eventNames = regexprep(eventNames,'[^a-zA-Z0-9]','');
-                        end
-                        if BIDSsettings.convertEventsToUppercase
-                            eventNames = upper(eventNames);
-                        end
-                        if BIDSsettings.maxEventNameLength < Inf
-                            eventNames = cellfun(@(x) x(1:min(BIDSsettings.maxEventNameLength,length(x))), eventNames,'UniformOutput',false);
-                        end
+                        TR = 0; if isfield(hdr,'RepetitionTime'), TR = hdr.RepetitionTime; end
 
-                        % - add events to the models
-                        for m = indModel
-                            for e = 1:numel(eventNames)
-                                if BIDSsettings.omitNullEvents && strcmpi(eventNames{e},'null'), continue; end
-                                rap = addEvent(rap,sprintf('firstlevelmodel_%05d',m),subjname,taskname,eventNames{e},eventOnsets{e}-tDummies,eventDurations{e});
+                        % locate firstlevelmodel modules
+                        indModel = [];
+                        for stageInd = find(strcmp({rap.tasklist.main.name},'firstlevelmodel'))
+                            if isstruct(rap.tasklist.main(stageInd).extraparameters)
+                                runs = strsplit(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedruns,' ');
+                            else
+                                runs = {rap.acqdetails.fmriruns.name};
                             end
+                            if any(strcmp(runs,'*')) || any(strcmp(runs,taskname)), indModel(end+1) = rap.tasklist.main(stageInd).index; end
+                        end
+
+                        if isempty(eventfile), logging.warning('No event found for subject %s task/run %s\n',subjname,taskname);
+                        else
+                            if ~TR, logging.warning('No (RepetitionTime in) header found for subject %s task/run %s\n\tNo correction of EV onset for dummies is possible!',subjname,taskname); end
+                            tDummies = rap.acqdetails.input.correctEVfordummies*rap.tasksettings.fromnifti_fmri.numdummies*TR;
+
+                            % process events
+                            EVENTS = bids.util.tsvread(eventfile{1});
+                            allEvents = EVENTS.(BIDSsettings.regcolumn);
+                            eventNames = unique(allEvents);
+                            for n = 1:numel(eventNames)
+                                indEvent = strcmp(allEvents,eventNames{n});
+                                eventOnsets{n} = EVENTS.onset(indEvent);
+                                eventDurations{n} = EVENTS.duration(indEvent);
+                            end
+
+                            % - preprocess even names
+                            if BIDSsettings.stripEventNames
+                                eventNames = regexprep(eventNames,'[^a-zA-Z0-9]','');
+                            end
+                            if BIDSsettings.convertEventsToUppercase
+                                eventNames = upper(eventNames);
+                            end
+                            if BIDSsettings.maxEventNameLength < Inf
+                                eventNames = cellfun(@(x) x(1:min(BIDSsettings.maxEventNameLength,length(x))), eventNames,'UniformOutput',false);
+                            end
+
+                            % - add events to the models
+                            for m = indModel
+                                for e = 1:numel(eventNames)
+                                    if BIDSsettings.omitNullEvents && strcmpi(eventNames{e},'null'), continue; end
+                                    rap = addEvent(rap,sprintf('firstlevelmodel_%05d',m),subjname,taskname,eventNames{e},eventOnsets{e}-tDummies,eventDurations{e});
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    % fieldmaps
+    if ismember('fmap',MODs)
+        for sessInd = 1:numel(SESS)
+            % dual-echo
+            for fmap = reshape(bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'modality','fmap', 'suffix','phasediff'),1,[])
+                images = cell(1,3);
+                images(1) = fmap;
+                images{2} = strrep(images{1},'phasediff','magnitude1');
+                images{3} = strrep(images{1},'phasediff','magnitude2');
+                if ~exist(images{3},'file'), images(end) = []; end
+                hdr = jsonread(strrep(images{1},'.nii.gz','.json'));
+                hdr.EchoTime = [hdr.EchoTime1 hdr.EchoTime2];
+                runName = regexp(hdr.IntendedFor,'(?<=task-)[^_]*','match','once');
+                if isempty(runName)
+                    logging.warning('No task specification found for fieldmap %s -> assuming all run',images{1});
+                    runName = '*';
+                end
+                runName = ['fmrirun-' runName];
+
+                rapFmap.fname = images;
+                rapFmap.hdr = hdr;
+                rapFmap.run = runName;
+
+                if BIDSsettings.combinemultiple
+                    fieldmapimages = horzcat(fieldmapimages,rapFmap);
+                else
+                    fieldmapimages{sessInd} = horzcat(fieldmapimages{sessInd},rapFmap);
+                end
+            end
+
+            % topup
+            if ~isempty(bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'modality','fmap', 'suffix','epi'))
+                DIRs = bids.query(BIDS, 'directions', 'sub',subj{1}, 'ses',SESS{sessInd}, 'modality','fmap', 'suffix','epi');
+                uniqeDirs = {};
+                while ~isempty(DIRs)
+                    uniqeDirs(end+1) = DIRs(1); DIRs(1) = [];
+                    DIRs(strcmp(DIRs,fliplr(uniqeDirs{end}))) = [];
+                end
+                for pedir = uniqeDirs
+                    for fmap = reshape(bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'modality','fmap', 'suffix','epi', 'dir', pedir{1}),1,[])
+                        images = cellstr(spm_select('FPList',spm_file(fmap{1},'path'),strrep(spm_file(fmap{1},'filename'),['dir-' pedir{1}],['dir-[' pedir{1} ']{2}'])));
+                        hdr = jsonread(strrep(images{1},'.nii.gz','.json'));
+                        hdr2 = jsonread(strrep(images{2},'.nii.gz','.json'));
+                        hdr.PhaseEncodingDirection = {hdr.PhaseEncodingDirection hdr2.PhaseEncodingDirection};
+                        switch spm_file(spm_file(hdr.IntendedFor,'path'),'basename')
+                            case 'func'
+                                runName = regexp(hdr.IntendedFor,'(?<=task-)[^_]*','match','once');
+                                if ~isempty(runName)
+                                    runNum = regexp(hdr.IntendedFor,'(?<=run-)[^_]*','match','once');
+                                    if ~isempty(runNum), runName = [runName '-' runNum]; end
+                                else
+                                    logging.warning('No task specification found for fieldmap  %s -> assuming all run',images{1});
+                                    runName = '*';
+                                end
+                                runName = ['fmrirun-' runName];
+                            case 'dwi'
+                                logging.warning('Fieldmap %s detected for diffusion -> assuming all run',images{1});
+                                runName = 'diffusionrun-*';
+                        end
+
+                        rapFmap.fname = images;
+                        rapFmap.hdr = hdr;
+                        rapFmap.run = runName;
+
+                        if BIDSsettings.combinemultiple
+                            fieldmapimages = horzcat(fieldmapimages,rapFmap);
+                        else
+                            fieldmapimages{sessInd} = horzcat(fieldmapimages{sessInd},rapFmap);
                         end
                     end
                 end

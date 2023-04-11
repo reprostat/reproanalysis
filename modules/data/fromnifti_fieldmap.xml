@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='?' desc='Find fieldmap input files from nifti' modality='MRI'/>
+
+    <hpc>
+        <timeBase>0.2</timeBase>
+        <memoryBase>0.2</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>1</permanenceofoutput>
+
+    <settings>
+        <pattern desc='Regular expression pattern to select images if multiple are present'></pattern>
+    </settings>
+
+    <outputstreams>
+        <stream>dualtefieldmap</stream>
+        <stream>dualtefieldmap_header</stream>
+        <stream>dualpefieldmap</stream>
+        <stream>dualpefieldmap_header</stream>
+    </outputstreams>
+</rap>
+
