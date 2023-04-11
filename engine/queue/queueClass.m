@@ -18,19 +18,21 @@ classdef queueClass < statusClass
 
     methods
         function this = queueClass(rap)
-            global reproacache
-            if ~isa(reproacache,'cacheClass'), logging.error('Cannot find reproacache'); end
-            global reproaworker
-            if ~isa(reproaworker,'workerClass'), logging.error('Cannot find reproaworker'); end
+            if ~isa(this,'localsingleClass')
+                global reproacache
+                if ~isa(reproacache,'cacheClass'), logging.error('Cannot find reproacache'); end
+                global reproaworker
+                if ~isa(reproaworker,'workerClass'), logging.error('Cannot find reproaworker'); end
 
-            reproa = reproacache('reproa');
+                reproa = reproacache('reproa');
 
-            if isOctave, strnow = char(datetime(clock,'yyyymmddHHMMSS'));
-            else, strnow = char(datetime(clock,'Format','yyyyMMddHHmmss'));
+                if isOctave, strnow = char(datetime(clock,'yyyymmddHHMMSS'));
+                else, strnow = char(datetime(clock,'Format','yyyyMMddHHmmss'));
+                end
+                this.queueFolder = fullfile(reproa.configdir,['queue_' strnow]);
+                dirMake(this.queueFolder);
+                reproaworker.logFile = spm_file(reproaworker.logFile,'path',this.queueFolder);
             end
-            this.queueFolder = fullfile(reproa.configdir,['queue_' strnow]);
-            dirMake(this.queueFolder);
-            reproaworker.logFile = spm_file(reproaworker.logFile,'path',this.queueFolder);
 
             this.rap = rap;
             this.pStatus = this.STATUS('pending');

@@ -2,7 +2,7 @@ function testRun(testScript,taskList,varargin)
 
     argParse = inputParser;
     argParse.addParameter('deletePrevious',false,@(x) islogical(x) || isnumeric(x));
-    argParse.addParameter('whereToProcess','localsingle',@(x) ischar(x) && ismember(x, {'localsingle'}));
+    argParse.addParameter('whereToProcess','localsingle',@(x) ischar(x) && ismember(x, {'localsingle' 'batch'}));
     argParse.parse(varargin{:});
 
     rap = reproaWorkflow([taskList '.xml']);
