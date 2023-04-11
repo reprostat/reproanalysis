@@ -45,19 +45,29 @@ function rap = fromnifti_structural(rap,command,subj)
 
                     %% Image
                     if ~exist(niftiFile,'file')
-                        niftisearchpth = findvol(rap,'mri',rap.acqdetails.subjects(subj).mridata);
-                        if ~isempty(niftisearchpth)
-                            niftiFile = fullfile(niftisearchpth,niftiFile);
-                            if ~exist(niftiFile,'file'), logging.error(['Image ' niftiFile ' not found']); end
+                        niftiFile = '';
+                        for niftisearchpth = cellfun(@(d) findData(rap,'mri',d), rap.acqdetails.subjects(subj).mridata,'UniformOutput',false);
+                            niftiFile = fullfile(niftisearchpth{1},niftiFile);
+                            if exist(niftiFile,'file'), break; end
                         end
+                        if isempty(niftiFile), logging.error(['Image ' niftiFile ' not found']); end
+                    end
+
+                    doUncompress = false;
+                    if strcmp(spm_file(niftiFile,'ext'),'gz')
+                        doUncompress = true;
+                        tmpDir = tempdir;
+                        gunzip(niftiFile,tmpDir);
+                        niftiFile = spm_file(niftiFile,'path',tmpDir,'ext','');
                     end
 
                     V(s) = spm_vol(niftiFile);
                     Y = spm_read_vols(V(s));
 
+                    if doUncompress, delete(niftiFile); end
+
                     fn{s} = spm_file(niftiFile,'path',localPath,'suffix','_0001');
-                    if strcmp(spm_file(fn{s},'ext'),'gz'), fn{s} = spm_file(fn{s},'ext',''); end
-                    V(s).fname=deblank(fn{s});
+                    V(s).fname = deblank(fn{s});
                     V(s).n=[1 1];
 
                     if doAverage

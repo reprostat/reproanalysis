@@ -78,9 +78,17 @@ switch command
 
         % Image
         finalepis={};
+
+        doUncompress = false;
+        if strcmp(spm_file(niftiFile,'ext'),'gz')
+            doUncompress = true;
+            tmpDir = tempdir;
+            gunzip(niftiFile,tmpDir);
+            niftiFile = spm_file(niftiFile,'path',tmpDir,'ext','');
+        end
+
         V = spm_vol(niftiFile);
         if iscell(V), V = cell2mat(V); end
-        if strcmp(spm_file(niftiFile{1},'ext'),'gz'), niftiFile = spm_file(niftiFile,'ext',''); end
         for fileInd = 1:numel(V)
             Y = spm_read_vols(V(fileInd));
             if numel(niftiFile) == 1 % 4D-NIFTI
@@ -94,6 +102,8 @@ switch command
             finalepis = [finalepis fn];
         end
 
+        if doUncompress, cellfun(@delete, niftiFile); end
+
         if isfield(header{1},'PhaseEncodingDirection') && ~isempty(header{1}.PhaseEncodingDirection(1))
             sliceaxes = {'x' 'y'};
             ind = cellfun(@(t) contains(header{1}.PhaseEncodingDirection(1),t), sliceaxes);
@@ -104,7 +114,7 @@ switch command
             if ind == 0
                 logging.error('Could not parse PhaseEncodingDirection: %s', header{1}.PhaseEncodingDirection(1));
             end
-            logging.info('PhaseEncodingDirection is %s',sliceaxes(ind));
+            logging.info('PhaseEncodingDirection is %s',sliceaxes{ind});
             header{1}.NumberOfPhaseEncodingSteps = V(1).dim(ind);
         end
 
@@ -148,9 +158,13 @@ switch command
         % QA
         Y = spm_read_vols(V);
         Ymean = mean(Y,4);
-        QA.sd = std(Y,[],4); QA.sd(QA.sd==0) = NaN;
+        % - slice-by-slice caluclation of SD to avoid "dimension too large for Octave's index type" error
+        for s = 1:size(Y,3), QA.sd(:,:,s) = std(Y(:,:,s,:),[],4); end
+        QA.sd(QA.sd==0) = NaN;
+        clear Y;
+
         QA.snr = Ymean./QA.sd;
-        if ~isempty(header{1}.EchoTime), QA.cnr = Ysnr*header{1}.EchoTime; end
+        if ~isempty(header{1}.EchoTime), QA.cnr = QA.snr*header{1}.EchoTime; end
         for m = fieldnames(QA)'
             V(1).fname = spm_file(finalepis,'suffix',['_' m{1}]);
             spm_write_vol(V(1),QA.(m{1}));
