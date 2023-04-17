@@ -159,7 +159,7 @@ jobs:
             cd octave
             mkdir .build
             cd .build
-            ./../configure --prefix=$HOME/tools/octave
+            ./../configure --prefix=$HOME/tools/octave CPPFLAGS="-I/usr/include/suitesparse" --with-hdf5-includedir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/hdf5/serial
             make -j2
             make check
             cd $HOME/build
