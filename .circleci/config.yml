@@ -73,8 +73,8 @@ commands:
       - run:
           name: Run test
           command: |
-            echo "addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
-            $HOME/tools/octave/bin/octave-cli ~/test_run.m
+            echo "graphics_toolkit qt; addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
+            $HOME/tools/octave/bin/octave ~/test_run.m
           no_output_timeout: 1h
 
 
