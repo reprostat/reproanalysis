@@ -152,9 +152,10 @@ jobs:
             sudo apt remove needrestart
             sudo apt update
             sudo apt install gcc g++ gfortran make libopenblas-dev liblapack-dev libpcre3-dev libarpack2-dev libcurl4-gnutls-dev epstool libfftw3-dev fig2dev libfltk1.3-dev libfontconfig1-dev libfreetype6-dev libgl2ps-dev libglpk-dev libreadline-dev gnuplot-x11 libgraphicsmagick++1-dev libhdf5-dev openjdk-11-jdk libsndfile1-dev llvm-dev texinfo libgl1-mesa-dev pstoedit portaudio19-dev libqhull-dev libqrupdate-dev libsuitesparse-dev texlive-latex-extra libxft-dev zlib1g-dev autoconf automake bison flex gperf gzip icoutils librsvg2-bin libtool perl rsync tar qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev libsundials-dev rapidjson-dev
-            wget https://ftp.gnu.org/gnu/octave/octave-8.2.0.tar.gz -O octave.tar.gz
-            tar -xzf octave.tar.gz
-            rm octave.tar.gz
+            wget https://ftp.gnu.org/gnu/octave/octave-8.2.0.tar.gz
+            tar -xzf octave-8.2.0.tar.gz
+            rm octave-8.2.0.tar.gz
+            mv octave-8.2.0 octave
             cd octave
             mkdir .build
             cd .build
