@@ -7,7 +7,7 @@ orbs:
 executors:
   ubuntu:
     machine:
-      image: 'ubuntu-2004:2023.02.1' # if you change version you may need to update the command installing OCTAVE dependencies
+      image: 'ubuntu-2204:2022.04.1' # if you change version you may need to update the command installing OCTAVE dependencies
     resource_class: medium
 
     environment:
@@ -43,7 +43,7 @@ commands:
             export DEBIAN_FRONTEND=noninteractive
             sudo apt remove needrestart
             sudo apt update
-            sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libhdf5-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-11-jdk libgraphicsmagick++1-dev libgl2ps-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev libcurl4-gnutls-dev -y
+            sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libhdf5-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-8-jdk libgraphicsmagick++1-dev libgl2ps-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev -y
             if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
             tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
             cd $HOME/build/octave/.build
@@ -60,7 +60,7 @@ commands:
             sudo apt update
             sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev
             sudo apt install python2
-            if [[ ! -e /usr/bin/python ]]; then sudo ln -s /usr/bin/python2 /usr/bin/python; fi
+            sudo ln -s /usr/bin/python2 /usr/bin/python
             python trigger_install.py            
             cd ~/tools/spm12/src
             make PLATFORM=octave
@@ -73,8 +73,8 @@ commands:
       - run:
           name: Run test
           command: |
-            echo "graphics_toolkit qt; addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
-            $HOME/tools/octave/bin/octave ~/test_run.m
+            echo "addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
+            $HOME/tools/octave/bin/octave-cli ~/test_run.m
           no_output_timeout: 1h
 
 
@@ -151,11 +151,11 @@ jobs:
             export DEBIAN_FRONTEND=noninteractive
             sudo apt remove needrestart
             sudo apt update
-            sudo apt install gcc g++ gfortran make libopenblas-dev liblapack-dev libpcre3-dev libarpack2-dev libcurl4-gnutls-dev epstool libfftw3-dev fig2dev libfltk1.3-dev libfontconfig1-dev libfreetype6-dev libgl2ps-dev libglpk-dev libreadline-dev gnuplot-x11 libgraphicsmagick++1-dev libhdf5-dev openjdk-11-jdk libsndfile1-dev llvm-dev texinfo libgl1-mesa-dev pstoedit portaudio19-dev libqhull-dev libqrupdate-dev libsuitesparse-dev texlive-latex-extra libxft-dev zlib1g-dev autoconf automake bison flex gperf gzip icoutils librsvg2-bin libtool perl rsync tar qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev libsundials-dev rapidjson-dev
-            wget https://ftp.gnu.org/gnu/octave/octave-8.2.0.tar.gz
-            tar -xzf octave-8.2.0.tar.gz
-            rm octave-8.2.0.tar.gz
-            mv octave-8.2.0 octave
+            sudo apt install gcc g++ autoconf automake bison dvipng epstool fig2dev flex gfortran gnuplot-x11 gperf gzip icoutils libarpack2-dev libbison-dev libopenblas-dev libcurl4-gnutls-dev libfftw3-dev libfltk1.3-dev libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libgl2ps-dev libglpk-dev libgraphicsmagick++1-dev libhdf5-dev liblapack-dev libosmesa6-dev libpcre3-dev libqhull-dev libqscintilla2-qt5-dev libqrupdate-dev libreadline-dev librsvg2-bin libsndfile1-dev libsuitesparse-dev libsundials-dev libtool libxft-dev make openjdk-8-jdk perl portaudio19-dev pstoedit qtbase5-dev qttools5-dev qttools5-dev-tools rapidjson-dev rsync tar texinfo texlive-latex-extra zlib1g-dev -y
+            wget https://ftp.gnu.org/gnu/octave/octave-8.1.0.tar.gz
+            tar -xzf octave-8.1.0.tar.gz
+            rm octave-8.1.0.tar.gz
+            mv octave-8.1.0 octave
             cd octave
             mkdir .build
             cd .build
