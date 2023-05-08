@@ -1,7 +1,10 @@
+
 classdef batchClass < queueClass
-    properties (Access = private)
+    properties % (Access = private)
         pool
-        taskFlags % 0 - in queue; 1 - submitted; 2 - reported
+        taskFlags % 0 - in queue; job.ID - submitted; -inf - finished; -1 error
+        updateTime = 10 % s to wait for the scheduler to update job states
+        waitBeforeNext = 60 % s to wait when no task or worker is available
     end
 
     properties (Depend)
@@ -13,13 +16,19 @@ classdef batchClass < queueClass
             this = this@queueClass(rap);
 
             if isOctave()
+                poolProfile = strsplit(rap.directoryconventions.poolprofile,':');
                 if ispc()
-                    this.pool = poolClass('+pooldef\+local_PS\local_PS.json');
+                    if numel(poolProfile{1}) == 1 % pool profile is a full path
+                        poolProfile{1} = strjoin(poolProfile(1:2),':');
+                        poolProfile(2) = [];
+                    end
+                    this.pool = poolClass('local_PS');
                 elseif isunix()
-                    logging.error('NYI');
+                    this.pool = poolClass('slurm');
                 elseif ismac()
                     logging.error('NYI');
                 end
+                if numel(poolProfile) > 1, pool.submitArguments = poolProfile{2}; end
             else
                 logging.error('NYI');
             end
@@ -29,7 +38,7 @@ classdef batchClass < queueClass
         end
 
         function val = get.numWorkers(this)
-            this.pool.numWorkers;
+            val = this.pool.numWorkers;
         end
 
         % Run all tasks on the queue using batch
@@ -38,16 +47,16 @@ classdef batchClass < queueClass
 
             global reproacache
 
-            while ~isempty(this.taskQueue)
+            while ~all(this.taskFlags == -inf)
                 this.pStatus = this.STATUS('running');
 
                 % Ready and still in queue
-                nextTaskIndices = find(cellfun(@(t) t.isNext(), this.taskQueue) & ~this.taskFlags);
+                nextTaskIndices = find(cellfun(@(t) t.isNext(), this.taskQueue) & (this.taskFlags == 0));
 
+                toWait = false;
                 if isempty(nextTaskIndices)
                     logging.info('There is no available task -> wait for 60s');
-                    pause(60);
-                    continue;
+                    toWait = true;
                 end
 
                 if isOctave()
@@ -57,55 +66,63 @@ classdef batchClass < queueClass
                 end
                 if nAvailableWorkers == 0
                     logging.info('There is no available worker -> wait for 60s');
-                    pause(60);
-                    continue;
+                    toWait = true;
                 end
 
                 % Submit tasks
                 for i = nextTaskIndices(1:min([numel(nextTaskIndices) nAvailableWorkers]))
                     task = this.taskQueue{i};
                     if isOctave()
-                        batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' struct(reproacache) 'reproaworker' '$thisworker'},...
+                        j = batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' struct(reproacache) 'reproaworker' '$thisworker'},...
                               'name',task.name,...
                               'additionalPaths',this.getAdditionalPaths());
                     else
-                        batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' reproacache 'reproaworker' '$thisworker'},...
+                        j = batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' reproacache 'reproaworker' '$thisworker'},...
                               'name',task.name,...
                               'AutoAttachFiles', false, ...
                               'AutoAddClientPath', false, ...
                               'AdditionalPaths', this.getAdditionalPaths(),...
                               'CaptureDiary', true);
                     end
-                    this.taskFlags(i) = 1;
+                    this.reportTasks('submitted',i);
+                    this.taskFlags(i) = j.id;
                 end
 
-                % Monitor tasks
+                % Wait before checking
+                pause(this.updateTime);
+                if toWait, pause(this.waitBeforeNext-this.updateTime); end
+
+                % Monitor jobs
                 if isOctave()
-                    jobState = cellfun(@(j) {strrep(j.tasks{1}.name,'Task1_','') j.state}, this.pool.jobs, 'UniformOutput',false);
+                    jobState = cellfun(@(j) {j.id j.state}, this.pool.jobs(cellfun(@(j) ismember(j.id,this.taskFlags), this.pool.jobs)), 'UniformOutput',false);
                     jobState = cat(1,jobState{:});
                 else
                     logging.error('NYI');
                 end
-                % - consider only those still in the taskSubmitted
-                [~, indJob, indTask] = intersect(jobState(:,1),cellfun(@(t) t.name, ...
-                                                 this.taskQueue(this.taskFlags==1), 'UniformOutput',false));
-                jobState = jobState(indJob,:);
 
                 if ~any(cellfun(@(s) any(strcmp(s,{'finished' 'error'})), jobState(:,2)))
                     logging.info('All tasks are running');
                     continue;
                 end
 
-                % Process tasks
-                doneTaskIndices = find(cellfun(@(t) t.isDone(), this.taskQueue) & (this.taskFlags==1));
-                this.reportTasks('finished',doneTaskIndices);
-                if ~isequal(find(this.taskFlags==1),doneTaskIndices)
-                    this.reportTasks('failed',setdiff(find(this.taskFlags==1),doneTaskIndices));
+                % Monitor reproa tasks
+                % done
+                %   - submitted % isDone
+                % failed
+                %   - submitted & error
+                %   - submitted & ~isDone & finished
+                doneTask = arrayfun(@(t) this.taskFlags(t)>0 && this.taskQueue{t}.isDone(), 1:numel(this.taskFlags));
+                failedTask = arrayfun(@(t) this.taskFlags(t)>0 && ...
+                                           (strcmp(jobState{[jobState{:,1}] == this.taskFlags(t),2},'error') | ...
+                                            (strcmp(jobState{[jobState{:,1}] == this.taskFlags(t),2},'finished') & ~this.taskQueue{t}.isDone())), ...
+                                      1:numel(this.taskFlags));
+
+                % Report reproa tasks
+                this.taskFlags(doneTask) = -Inf;
+                this.reportTasks('finished',find(doneTask));
+                if any(failedTask)
+                    this.reportTasks('failed',find(failedTask));
                     break;
-                end
-                if ~isempty(doneTaskIndices)
-                    this.taskQueue(doneTaskIndices) = [];
-                    this.taskFlags(doneTaskIndices) = 2;
                 end
             end
             if ~strcmp(this.status,'error')

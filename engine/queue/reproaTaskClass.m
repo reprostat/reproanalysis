@@ -48,7 +48,7 @@ classdef reproaTaskClass
         end
 
         function resp = isDone(this)
-            resp = doneflagExists(this);
+            resp = this.doneflagExists();
         end
 
         function resp = duration(this)
