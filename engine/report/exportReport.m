@@ -20,7 +20,8 @@ function exportReport(studyPath, target)
     end
 
     % top-level HTMLs
-    topHMLSs = ['main' 'sub0' rap.report.summaries(:,1)'];
+    topHMLSs = {'main' 'sub0'};
+    if ~isempty(rap.report.summaries), topHMLSs = [topHMLSs rap.report.summaries(:,1)']; end
 
     % HTMLs in subfolders
     subHTMLs = reportFields(contains(reportFields,'(con[1-9])|(sub[1-9])','regularExpression',true))';
