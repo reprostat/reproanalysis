@@ -18,13 +18,17 @@ function [s,w] = shell(cmd,varargin)
 
     % Prepare
     if isa(reproacache,'cacheClass') && reproacache.isKey('shellprefix')
+        sh = reproacache('shell');
         prefix = reproacache('shellprefix');
     else
         % determine active shell (based on https://uk.mathworks.com/help/matlab/ref/system.html#btnr3fv-1)
         if ispc()
+            sh = '';
             prefix = '';
         else
-            sh = getenv('MATLAB_SHELL');
+            sh = '';
+            if isa(reproacache,'cacheClass'), sh = reproacache('shell'); end
+            if isempty(sh), sh = getenv('MATLAB_SHELL'); end
             if isempty(sh), sh = getenv('SHELL'); end
             if isempty(sh), sh = '/bin/sh'; end
             sh = spm_file(sh,'basename');
@@ -39,7 +43,10 @@ function [s,w] = shell(cmd,varargin)
         end
 
         % cache it
-        if isa(reproacache,'cacheClass'), reproacache('shellprefix') = prefix; end
+        if isa(reproacache,'cacheClass')
+            if isempty(reproacache('shell')), reproacache('shell') = sh; end
+            reproacache('shellprefix') = prefix;
+        end
     end
 
     % Environment
@@ -57,7 +64,7 @@ function [s,w] = shell(cmd,varargin)
 
     % Run
     if ~quiet, logging.info('shell:%s', strrep([prefix argParse.Results.shellprefix cmd],'\','\\')); end
-    [s, w]=system([prefix argParse.Results.shellprefix cmd]);
+    [s, w] = system([sh ' -c "' prefix argParse.Results.shellprefix cmd '"']);
 
     % Special cases
     % - ensure shell-init error to be handled

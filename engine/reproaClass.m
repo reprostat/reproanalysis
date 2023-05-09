@@ -154,6 +154,7 @@ classdef reproaClass < toolboxClass
             logging.info('Starting reproa');
 
             rap = readParameterset(this.getUserParameterFile);
+            if isfield(rap.directoryconventions,'shell'), reproacache('shell') = rap.directoryconventions.shell; end
 
             % Sub-toolboxes
             for tbx = reshape(rap.directoryconventions.toolbox,1,[])
