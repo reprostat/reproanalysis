@@ -110,7 +110,11 @@ function rap = fromnifti_structural(rap,command,subj)
 
                 if ~all(cellfun(@isempty,header))
                     hdrfn = fullfile(localPath,[stream '_header.mat']);
-                    save(hdrfn,'header');
+                    if isOctave
+                        save('-mat-binary',hdrfn,'header');
+                    else
+                        save(hdrfn,'header');
+                    end
                     putFileByStream(rap,'subject',subj,[stream '_header'],hdrfn);
                 end
             end

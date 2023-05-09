@@ -51,7 +51,11 @@ classdef queueClass < statusClass
         function save(this,fn)
             taskQueue = this.taskQueue;
             rap = this.rap;
-            save(fn,'taskQueue','rap')
+            if isOctave
+                save('-mat-binary',fn,'taskQueue','rap');
+            else
+                save(fn,'taskQueue','rap');
+            end
         end
 
         function resp = addTask(this,indTask,indices)

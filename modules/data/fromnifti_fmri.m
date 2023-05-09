@@ -152,7 +152,11 @@ switch command
         if ~isempty(dummylist), putFileByStream(rap,'fmrirun',[subj run],'dummyscans',dummylist); end
 
         hdrfn = fullfile(runpth,'fmri_headers.mat');
-        save(hdrfn,'header');
+        if isOctave
+            save('-mat-binary',hdrfn,'header');
+        else
+            save(hdrfn,'header');
+        end
         putFileByStream(rap,'fmrirun',[subj run],'fmri_header',hdrfn);
 
         % QA

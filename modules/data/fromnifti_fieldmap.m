@@ -67,7 +67,11 @@ function rap = fromnifti_fieldmap(rap,command,subj,run)
             end
             dirMake(localPath);
             fn = fullfile(localPath,'fieldmap_header.mat');
-            save(fn,'dcmhdr');
+            if isOctave
+                save('-mat-binary',fn,'dcmhdr');
+            else
+                save(fn,'dcmhdr');
+            end
             putFileByStream(rap,rap.tasklist.currenttask.domain,[subj run],[streamPrefix 'fieldmap_header'],fn);
 
             % Images
