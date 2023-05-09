@@ -198,8 +198,8 @@ function rap = segment(rap, command, subj)
         case 'checkrequirements'
             % Remove "input as output" stream not to be created
             if strcmp(getSetting(rap,'writenormalised.method'),'none') && isempty(getSetting(rap,'writecombined'))
-                for input = {rap.tasklist.currenttask.settings.inputstreams.name}
-                    if any(strcmp({rap.tasklist.currenttask.settings.outputstreams.name},input{1}))
+                for input = {rap.tasklist.currenttask.inputstreams.name}
+                    if any(strcmp({rap.tasklist.currenttask.outputstreams.name},input{1}))
                         rap = renameStream(rap,rap.tasklist.currenttask.name,'output',input{1},[]);
                         logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,input{1});
                     end
