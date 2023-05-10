@@ -20,8 +20,8 @@ function rap = processBIDS(rap,varargin)
 %           selection of a subset of tasks/runs based on their names (e.g. '<task name>-<run name>')
 %           - elements are strings: selecting for preprocessing and analysis
 %           - elements are cells:
-%               - one cell is a selection for one "firstlevelmodel" (in the tasklist)
-%               - tasks/runs selected for any "firstlevelmodel" are pre-processed
+%               - one cell is a selection for one "reproa_firstlevelmodel" (in the tasklist)
+%               - tasks/runs selected for any "reproa_firstlevelmodel" are pre-processed
 %           (default = [], all tasks/runs are selected for both preprocessing and analysis)
 %     - rap.acqdetails.input.correctEVfordummies: whether number of
 %           dummies should be take into account when defining onset times (default = true);
@@ -86,9 +86,9 @@ rap.directoryconventions.subjectdirectoryformat = 3;
 rap.directoryconventions.subjectoutputformat = 'sub-%s';
 
 % - ensure that models (if any) use seconds
-if isfield(rap.tasksettings,'firstlevelmodel') && ~BIDSsettings.omitModeling
-    for m = 1:numel(rap.tasksettings.firstlevelmodel)
-        rap.tasksettings.firstlevelmodel(m).xBF.UNITS  ='secs';
+if isfield(rap.tasksettings,'reproa_firstlevelmodel') && ~BIDSsettings.omitModeling
+    for m = 1:numel(rap.tasksettings.reproa_firstlevelmodel)
+        rap.tasksettings.reproa_firstlevelmodel(m).xBF.UNITS  ='secs';
     end
 end
 
@@ -123,7 +123,7 @@ for subj = SUBJ
 
     % anat
     if ismember('anat',MODs)
-        for sfx = intersect(strsplit(rap.tasksettings.fromnifti_structural.sfxformodality,':'), bids.query(BIDS, 'suffixes', 'modality', 'anat'),'stable')
+        for sfx = intersect(strsplit(rap.tasksettings.reproa_fromnifti_structural.sfxformodality,':'), bids.query(BIDS, 'suffixes', 'modality', 'anat'),'stable')
             for sessInd = 1:numel(SESS)
                 image = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix',sfx{1});
                 hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix',sfx{1});
@@ -178,7 +178,7 @@ for subj = SUBJ
 
                         % locate firstlevelmodel modules
                         indModel = [];
-                        for stageInd = find(strcmp({rap.tasklist.main.name},'firstlevelmodel'))
+                        for stageInd = find(strcmp({rap.tasklist.main.name},'reproa_firstlevelmodel'))
                             if isstruct(rap.tasklist.main(stageInd).extraparameters)
                                 runs = strsplit(rap.tasklist.main(stageInd).extraparameters.rap.acqdetails.selectedruns,' ');
                             else
@@ -190,7 +190,7 @@ for subj = SUBJ
                         if isempty(eventfile), logging.warning('No event found for subject %s task/run %s\n',subjname,taskname);
                         else
                             if ~TR, logging.warning('No (RepetitionTime in) header found for subject %s task/run %s\n\tNo correction of EV onset for dummies is possible!',subjname,taskname); end
-                            tDummies = rap.acqdetails.input.correctEVfordummies*rap.tasksettings.fromnifti_fmri.numdummies*TR;
+                            tDummies = rap.acqdetails.input.correctEVfordummies*rap.tasksettings.reproa_fromnifti_fmri.numdummies*TR;
 
                             % process events
                             EVENTS = bids.util.tsvread(eventfile{1});
@@ -217,7 +217,7 @@ for subj = SUBJ
                             for m = indModel
                                 for e = 1:numel(eventNames)
                                     if BIDSsettings.omitNullEvents && strcmpi(eventNames{e},'null'), continue; end
-                                    rap = addEvent(rap,sprintf('firstlevelmodel_%05d',m),subjname,taskname,eventNames{e},eventOnsets{e}-tDummies,eventDurations{e});
+                                    rap = addEvent(rap,sprintf('reproa_firstlevelmodel_%05d',m),subjname,taskname,eventNames{e},eventOnsets{e}-tDummies,eventDurations{e});
                                 end
                             end
                         end

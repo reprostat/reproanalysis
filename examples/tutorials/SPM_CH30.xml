@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
     <!-- data -->
-    <module><name>fromnifti_structural</name></module>
-    <module><name>fromnifti_fmri</name></module>
+    <module><name>reproa_fromnifti_structural</name></module>
+    <module><name>reproa_fromnifti_fmri</name></module>
 
     <!-- preprocessing -->
-    <module><name>realign</name></module>
-    <module><name>coregextended</name></module>
-    <module><name>segment</name></module>
-    <module><name>normwrite_fmri</name></module>
-    <module><name>smooth_fmri</name></module>
+    <module><name>reproa_realign</name></module>
+    <module><name>reproa_coregextended</name></module>
+    <module><name>reproa_segment</name></module>
+    <module><name>reproa_normwrite_fmri</name></module>
+    <module><name>reproa_smooth_fmri</name></module>
 
     <!-- statistics -->
-    <module><name>firstlevelmodel</name></module>
-    <module><name>firstlevelcontrasts</name></module>
-    <module><name>firstlevelthreshold</name></module>
+    <module><name>reproa_firstlevelmodel</name></module>
+    <module><name>reproa_firstlevelcontrasts</name></module>
+    <module><name>reproa_firstlevelthreshold</name></module>
 </rap>

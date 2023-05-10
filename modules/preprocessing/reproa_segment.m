@@ -1,4 +1,4 @@
-function rap = segment(rap, command, subj)
+function rap = reproa_segment(rap, command, subj)
 
     switch command
         case 'report'

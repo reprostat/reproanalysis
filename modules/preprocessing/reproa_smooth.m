@@ -1,4 +1,4 @@
-function rap = smooth(rap,command,varargin)
+function rap = reproa_smooth(rap,command,varargin)
 
     switch command
         case 'doit'

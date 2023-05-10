@@ -1,6 +1,6 @@
 % realignment
 
-function rap = realign(rap,command,subj)
+function rap = reproa_realign(rap,command,subj)
 
 switch command
     case 'report'

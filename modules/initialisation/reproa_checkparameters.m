@@ -2,7 +2,7 @@
 % Uses a copy of the parameters made taken straight after the recipe construction
 % If rap structure is different, mistyping has probably occurred and an error will be generated
 
-function rap = checkparameters(rap,task)
+function rap = reproa_checkparameters(rap,task)
 switch task
     case 'doit'
         % Check parameters

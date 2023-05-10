@@ -1,6 +1,6 @@
 % fMRI from NIFTI
 
-function rap = fromnifti_fmri(rap,command,subj,run)
+function rap = reproa_fromnifti_fmri(rap,command,subj,run)
 
 switch command
     case 'doit'

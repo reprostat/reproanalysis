@@ -1,4 +1,4 @@
-function rap = normwrite(rap,command,varargin)
+function rap = reproa_normwrite(rap,command,varargin)
 
     switch command
         case 'report'

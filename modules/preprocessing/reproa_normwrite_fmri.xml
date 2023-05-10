@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
-    <header mfile='normwrite' domain='fmrirun' desc='Applying normalisation estimates on fMRI' modality='FMRI'/>
+    <header mfile='reproa_normwrite' domain='fmrirun' desc='Applying normalisation estimates on fMRI' modality='FMRI'/>
             
     <hpc>
         <timeBase>1</timeBase>

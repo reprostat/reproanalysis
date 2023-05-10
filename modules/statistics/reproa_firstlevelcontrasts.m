@@ -1,4 +1,4 @@
-function rap = firstlevelcontrasts(rap,command,subj)
+function rap = reproa_firstlevelcontrasts(rap,command,subj)
 
     switch command
         case 'report'

@@ -1,6 +1,6 @@
 % Makes study directory
 
-function rap = makeanalysisroot(rap,task)
+function rap = reproa_makeanalysisroot(rap,task)
 
 switch task
     case 'doit'

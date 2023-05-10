@@ -1,4 +1,4 @@
-function rap = firstlevelmodel(rap,command,subj)
+function rap = reproa_firstlevelmodel(rap,command,subj)
 
 switch command
     case 'report'
@@ -64,14 +64,14 @@ switch command
 
             % - check that we have at least one model of each
             if (numel(model{run})>1) || (numel(modelC{run})>1)
-                logging.error('Error while getting model details as more than one specification for subject %s run %s',subjname,rap.acqdetails.fmriruns(runInds(run)).name);
+                logging.error('Error while getting model details as more than one specification for subject %s run %s', rap.acqdetails.subjects(subj).subjname,rap.acqdetails.fmriruns(runInds(run)).name);
             end
             if isempty(model{run}) && isempty(modelC{run})
-                logging.warning('Cannot find model specification for subject %s run %s',subjname,rap.acqdetails.fmriruns(runInds(run)).name);
+                logging.warning('Cannot find model specification for subject %s run %s', rap.acqdetails.subjects(subj).subjname,rap.acqdetails.fmriruns(runInds(run)).name);
             end
 
             % Nuisance regressors
-            xml = readModule('firstlevelmodel.xml');
+            xml = readModule('reproa_firstlevelmodel.xml');
             schema = xml.settings.modelC.covariate;
 
             % - realignment parameter

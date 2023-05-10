@@ -122,34 +122,34 @@ rap.directoryconventions.analysisid = RESULTS_DIR;
 % data was generated so adjustment is unnecessary here. Otherwise we would
 % set numdummies > 0 and also set correctEVfordummies = 1 (true) so that
 % event timing (read from the BIDS tsv files) would be corrected.
-rap.tasksettings.fromnifti_fmri.numdummies = 0;
+rap.tasksettings.reproa_fromnifti_fmri.numdummies = 0;
 rap.acqdetails.input.correctEVfordummies = 0;
 
 % OPTIONAL - Although the SPM manual does not contain, we can use the temopral
 % SD of the run to weight realignment. SD images MUST be inverted
-rap = renameStream(rap,'realign_00001','input','weighting_image','fmri_sd');
-rap.tasksettings.realign.invertweighting = 1;
+rap = renameStream(rap,'reproa_realign_00001','input','weighting_image','fmri_sd');
+rap.tasksettings.reproa_realign.invertweighting = 1;
 
 % Since the workflow includes initial registration of the structural image, we
 % can leave it out during normalisation
-rap.tasksettings.segment.normalisation.affreg = '';
+rap.tasksettings.reproa_segment.normalisation.affreg = '';
 
 % the SPM manual specifies a smoothing kernal of 6 mm. We can set this
 % here in the rap struct.
-rap.tasksettings.smooth.FWHM = 6;
+rap.tasksettings.reproa_smooth.FWHM = 6;
 
 % UNITS can be 'secs' or 'scans' (the SPM auditory tutorial has it set
 % for 'scans' in the manual but a BIDS tsv is always specified in secs)
-rap.tasksettings.firstlevelmodel.xBF.UNITS = 'secs';
+rap.tasksettings.reproa_firstlevelmodel.xBF.UNITS = 'secs';
 
 % Include realignement parameters extended to the first and second orders and derivatives
-rap.tasksettings.firstlevelmodel.includerealignmentparameters = [1 1 0; 1 1 0];
+rap.tasksettings.reproa_firstlevelmodel.includerealignmentparameters = [1 1 0; 1 1 0];
 
-% Set threshold uncorrected voxelwise p=0.001 (~Z=3.1) cluster-forming threshold 
+% Set threshold uncorrected voxelwise p=0.001 (~Z=3.1) cluster-forming threshold
 % with p=0.05 (FWE-corrected) cluster extent threshold
-rap.tasksettings.firstlevelthreshold.threshold.correction = 'none';
-rap.tasksettings.firstlevelthreshold.threshold.p = 0.001;
-rap.tasksettings.firstlevelthreshold.threshold.extent = 'FWE:0.05';
+rap.tasksettings.reproa_firstlevelthreshold.threshold.correction = 'none';
+rap.tasksettings.reproa_firstlevelthreshold.threshold.p = 0.001;
+rap.tasksettings.reproa_firstlevelthreshold.threshold.extent = 'FWE:0.05';
 
 % -------------------------------------------------------------------------
 % 5) process BIDS input
@@ -167,7 +167,7 @@ rap = processBIDS(rap);
 
 % note any calls to addContrast MUST appear *after* processBIDS
 
-rap = addContrast(rap, 'firstlevelcontrasts', '*', '*', 1, 'L_G_R','T');
+rap = addContrast(rap, 'reproa_firstlevelcontrasts', '*', '*', 1, 'L_G_R','T');
 
 % -------------------------------------------------------------------------
 % 7) run and report

@@ -1,6 +1,6 @@
 % AA module - structural from NIFTI
 
-function rap = fromnifti_structural(rap,command,subj)
+function rap = reproa_fromnifti_structural(rap,command,subj)
 
     switch command
         case 'doit'
@@ -124,7 +124,7 @@ function rap = fromnifti_structural(rap,command,subj)
             sfxs = strsplit(getSetting(rap,'sfxformodality'),':');
             if numel(sfxs) ~= numel(allstreams), logging.error('streams and suffices do not match'); end
             noData = cellfun(@(s) ~any(contains({allseries.fname},s)), sfxs);
-            rap.tasksettings.fromnifti_structural.sfxformodality = strjoin(sfxs(~noData),':');
+            rap.tasksettings.reproa_fromnifti_structural.sfxformodality = strjoin(sfxs(~noData),':');
             for s = find(noData)
                 rap = renameStream(rap,rap.tasklist.currenttask.name,'output',allstreams{s},'');
                 logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,allstreams{s});

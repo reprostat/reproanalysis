@@ -1,4 +1,4 @@
-function rap = firstlevelthreshold(rap,command,subj)
+function rap = reproa_firstlevelthreshold(rap,command,subj)
 
     switch command
 
@@ -270,7 +270,7 @@ function rap = firstlevelthreshold(rap,command,subj)
             else, bgFile = readLink(bgFile);
             end
 
-            rap.tasksettings.firstlevelthreshold(rap.tasklist.currenttask.index).overlay.background = bgFile;
+            rap.tasksettings.reproa_firstlevelthreshold(rap.tasklist.currenttask.index).overlay.background = bgFile;
 
             % Clustering may require external toolbox
             global reproacache
@@ -278,7 +278,7 @@ function rap = firstlevelthreshold(rap,command,subj)
                 case 'fusionwatershed'
                     if ~reproacache.isKey('toolbox.fws')
                         logging.warning('Fusion-Watershed is not installed! --> clustering will not be performed');
-                        rap.tasksettings.firstlevelthreshold(rap.tasklist.currenttask.index).cluster.method = 'none';
+                        rap.tasksettings.reproa_firstlevelthreshold(rap.tasklist.currenttask.index).cluster.method = 'none';
                     end
             end
     end
@@ -495,7 +495,7 @@ function print_table(F,fname)
     opt = 'jpg';
 
     %-Make print-friendly
-    set(findall(F,'Type','text'),'FontUnits','normalized','FontSize',0.025);
+    set(findall(F,'Type','text'),'FontUnits','normalized','FontSize',0.05);
     set(F,'PaperUnits','inches','PaperPosition',[0 0 5 4]);
 
     %-See if window has paging controls

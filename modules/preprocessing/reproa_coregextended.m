@@ -5,7 +5,7 @@
 % 3) Coregister mean fMRI to Structural
 % 4) Apply transformation matrix of mean fMRI to all fMRIs
 
-function rap = coregextended(rap,command,subj)
+function rap = reproa_coregextended(rap,command,subj)
 
     switch command
         case 'report' % [TA]

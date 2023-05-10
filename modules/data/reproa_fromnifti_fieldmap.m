@@ -1,4 +1,4 @@
-function rap = fromnifti_fieldmap(rap,command,subj,run)
+function rap = reproa_fromnifti_fieldmap(rap,command,subj,run)
 
     switch command
         case 'doit'
