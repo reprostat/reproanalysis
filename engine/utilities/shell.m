@@ -44,7 +44,7 @@ function [s,w] = shell(cmd,varargin)
 
         % cache it
         if isa(reproacache,'cacheClass')
-            if isempty(reproacache('shell')), reproacache('shell') = sh; end
+            if ~reproacache.isKey('shell') || isempty(reproacache('shell')), reproacache('shell') = sh; end
             reproacache('shellprefix') = prefix;
         end
     end
@@ -64,7 +64,9 @@ function [s,w] = shell(cmd,varargin)
 
     % Run
     if ~quiet, logging.info('shell:%s', strrep([prefix argParse.Results.shellprefix cmd],'\','\\')); end
-    [s, w] = system([sh ' -c "' prefix argParse.Results.shellprefix cmd '"']);
+    if isempty(sh), [s, w] = system([prefix argParse.Results.shellprefix cmd]);
+    else, [s, w] = system([sh ' -c "' prefix argParse.Results.shellprefix cmd '"']);
+    end
 
     % Special cases
     % - ensure shell-init error to be handled
