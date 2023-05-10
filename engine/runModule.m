@@ -108,7 +108,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     end
 
     % run task
-    if ~exist(spm_file(rap.tasklist.currenttask.mfile,'ext','.m'),'file'), logging.error('%s doesn''t appear to be a valid m file?',funcname); end
+    if ~exist(spm_file(rap.tasklist.currenttask.mfile,'ext','.m'),'file'), logging.error('%s doesn''t appear to be a valid m file?',rap.tasklist.currenttask.mfile); end
     ci = num2cell(indices);
     t0 = datetime;
     rap = feval(rap.tasklist.currenttask.mfile,rap,command,ci{:});
