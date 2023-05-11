@@ -70,7 +70,16 @@ switch command
                 header{1}.volumeTR = header{1}.RepetitionTime/1000;
                 header{1}.volumeTE = header{1}.EchoTime/1000;
                 header{1}.slicetimes = header{1}.SliceTiming/1000;
-                [~, header{1}.sliceorder] = sort(header{1}.slicetimes);
+                % - calculate slice order based on slice times (also considering multiband)
+                sltimes_sorted = sort(header{1}.slicetimes); [~, slorder] = ismember(header{1}.slicetimes,sltimes_sorted); 
+                slorder = slorder-(min(slorder))+1; % hack for octave
+                i = min(slorder);
+                while i ~= max(slorder)
+                    if ismember(i,slorder), i = i + 1;
+                    else, slorder(slorder>i) = slorder(slorder>i) - 1; 
+                    end
+                end
+                header{1}.sliceorder = slorder;
                 header{1}.echospacing = header{1}.EffectiveEchoSpacing/1000;
             end
         end
