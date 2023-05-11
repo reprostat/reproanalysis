@@ -75,11 +75,11 @@ switch command
             schema = xml.settings.modelC.covariate;
 
             % - realignment parameter
-            if anyall(getSetting(rap,'includerealignmentparameters')) && hasStream(rap,'fmrirun',[subj runInds(run)],'realignment_parameter')
+            if anyall(getSetting(rap,'includemovementparameters')) && hasStream(rap,'fmrirun',[subj runInds(run)],'movementparameters')
                 movRegNames = {'x' 'y' 'z' 'r' 'p' 'j'};
-                fn = getFileByStream(rap,'fmrirun',[subj runInds(run)], 'realignment_parameter');
+                fn = getFileByStream(rap,'fmrirun',[subj runInds(run)], 'movementparameters');
                 rp = load(fn{1}); % expect text file
-                movMat = getSetting(rap,'includerealignmentparameters');
+                movMat = getSetting(rap,'includemovementparameters');
                 for o = 1:size(movMat,1)
                     for d = 1:size(movMat,2)
                         if movMat(o,d)
@@ -432,8 +432,8 @@ switch command
         if strcmp(getSetting(rap,'autocorrelation'),'wls')
             % sometimes rwls looks for the movement params using the wrong
             % filename, so pass in an expliclit fname if we can
-            if hasStream(rap,'subject',subj,'realignment_parameter')
-                rpFileName = getFileByStream(rap,'subject',subj,'realignment_parameter');
+            if hasStream(rap,'subject',subj,'movementparameters')
+                rpFileName = getFileByStream(rap,'subject',subj,'movementparameters');
                 spm_rwls_resstats(SPM,[],rpFileName);
             else
                 spm_rwls_resstats(SPM);

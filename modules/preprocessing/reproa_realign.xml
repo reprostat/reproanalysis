@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
     <header domain='subject' desc='SPM motion correction' modality='FMRI'/>
-            
+
     <hpc>
         <timeBase>1</timeBase>
         <memoryBase>1</memoryBase>
@@ -19,11 +19,11 @@
             <interp desc='interpolation method'>2</interp>
             <wrap desc='wrapping'>[0 0 0]</wrap>
         </eoptions>
-        
+
         <!-- Weighting considers only voxels with weight > 0.01 (see https://github.com/spm/spm12/blob/3085dac00ac804adb190a7e82c6ef11866c8af02/spm_realign.m#L217) -->
         <invertweighting desc='Take the reciprocal of the weighting image (e.g., for SD)'>0</invertweighting>
 
-        <!--Reslicing parameters-->            
+        <!--Reslicing parameters-->
         <roptions>
             <which desc='images to reslice [input mean]'>[2 1]</which>
             <interp desc='interpolation method'>4</interp>
@@ -40,9 +40,9 @@
             <keep desc="include how many mfp timecourses in resulting txt-file [1-9]">3</keep>
             <shifted desc="Volterra option 1">1</shifted>
             <squared desc="Volterra option 2">0</squared>
-        </mfp> 
+        </mfp>
     </settings>
-    
+
     <inputstreams>
         <stream domain="fmrirun" isessential="0" isrenameable="1">weighting_image</stream>
         <stream domain="fmrirun" tobemodified="0">fmri</stream>
@@ -51,7 +51,7 @@
     <outputstreams>
         <stream domain="subject">meanfmri</stream>
         <stream domain="fmrirun">fmri</stream>
-        <stream domain="fmrirun">realignment_parameter</stream>
+        <stream domain="fmrirun">movementparameters</stream>
         <stream domain="fmrirun">fd</stream>
     </outputstreams>
 

@@ -8,7 +8,7 @@ function test_MoAEpilot_fmri(rap)
     rap.tasksettings.reproa_smooth_fmri.FWHM = 6;
 
     rap.tasksettings.reproa_firstlevelmodel.xBF.UNITS = 'secs';
-    rap.tasksettings.reproa_firstlevelmodel.includerealignmentparameters = [1 1 0; 1 1 0];
+    rap.tasksettings.reproa_firstlevelmodel.includemovementparameters = [1 1 0; 1 1 0];
 
     rap.tasksettings.reproa_firstlevelthreshold.threshold.correction = 'none';
     rap.tasksettings.reproa_firstlevelthreshold.threshold.p = 0.001;

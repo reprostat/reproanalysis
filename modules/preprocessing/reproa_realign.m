@@ -25,7 +25,7 @@ switch command
             fn = spm_select('FPListRec',getPathByDomain(rap,'subject',subj),['^diagnostic_.*' runName '\.jpg']);
             rap = addReportMedia(rap,reportStore,fn,'scaling',0.5,'displayFileName',false);
 
-            parFn = getFileByStream(rap,'fmrirun',[subj run],'realignment_parameter');
+            parFn = getFileByStream(rap,'fmrirun',[subj run],'movementparameters');
             mv = load(parFn{1});
 
             rap.report.(mfilename).mvmax(subj,run,:) = max(mv);
@@ -203,7 +203,7 @@ switch command
                 spm_figure('Close',f);
             end
 
-            putFileByStream(rap,'fmrirun',[subj run],'realignment_parameter', outpars);
+            putFileByStream(rap,'fmrirun',[subj run],'movementparameters', outpars);
 
 			% FD
 			FD = [0;sum(abs(diff(load(outpars) * diag([1 1 1 50 50 50]))),2)];

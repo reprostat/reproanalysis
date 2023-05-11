@@ -143,7 +143,7 @@ rap.tasksettings.reproa_smooth.FWHM = 6;
 rap.tasksettings.reproa_firstlevelmodel.xBF.UNITS = 'secs';
 
 % Include realignement parameters extended to the first and second orders and derivatives
-rap.tasksettings.reproa_firstlevelmodel.includerealignmentparameters = [1 1 0; 1 1 0];
+rap.tasksettings.reproa_firstlevelmodel.includemovementparameters = [1 1 0; 1 1 0];
 
 % Set threshold uncorrected voxelwise p=0.001 (~Z=3.1) cluster-forming threshold
 % with p=0.05 (FWE-corrected) cluster extent threshold
