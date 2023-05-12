@@ -78,7 +78,7 @@ function [s,w] = shell(cmd,varargin)
 
     if ~s
         %% Process output if we're in non-quiet mode
-        if ~isempty(w) && ~quiet, logging.info(strrep(w,'\','\\')); end
+        if ~isempty(w) && ~quiet, logging.info(strreps(w,{'\' '%'},{'\\' '%%'})); end
     else
         %% Process error if we're in non-quiet mode OR if we want to stop for errors
         if ~ignoreerror
