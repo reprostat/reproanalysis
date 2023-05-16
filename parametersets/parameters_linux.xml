@@ -9,6 +9,7 @@
             <toolbox desc="Toolbox with implemented interface in extrafunctions/toolboxes" ui="custom">
                 <name desc="Name corresponding to the name of the interface without the 'Class' suffix" ui="text">spm</name>
                 <dir ui="dir">$HOME/tools/spm12</dir>
+                <extraparameters ignorecheck='1'/>
             </toolbox>
             <poolprofile desc="Cluster Profile and (optional) initial submit argument (e.g. asking for specific queue or resource) separated with colon" ui="text">slurm</poolprofile>
             <shell desc='Shell used in when calling the shell function'>bash</shell>

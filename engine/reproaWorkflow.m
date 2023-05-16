@@ -27,12 +27,19 @@ function rap = reproaWorkflow(varargin)
     end
 
     % Read parameterset
-    rap = readParameterset(parametersetFile);
+    rap = expandPathByVars(readParameterset(parametersetFile));
     % - extensions
     for extName = reproa.extensions
         paramExt = fullfile(reproa.toolPath,'extensions',extName{1},'parametersets',['parameters_' lower(extName{1}) '.xml']);
         if exist(paramExt,'file')
-            rapExt = readParameterset(paramExt);
+            rapExt = expandPathByVars(readParameterset(paramExt));
+            % - add toolboxes (if any)
+            if isfield(rapExt.directoryconventions,'toolbox')
+                for tbx = reshape(rapExt.directoryconventions.toolbox,1,[])
+                    if isempty(tbx.dir), continue; end % unspecified
+                    reproa.addReproaToolbox(tbx);
+                end
+            end
             rap = structUpdate(rap,rapExt,'Mode','extend');
         end
     end

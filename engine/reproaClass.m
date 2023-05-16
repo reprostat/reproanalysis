@@ -153,30 +153,13 @@ classdef reproaClass < toolboxClass
 
             logging.info('Starting reproa');
 
-            rap = readParameterset(this.getUserParameterFile);
+            rap = expandPathByVars(readParameterset(this.getUserParameterFile));
             if isfield(rap.directoryconventions,'shell'), reproacache('shell') = rap.directoryconventions.shell; end
 
             % Sub-toolboxes
             for tbx = reshape(rap.directoryconventions.toolbox,1,[])
                 if isempty(tbx.dir), continue; end % unspecified
-
-                if ~exist([tbx.name 'Class'],'class'), logging.error('no interface class found for toolbox %s', tbx.name); end
-                constr = str2func([tbx.name 'Class']);
-
-                params = {};
-                if isfield(tbx,'extraparameters') && ~isempty(tbx.extraparameters)
-                    for p = fieldnames(tbx.extraparameters)
-                        val = tbx.extraparameters.(p{1});
-                        if isempty(val), continue; end
-                        if ischar(val) && contains(val,pathsep), val = strsplit(val,pathsep); end
-                        params{end+1} = p{1};
-                        params{end+1} = val;
-                    end
-                end
-                T = constr(tbx.dir,'name',tbx.name,params{:});
-                if strcmp(tbx.name,'spm'), T.setAutoLoad(); end % SPM is auto-loaded with ReproA
-                this.addToolbox(T);
-                reproacache(['toolbox.' tbx.name]) = T;
+                this.addReproaToolbox(tbx);
             end
 
             % Cleanup
@@ -297,6 +280,29 @@ classdef reproaClass < toolboxClass
                     fprintf('\n%s\n',msg);
                 end
             end
+        end
+
+        function addReproaToolbox(this,tbx)
+            global reproacache
+            if ~isa(reproacache,'cacheClass'), logging.error('Cannot find reproacache. reproa is not initialised'); end
+
+            if ~exist([tbx.name 'Class'],'class'), logging.error('no interface class found for toolbox %s', tbx.name); end
+            constr = str2func([tbx.name 'Class']);
+
+            params = {};
+            if isfield(tbx,'extraparameters') && ~isempty(tbx.extraparameters)
+                for p = fieldnames(tbx.extraparameters)
+                    val = tbx.extraparameters.(p{1});
+                    if isempty(val), continue; end
+                    if ischar(val) && contains(val,pathsep), val = strsplit(val,pathsep); end
+                    params{end+1} = p{1};
+                    params{end+1} = val;
+                end
+            end
+            T = constr(tbx.dir,'name',tbx.name,params{:});
+            if strcmp(tbx.name,'spm'), T.setAutoLoad(); end % SPM is auto-loaded with ReproA
+            this.addToolbox(T);
+            reproacache(['toolbox.' tbx.name]) = T;
         end
 
         function addExtension(this,extName)
