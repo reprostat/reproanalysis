@@ -50,7 +50,7 @@ classdef datasetClass
                         end
                     end
                 otherwise
-                    logging.error('ERROR: unknown dataset filetype used for downloaddemo dataset: %s', dataset.filetype);
+                    logging.error('unknown dataset filetype used for downloaddemo dataset: %s', dataset.filetype);
             end
             if ~strcmp(this.type,'AWS'), delete(tgz_filename); end
 
