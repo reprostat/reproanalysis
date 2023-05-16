@@ -27,11 +27,11 @@ function [s,w] = shell(cmd,varargin)
             prefix = '';
         else
             sh = '';
-            if isa(reproacache,'cacheClass'), sh = reproacache('shell'); end
+            if isa(reproacache,'cacheClass') && reproacache.isKey('shell'), sh = reproacache('shell'); end
             if isempty(sh), sh = getenv('MATLAB_SHELL'); end
             if isempty(sh), sh = getenv('SHELL'); end
             if isempty(sh), sh = '/bin/sh'; end
-            sh = spm_file(sh,'basename');
+            sh = regexp(sh,['(?<=\' filesep ')[^\' filesep ']*$'],'match','once');
             switch sh
                 case {'sh' 'bash'}
                     prefix = 'export TERM=dumb;';
