@@ -1,6 +1,6 @@
 function reproaSetup(varargin)
 % Reproducible Analysis - wrapper around reproaClass to ensure clean start with toolboxes in path
-% 
+%
 % reproaSetup(Name,Value)
 % INPUT
 %   Name - Value
@@ -15,7 +15,7 @@ function reproaSetup(varargin)
 
     if exist ('OCTAVE_VERSION', 'builtin')
         fprintf('Checking required Octave packages...\n');
-        [~,pkgInfo] = pkg('list');
+        [pkgInfo1,pkgInfo2] = pkg('list'); pkgInfo = [pkgInfo1 pkgInfo2]; % local and global packages
         for indP = 1:size(REQUIREDOCTAVEPACKAGES,1)
             pkgName = REQUIREDOCTAVEPACKAGES{indP,1};
             fprintf('\t%s\t- %s\n',REQUIREDOCTAVEPACKAGES{indP,:});
