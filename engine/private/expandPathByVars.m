@@ -60,7 +60,7 @@ if ischar(x) && ~isempty(intersect(x,'$`'))
             end
         end
     else
-        [err, x] = aas_shell(['echo ' x]);
+        [err, x] = shell(['echo ' x],'quiet',true);
         % white space and row breaks aren't valid XML so these are errors we assume
         x = deblank(x);
         if isempty(x) || err~=0, logging.error('failed to expand x: %s',xold); end
