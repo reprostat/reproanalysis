@@ -56,6 +56,7 @@ function validateParameters(paramroot,parameters,schema)
         switch class(parameters.(f{1}))
             case 'struct'
                 for s = parameters.(f{1})
+                    if numel(schema.(f{1})) > 1, schema.(f{1}) = schema.(f{1})(1); end % ASSSUME: array items are equi-valid
                     validateParameters(strjoin([{paramroot} f],'.'),s,schema.(f{1}));
                 end
             case 'char'
