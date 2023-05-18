@@ -16,6 +16,8 @@ function rap = registrationReport(rap,varargin)
         streamToReport = streamToReport(getSetting(rap,'diagnostic.streamInd'));
     end
 
+    if isempty(streamToReport), return; end
+
     % Compile list of filename patterns to images
     % - we assume (normalised) structural is the default to test against
     imgToReport = {...

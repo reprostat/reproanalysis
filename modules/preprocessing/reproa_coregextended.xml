@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
     <header domain='subject' desc='SPM coregistration (extended a la DCCN)' modality='FMRI'/>
-            
+
     <hpc>
         <timeBase>1</timeBase>
         <memoryBase>1</memoryBase>
     </hpc>
 
     <permanenceofoutput>-1</permanenceofoutput>
-    
+
+    <settings>
+      <target desc="name of the registration target stream" options='structural|meanfmri' ui='optionlist'>structural</target>
+      <reorienttotemplate desc="reorient all images to the MNI space">1</reorienttotemplate>
+    </settings>
+
     <inputstreams>
         <stream domain="subject">structural</stream>
-        <stream domain="subject">meanfmri</stream>
+        <stream domain="subject" isessential="0">meanfmri</stream>
         <stream domain="fmrirun">fmri</stream>
     </inputstreams>
 

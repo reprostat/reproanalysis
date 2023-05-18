@@ -32,43 +32,105 @@ function rap = reproa_coregextended(rap,command,subj)
             Simg = getFileByStream(rap,'subject',subj,'structural');
             if numel(Simg) > 1, logging.error('Found more than 1 structural images. Make sure you set rap.options.autoidentifystructural correctly.'); end
             Simg = Simg{1};
-            mfMRIimg = getFileByStream(rap,'subject',subj,'meanfmri'); mfMRIimg = mfMRIimg{1};
+            if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),'structural') % preserve original image
+                copyfile(Simg,spm_file(Simg,'basename','tmpStruct'));
+                Simg = spm_file(Simg,'basename','tmpStruct');
+            end
+            if hasStream(rap,'subject',subj,'meanfmri')
+                mfMRIimg = getFileByStream(rap,'subject',subj,'meanfmri'); mfMRIimg = mfMRIimg{1};
+                if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),'meanfmri') % preserve original image
+                    copyfile(mfMRIimg,spm_file(mfMRIimg,'basename','tmpMeanfmri'));
+                    mfMRIimg = spm_file(mfMRIimg,'basename','tmpMeanfmri');
+                end
+            else % create from fmri (1st run only, assumes coregsitered/realigned runs)
+                fMRIimg = char(getFileByStream(rap,'fmrirun',[subj rap.acqdetails.selectedruns(1)],'fmri'));
+                mfMRIimg = spm_file(fMRIimg,'prefix','mean_');
+                V = spm_vol(fMRIimg);
+                Y = spm_read_vols(V);
+                V = V(1); Y = mean(Y,4); V.fname = mfMRIimg;
+                spm_write_vol(V,Y);
+            end
 
-            runCoreg(Simg,sTimg,'Structural to template');
-            runCoreg(mfMRIimg,eTimg,'Mean fMRI to template');
-            runCoreg(mfMRIimg,Simg,'Mean fMRI to structural');
+            preMstruct = runCoreg(Simg,sTimg,'Structural to template');
+            preMfmri = runCoreg(mfMRIimg,eTimg,'Mean fMRI to template');
+            doCoregFmri = false;
+            switch getSetting(rap,'target')
+                case 'meanfmri'
+                    runCoreg(Simg,mfMRIimg,'Mean structural to fMRI');
+                    if getSetting(rap,'reorienttotemplate')
+                        putFileByStream(rap,'subject',subj,'meanfmri',mfMRIimg);
+                        doCoregFmri = true;
+                    else
+                        spm_get_space(Simg, inv(preMfmri)*spm_get_space(Simg));
+                        delete(mfMRIimg);
+                    end
 
-            % Apply transformation to fMRI
+                    putFileByStream(rap,'subject',subj,'structural',Simg);
+                case 'structural'
+                    doCoregFmri = true;
+                    runCoreg(mfMRIimg,Simg,'Mean fMRI to structural');
+                    if getSetting(rap,'reorienttotemplate')
+                        putFileByStream(rap,'subject',subj,'structural',Simg);
+                    else
+                        delete(Simg);
+                        spm_get_space(mfMRIimg, inv(preMstruct)*spm_get_space(mfMRIimg));
+                    end
 
-            % - get space of mean functional
-            MM = spm_get_space(mfMRIimg);
+                    putFileByStream(rap,'subject',subj,'meanfmri',mfMRIimg);
+            end
 
-            fMRIimg = cell(1,numel(rap.acqdetails.fmriruns));
-            % Locate all the fMRIs we want to coregister
-            for run = rap.acqdetails.selectedruns
-                fMRIimg{run} = getFileByStream(rap,'fmrirun',[subj,run],'fmri');
+            if doCoregFmri
+                % Apply transformation to fMRI
 
-                % For each image, apply the space of the mean fMRI image
-                for e = 1:numel(fMRIimg{run})
-                    % Apply the space of the coregistered mean fMRI to the
-                    % remaining fMRIs (safest solution!)
-                    spm_get_space(fMRIimg{run}{e}, MM);
+                % - get space of mean functional
+                MM = spm_get_space(mfMRIimg);
+
+                fMRIimg = cell(1,numel(rap.acqdetails.fmriruns));
+                % Locate all the fMRIs we want to coregister
+                for run = rap.acqdetails.selectedruns
+                    fMRIimg{run} = getFileByStream(rap,'fmrirun',[subj,run],'fmri');
+
+                    % For each image, apply the space of the mean fMRI image
+                    for e = 1:numel(fMRIimg{run})
+                        % Apply the space of the coregistered mean fMRI to the
+                        % remaining fMRIs (safest solution!, assumes coregsitered/realigned runs)
+                        spm_get_space(fMRIimg{run}{e}, MM);
+                    end
+                end
+
+                % Describe the outputs
+                for run = rap.acqdetails.selectedruns
+                    putFileByStream(rap,'fmrirun',[subj run],'fmri',fMRIimg{run});
+                end
+
+                % Diagnostics
+                registrationCheck(rap,'subject',subj,'structural','meanfmri',spm_file(fMRIimg{rap.acqdetails.selectedruns(1)}{1},'number',',1'));
+            else
+
+                % Diagnostics
+                if hasStream(rap,'subject',subj,'meanfmri'), registrationCheck(rap,'subject',subj,'structural','meanfmri');
+                else
+                    if iscell(fMRIimg), fMRIimg = fMRIimg{rap.acqdetails.selectedruns(1)}{1}; end
+                    registrationCheck(rap,'subject',subj,'structural',spm_file(fMRIimg,'number',',1'));
                 end
             end
 
-            % Describe the outputs
-            putFileByStream(rap,'subject',subj,'structural',Simg);
-            putFileByStream(rap,'subject',subj,'meanfmri',mfMRIimg);
-            for run = rap.acqdetails.selectedruns
-                putFileByStream(rap,'fmrirun',[subj run],'fmri',fMRIimg{run});
+        case 'checkrequirements'
+            if ~getSetting(rap,'reorienttotemplate')
+                targetStream = getSetting(rap,'target');
+                if ismember(targetStream,{rap.tasklist.currenttask.outputstreams.name})
+                    rap = renameStream(rap,rap.tasklist.currenttask.name,'output',targetStream,[]);
+                    logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,targetStream);
+                end
+                if strcmp(targetStream,'meanfmri') && ismember('fmri',{rap.tasklist.currenttask.outputstreams.name})
+                    rap = renameStream(rap,rap.tasklist.currenttask.name,'output','fmri',[]);
+                    logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,'fmri');
+                end
             end
-
-            % Diagnostics
-            registrationCheck(rap,'subject',subj,'structural','meanfmri',spm_file(fMRIimg{rap.acqdetails.selectedruns(1)}{1},'number',',1'))
     end
 end
 
-function runCoreg(inputImg,targetImg,desc)
+function M = runCoreg(inputImg,targetImg,desc)
     global defaults
     flags = defaults.coreg.estimate;
 
