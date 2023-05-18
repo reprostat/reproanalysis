@@ -45,6 +45,8 @@ commands:
             sudo apt update
             sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libhdf5-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-8-jdk libgraphicsmagick++1-dev libgl2ps-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev -y
             if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
+            if [[ ! -d $HOME/build ]]; then mkdir $HOME/build; fi
+            wget https://osf.io/download/dg6pj -O $HOME/build/octave.tar.gz
             tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
             cd $HOME/build/octave/.build
             make install
@@ -190,8 +192,5 @@ jobs:
 workflows:
   test:
     jobs:
-      - build_octave
       - usecase_octave_SPM:
-          requires:
-            - build_octave
       - usecase_MATLAB_SPM
