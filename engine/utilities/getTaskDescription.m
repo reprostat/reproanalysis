@@ -3,7 +3,7 @@ function desc = getTaskDescription(rap,indices,whatToReturn)
 
     desc = rap.tasklist.currenttask.name;
     if ~isempty(rap.tasklist.currenttask.extraparameters)
-        desc = [desc rap.tasklist.currenttask.extraparameters.rap.directory_conventions.analysisid_suffix];
+        desc = [desc rap.tasklist.currenttask.extraparameters.rap.directoryconventions.analysisidsuffix];
     end
     if strcmp(whatToReturn,'taskname'), return; end
 
