@@ -192,5 +192,5 @@ jobs:
 workflows:
   test:
     jobs:
-      - usecase_octave_SPM:
+      - usecase_octave_SPM
       - usecase_MATLAB_SPM
