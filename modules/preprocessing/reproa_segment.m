@@ -84,8 +84,9 @@ function rap = reproa_segment(rap, command, subj)
             end
 
             for c = 1:numel(img)
-                job.channel(c) = structUpdate(cfgBiascorrection,cfgSegmentation,'Mode','extend');
-                job.channel(c).vols  = img(c);
+                ch = structUpdate(cfgBiascorrection,cfgSegmentation,'Mode','extend');
+                ch.vols  = img(c);
+                job.channel(c) = ch;
             end
 
             job.warp = cfgNormalisation;
