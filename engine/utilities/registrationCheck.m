@@ -11,6 +11,9 @@
 
 function registrationCheck(rap,domain,indices,background,varargin)
 
+    visFig = 'on';
+    if rap.internal.isdeployed, visFig = 'off'; end
+
     % Parse
     output = varargin;
     mode = 'separate';
@@ -50,6 +53,7 @@ function registrationCheck(rap,domain,indices,background,varargin)
     else
         % Resize slice display for optimal fit
         fig = spm_figure('GetWin','Graphics');
+        set(fig,'visible',visFig);
         windowSize = get(0,'ScreenSize');
         windowSize(4) = windowSize(4) - windowSize(2) - 50 - 50; % 50 for system menu and statusbar, 50 for figure menu
         windowSize(2) = 50;
@@ -122,7 +126,7 @@ function registrationCheck(rap,domain,indices,background,varargin)
             img = slicesSummary{v}{3};
             img(1:size(slicesSummary{v}{2},1),end+1:end+size(slicesSummary{v}{2},2),:) = slicesSummary{v}{2};
             img(1:size(slicesSummary{v}{1},1),end+1:end+size(slicesSummary{v}{1},2),:) = slicesSummary{v}{1};
-            f = figure;
+            f = figure('visible',visFig);
             set(f,'Position',[1 1 size(img,2) size(img,1)],'PaperPositionMode','auto','InvertHardCopy','off');
             imshow(img,'Border','tight');
             print(f,'-djpeg','-r150',slicesFilename);
