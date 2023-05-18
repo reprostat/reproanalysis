@@ -12,10 +12,12 @@ function processWorkflow(rap)
     rap.internal.pwd = pwd;
     rap.internal.reproaversion = reproa.version;
     rap.internal.reproapath = reproa.toolPath;
+    rap.internal.reproaextensions = reproa.extensions;
     rap.internal.spmversion = spm('Version');
     rap.internal.spmpath = spm('Dir');
     rap.internal.matlabversion = version;
     rap.internal.matlabpath = matlabroot;
+    rap.internal.isdeployed = ~strcmp(rap.options.wheretoprocess,'localsingle');
 
     % Backup
     rap = backupWorkflow(rap);

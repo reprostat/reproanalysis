@@ -92,17 +92,29 @@ classdef reproaClass < toolboxClass
             if any(strcmp(varargin,'fromstruct'))
                 this.toolInPath = initStruct.toolInPath;
                 this.configdir = initStruct.configdir;
+                this.extensions = initStruct.extensions;
+                allVars = evalin('base','whos'); allVars = {allVars.name};
+                for ws = intersect(allVars,{'reproacache' 'reproaworker'})
+                    this.workspace(strcmp({this.workspace.name},ws{1})).value = evalin('base',ws{1});
+                end
+                for ws = setdiff({'reproacache' 'reproaworker'},allVars)
+                    logging.warning([ws{1} ' is not detected upon loading']);
+                end
+
                 % reset warnings
                 arrayfun(@(w) warning(w.state,w.identifier), initStruct.warnings);
 
                 this.reload();
+
             end
         end
 
         function val = struct(this)
             val = struct@toolboxClass(this);
+            val.workspace = [];
             val.warnings = this.warnings;
             val.configdir = this.configdir;
+            val.extensions = this.extensions;
         end
 
         function close(this,varargin)

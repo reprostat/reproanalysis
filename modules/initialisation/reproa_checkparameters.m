@@ -6,12 +6,9 @@ function rap = reproa_checkparameters(rap,task)
 switch task
     case 'doit'
         % Check parameters
-        global reproacache
-        assert(isa(reproacache,'cacheClass'),'reproa is not initialised -> run reproaSetup')
-        reproa = reproacache('reproa');
         xmlParam0 = readxml(rap.internal.parametersetFile);
-        for extName = reproa.extensions
-            paramExt = fullfile(reproa.toolPath,'extensions',extName{1},'parametersets',['parameters_' lower(extName{1}) '.xml']);
+        for extName = rap.internal.reproaextensions
+            paramExt = fullfile(rap.internal.reproapath,'extensions',extName{1},'parametersets',['parameters_' lower(extName{1}) '.xml']);
             if exist(paramExt,'file')
                 rapExt = readxml(paramExt);
                 xmlParam0 = structUpdate(xmlParam0,rapExt,'Mode','extend');
