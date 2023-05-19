@@ -74,6 +74,13 @@ function rap = reproa_segment(rap, command, subj)
 
             %% Images (multichan)
             img = arrayfun(@(s) getFileByStream(rap,'subject',subj,s.name), rap.tasklist.currenttask.inputstreams);
+            % Check orientation
+            [s, w] = spm_check_orientations(cell2mat(spm_vol(img)),false);
+            if ~s
+                logging.warning([strjoin(cellstr(w),'\n') '\n\t -> Reslicing %s'],img{2});
+                spm_reslice(img,struct('interp',3,'which',[1 0],'prefix','r'));
+                img{2} = spm_file(img{2},'prefix','r');
+            end
 
             %% Segmentation
             % create job
@@ -90,7 +97,7 @@ function rap = reproa_segment(rap, command, subj)
             end
 
             job.warp = cfgNormalisation;
-            if job.warp.samp < 2, logging.warning('Note that the sampling distance is small, which means this might take up to a couple of hours!'); end
+            if numel(job.channel) > 1, logging.warning('Multi-channel segmentation might take up to a couple of hours!'); end
 
             tic
             logging.info('Starting to segment');
