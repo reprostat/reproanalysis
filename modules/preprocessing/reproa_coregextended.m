@@ -1,11 +1,15 @@
-% extended coregistration of fMRI to structural
-% Coregistration of structural to mean fMRI output by realignment in 3 steps
-% 1) Coregister Structural to T1 template
-% 2) Coregister mean fMRI to fMRI template
-% 3) Coregister mean fMRI to Structural
-% 4) Apply transformation matrix of mean fMRI to all fMRIs
+% Extended coregistration with structural by realignment to MNI (always applied, optionally saved)
+% 1) Coregister structural to T1 template
+% 2) Coregister input to corresponding template (fMRI -> EPI, T2 -> T2)
+% 3) Coregister input with structural (any direction)
+% 4) Apply transformation matrix to other inputs
 
 function rap = reproa_coregextended(rap,command,subj)
+
+  % Configure
+    if hasStream(rap,'fmri'), coregStream = 'meanfmri'; otherStream = 'fmri'; bTimg = 'EPI';
+    elseif hasStream(rap,'t2'), coregStream = 't2'; otherStream = ''; bTimg = 'T2';
+    end
 
     switch command
         case 'report' % [TA]
@@ -23,9 +27,9 @@ function rap = reproa_coregextended(rap,command,subj)
             if ~exist(sTimg,'file'), logging.error('Couldn''t find template T1 image %s.', sTimg); end
             sTimg = which(sTimg);
 
-            % - fMRI template
-            eTimg = fullfile(fileparts(sTimg), 'EPI.nii');
-            if ~exist(eTimg, 'file'), logging.error('Couldn''t find template fMRI image %s.', eTimg); end
+            % - input template
+            eTimg = fullfile(fileparts(sTimg), [bTimg '.nii']);
+            if ~exist(eTimg, 'file'), logging.error('Couldn''t find template %s image %s.', bTimg,eTimg); end
             eTimg = which(eTimg);
 
             % Coregister
@@ -36,14 +40,14 @@ function rap = reproa_coregextended(rap,command,subj)
                 copyfile(Simg,spm_file(Simg,'basename','tmpStruct'));
                 Simg = spm_file(Simg,'basename','tmpStruct');
             end
-            if hasStream(rap,'subject',subj,'meanfmri')
-                mfMRIimg = getFileByStream(rap,'subject',subj,'meanfmri'); mfMRIimg = mfMRIimg{1};
-                if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),'meanfmri') % preserve original image
-                    copyfile(mfMRIimg,spm_file(mfMRIimg,'basename','tmpMeanfmri'));
-                    mfMRIimg = spm_file(mfMRIimg,'basename','tmpMeanfmri');
+            if hasStream(rap,'subject',subj,coregStream)
+                mfMRIimg = getFileByStream(rap,'subject',subj,coregStream); mfMRIimg = mfMRIimg{1};
+                if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),coregStream) % preserve original image
+                    copyfile(mfMRIimg,spm_file(mfMRIimg,'basename','tmpCoreg'));
+                    mfMRIimg = spm_file(mfMRIimg,'basename','tmpCoreg');
                 end
-            else % create from fmri (1st run only, assumes coregsitered/realigned runs)
-                fMRIimg = char(getFileByStream(rap,'fmrirun',[subj rap.acqdetails.selectedruns(1)],'fmri'));
+            else % create from otherStream (1st run only, assumes coregsitered/realigned runs)
+                fMRIimg = char(getFileByStream(rap,[otherStream 'run'],[subj rap.acqdetails.selectedruns(1)],otherStream));
                 mfMRIimg = spm_file(fMRIimg,'prefix','mean_');
                 V = spm_vol(fMRIimg);
                 Y = spm_read_vols(V);
@@ -52,34 +56,33 @@ function rap = reproa_coregextended(rap,command,subj)
             end
 
             preMstruct = runCoreg(Simg,sTimg,'Structural to template');
-            preMfmri = runCoreg(mfMRIimg,eTimg,'Mean fMRI to template');
-            doCoregFmri = false;
-            switch getSetting(rap,'target')
-                case 'meanfmri'
-                    runCoreg(Simg,mfMRIimg,'Mean structural to fMRI');
-                    if getSetting(rap,'reorienttotemplate')
-                        putFileByStream(rap,'subject',subj,'meanfmri',mfMRIimg);
-                        doCoregFmri = true;
-                    else
-                        spm_get_space(Simg, inv(preMfmri)*spm_get_space(Simg));
-                        delete(mfMRIimg);
-                    end
-
+            preMfmri = runCoreg(mfMRIimg,eTimg,'Input to template');
+            doCoregOther = false;
+            if strcmp(getSetting(rap,'target'),'structural')
+                doCoregOther = true;
+                runCoreg(mfMRIimg,Simg,'Input to structural');
+                if getSetting(rap,'reorienttotemplate')
                     putFileByStream(rap,'subject',subj,'structural',Simg);
-                case 'structural'
-                    doCoregFmri = true;
-                    runCoreg(mfMRIimg,Simg,'Mean fMRI to structural');
-                    if getSetting(rap,'reorienttotemplate')
-                        putFileByStream(rap,'subject',subj,'structural',Simg);
-                    else
-                        delete(Simg);
-                        spm_get_space(mfMRIimg, inv(preMstruct)*spm_get_space(mfMRIimg));
-                    end
+                else
+                    delete(Simg);
+                    spm_get_space(mfMRIimg, inv(preMstruct)*spm_get_space(mfMRIimg));
+                end
 
-                    putFileByStream(rap,'subject',subj,'meanfmri',mfMRIimg);
+                putFileByStream(rap,'subject',subj,coregStream,mfMRIimg);
+            else
+                runCoreg(Simg,mfMRIimg,'Structural to Input');
+                if getSetting(rap,'reorienttotemplate')
+                    putFileByStream(rap,'subject',subj,coregStream,mfMRIimg);
+                    doCoregOther = true;
+                else
+                    spm_get_space(Simg, inv(preMfmri)*spm_get_space(Simg));
+                    delete(mfMRIimg);
+                end
+
+                putFileByStream(rap,'subject',subj,'structural',Simg);
             end
 
-            if doCoregFmri
+            if ~isempty(otherStream) && doCoregOther
                 % Apply transformation to fMRI
 
                 % - get space of mean functional
@@ -88,7 +91,7 @@ function rap = reproa_coregextended(rap,command,subj)
                 fMRIimg = cell(1,numel(rap.acqdetails.fmriruns));
                 % Locate all the fMRIs we want to coregister
                 for run = rap.acqdetails.selectedruns
-                    fMRIimg{run} = getFileByStream(rap,'fmrirun',[subj,run],'fmri');
+                    fMRIimg{run} = getFileByStream(rap,[otherStream 'run'],[subj,run],otherStream);
 
                     % For each image, apply the space of the mean fMRI image
                     for e = 1:numel(fMRIimg{run})
@@ -100,15 +103,15 @@ function rap = reproa_coregextended(rap,command,subj)
 
                 % Describe the outputs
                 for run = rap.acqdetails.selectedruns
-                    putFileByStream(rap,'fmrirun',[subj run],'fmri',fMRIimg{run});
+                    putFileByStream(rap,[otherStream 'run'],[subj run],otherStream,fMRIimg{run});
                 end
 
                 % Diagnostics
-                registrationCheck(rap,'subject',subj,'structural','meanfmri',spm_file(fMRIimg{rap.acqdetails.selectedruns(1)}{1},'number',',1'));
+                registrationCheck(rap,'subject',subj,'structural',coregStream,spm_file(fMRIimg{rap.acqdetails.selectedruns(1)}{1},'number',',1'));
             else
 
                 % Diagnostics
-                if hasStream(rap,'subject',subj,'meanfmri'), registrationCheck(rap,'subject',subj,'structural','meanfmri');
+                if hasStream(rap,'subject',subj,coregStream), registrationCheck(rap,'subject',subj,'structural',coregStream);
                 else
                     if iscell(fMRIimg), fMRIimg = fMRIimg{rap.acqdetails.selectedruns(1)}{1}; end
                     registrationCheck(rap,'subject',subj,'structural',spm_file(fMRIimg,'number',',1'));
