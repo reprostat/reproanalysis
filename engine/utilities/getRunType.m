@@ -36,7 +36,7 @@ end
 
 % default
 if isempty(modality)
-%     aas_log(rap,0,'WARNING:modality cannot be determined; (F)MRI is assumed');
+%     logging.warning('modality cannot be determined; (F)MRI is assumed');
     modality = 'FMRI'; % default modality
 end
 

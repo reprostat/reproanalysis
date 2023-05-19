@@ -34,9 +34,6 @@ commands:
           name: Checkout with submodules
           command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
-      - attach_workspace:
-          at: /home/circleci/build
-
       - run:
           name: Install OCTAVE (from build in /home/circleci/build/octave)
           command: |

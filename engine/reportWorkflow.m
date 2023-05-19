@@ -2,6 +2,11 @@
 
 function reportWorkflow(study,tasksToReport)
 
+    % Switch off verbose logging
+    global reproaworker
+    ll0 = reproaworker.logLevel;
+    reproaworker.logLevel = 1;
+
     logging.info('Fetching report started...');
 
     % Obtain study info
@@ -24,9 +29,9 @@ function reportWorkflow(study,tasksToReport)
     else
         doNotCheckInput = true;
     end
-    taskNotIncluded = cellfun(@(t) ~any(strcmp({rap.tasklist.main.name},regexp(t,'[_a-z]*(?=_[0-9])','match')) & ([rap.tasklist.main.index] == str2double(regexp(t,'[0-9]{5}','match')))), tasksToReport);
+    taskNotIncluded = cellfun(@(t) ~any(strcmp({rap.tasklist.main.name},regexp(t,'[_a-z0-9]*(?=_[0-9]{5})','match')) & ([rap.tasklist.main.index] == str2double(regexp(t,'[0-9]{5}','match')))), tasksToReport);
     if any(taskNotIncluded), logging.error('Task(s) not found in the workflow:%s',sprintf(' %s',tasksToReport{taskNotIncluded})); end
-    taskIndices = cellfun(@(t) find(strcmp({rap.tasklist.main.name},regexp(t,'[_a-z]*(?=_[0-9])','match')) & ([rap.tasklist.main.index] == str2double(regexp(t,'[0-9]{5}','match')))), tasksToReport);
+    taskIndices = cellfun(@(t) find(strcmp({rap.tasklist.main.name},regexp(t,'[_a-z0-9]*(?=_[0-9]{5})','match')) & ([rap.tasklist.main.index] == str2double(regexp(t,'[0-9]{5}','match')))), tasksToReport);
 
     % Init report
     if isfield(rap,'report'), rap = rmfield(rap,'report'); end
@@ -144,4 +149,7 @@ function reportWorkflow(study,tasksToReport)
 
     % Show report
     if ~isdeployed, web(['file://' rap.report.main.fname]); end
+
+    % Restore log level
+    reproaworker.logLevel = ll0;
 end
