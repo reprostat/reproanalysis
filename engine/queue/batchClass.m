@@ -34,6 +34,8 @@ classdef batchClass < queueClass
             end
 
             this.pool.numWorkers = rap.options.parallelresources.numberofworkers;
+            this.pool.reqMemory = rap.options.parallelresources.memory;
+            this.pool.reqWalltime = rap.options.parallelresources.walltime;
             this.pool.jobStorageLocation = this.queueFolder;
         end
 
@@ -75,7 +77,8 @@ classdef batchClass < queueClass
                     if isOctave()
                         j = batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' struct(reproacache) 'reproaworker' '$thisworker'},...
                               'name',task.name,...
-                              'additionalPaths',this.getAdditionalPaths());
+                              'additionalPaths',this.getAdditionalPaths(),...
+                              'additionalPackages',reproacache('octavepackages'));
                     else
                         j = batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' reproacache 'reproaworker' '$thisworker'},...
                               'name',task.name,...

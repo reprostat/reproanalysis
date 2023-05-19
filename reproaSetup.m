@@ -60,6 +60,7 @@ function reproaSetup(varargin)
     cellfun(@(ext) reproa.addExtension(ext), argParse.Results.extensions);
 
     reproacache('reproa') = reproa;
+    reproacache('octavepackages') = REQUIREDOCTAVEPACKAGES(:,1);
 
 end
 
