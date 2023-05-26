@@ -23,5 +23,5 @@ function hashMD5 = getHashByFiles(fileList, varargin)
                 md.update([num2str(filestat.date) num2str(filestat.bytes)])
          end
     end
-    hashMD5 = md.getHash();
+    hashMD5 = char(md.getHash());
 end
