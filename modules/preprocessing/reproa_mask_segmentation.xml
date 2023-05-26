@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='subject' desc='Create thresholded masks from the segmentations' modality='MRI'/>
+
+    <hpc>
+        <timeBase>0.2</timeBase>
+        <memoryBase>0.2</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>2</permanenceofoutput>
+
+    <settings>
+        <threshold options='zero|exclusive|[single value for each segmentation]|[struct with fields correspodning to the content of the segmentations]' ui='optionlist'>0.9</threshold>
+    </settings>
+
+    <inputstreams>
+        <stream domain='subject' isrenameable='1' tobemodified='0' isessential='0' desc='CAN be renamed to provide a reference for reslicing'>reference</stream>
+        <stream domain='subject' isrenameable='1' tobemodified='0' desc='MUST be renamed to match it with one of the outputs of reproa_segment'>segmentations</stream>
+    </inputstreams>
+
+    <outputstreams>
+        <stream domain='subject' isrenameable='1' desc='auto-renamed to match its prefix with that of the inputstream segmentations'>segmentationmasks</stream>
+    </outputstreams>
+
+</rap>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='fmrirun' desc='Get signal from the segmentations' modality='FMRI'/>
+
+    <hpc>
+        <timeBase>0.5</timeBase>
+        <memoryBase>0.5</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>2</permanenceofoutput>
+
+    <settings>
+        <margins  desc='all values MUST be odd integers'>
+            <WMtoGM>1</WMtoGM>
+            <CSFtoGM>0</CSFtoGM>
+            <CSFtoBone>3</CSFtoBone>
+            <CSFtoOOH>5</CSFtoOOH>
+        </margins>
+        <numberofcomponents>
+            <GM>1</GM>
+            <WM>5</WM>
+            <CSF>5</CSF>
+            <Bone>1</Bone>
+            <Soft>1</Soft>
+            <OOH>1</OOH>
+        </numberofcomponents>
+    </settings>
+
+    <inputstreams>
+        <stream domain='subject' desc='its content MUST include GM, WM, CSF and CAN include Bone, Soft and OOH; other content will not be considered'>segmentationmasks</stream>
+        <stream domain='fmrirun'>fmri</stream>
+    </inputstreams>
+
+    <outputstreams>
+        <stream domain='fmrirun'>segmentationsignal</stream>
+    </outputstreams>
+</rap>
