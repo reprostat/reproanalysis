@@ -114,6 +114,8 @@ commands:
       - run:
           name: Install tools and configure reproa
           command: |
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt remove needrestart
             mkdir ~/.reproa
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
