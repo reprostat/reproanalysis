@@ -20,6 +20,7 @@ function resp = fileRetrieve(fname,varargin)
             resp = '';
         end
         pause(1);
+        if r < argParse.Results.maximumRetry, logging.info('\tretry #%d',r+1); end
     end
     if isempty(resp), logging.error('Could not find or read %s - Are you sure it is in your path?', fname); end
 end
