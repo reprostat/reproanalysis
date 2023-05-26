@@ -54,9 +54,11 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     srcStreamPath = getPathByDomain(srcrap,s.streamdomain,deps(d,:));
                     srcStreamPath = readLink(srcStreamPath); % make sure the path is canonical
                     srcStreamDescriptor = fullfile(srcStreamPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name));
-                    srcStream = strsplit(fileRetrieve(srcStreamDescriptor,rap.options.maximumretry,'content'),'\n');
-                    srcHash = regexp(srcStream{1},'(?<=(#\t))[0-9a-f]*','match'); srcHash = srcHash{1};
-                    srcFile = srcStream(2:end-1); % last is newline
+                    srcStream = jsondecode(fileRetrieve(srcStreamDescriptor,rap.options.maximumretry,'content'));
+                    srcHash = srcStream.hash;
+                    srcFile = {};
+                    for f = fieldnames(srcStream.content)', srcFile = [srcFile; reshape(srcStream.content.(f{1}),[],1)]; end
+                    srcFile = srcFile';
 
                     % Destination
                     destStreamPath = getPathByDomain(rap,s.streamdomain,deps(d,:));
@@ -70,11 +72,11 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
                     if exist(destStreamDescriptor,'file')
                         % compare hashes of input at source and destination
-                        destHash = regexp(fileRetrieve(destStreamDescriptor,rap.options.maximumretry,'content'),'(?<=(#\t))[0-9a-f]*','match'); destHash = destHash{1};
+                        destHash = jsondecode(fileRetrieve(destStreamDescriptor,rap.options.maximumretry,'content')); destHash = destHash.hash;
                         if strcmp(destHash,getHashByFiles(srcFile,'localroot',destStreamPath)) && strcmp(srcHash,destHash), continue;
                         else, logging.warning('\tInput has changed at source - re-copying');
                         end
-                    else, logging.warning('\tretrieving');
+                    else, logging.info('\tretrieving');
                     end
                     copyfile(srcStreamDescriptor,destStreamDescriptor);
                     for f = srcFile
@@ -86,6 +88,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                                 dirMake(currDestStreamPath);
                             end
                         end
+                        if exist(fullfile(destStreamPath,f{1}),'file'), delete(fullfile(destStreamPath,f{1})); end
                         if s.tobemodified || ~rap.options.hardlinks
                             copyfile(fullfile(srcStreamPath,f{1}),fullfile(destStreamPath,f{1}));
                         else

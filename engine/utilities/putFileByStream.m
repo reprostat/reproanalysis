@@ -22,29 +22,37 @@ function  putFileByStream(rap,domain,indices,streamName,fileNames)
 
     streamDescriptor = fullfile(taskPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,rap.tasklist.currenttask.name));
 
-    % If fileNames provided as char array, reformat
-    if ~iscell(fileNames), fileNames = cellstr(fileNames); end
-
-    % Trim absolute path if it has been provided
-    for f = 1:numel(fileNames)
-        if isAbsolutePath(fileNames{f})
-            fileNames{f} = readLink(fileNames{f}); % make sure that the path is canonical
-            if strcmp(fileNames{f}(1:numel(taskPath)),taskPath)
-                fileNames{f} = strrep(fileNames{f},[taskPath filesep],'');
-            else
-                logging.error('File %s does not seems to be in the task folder %s',fileNames{f},taskPath);
-            end
+    % Unify format as a struct with description - cells
+    if ischar(fileNames), fileNames = cellstr(fileNames); end
+    if ~isstruct(fileNames)
+        fn = fileNames; fileNames = struct(); fileNames.files = fn;
+    else
+        for f = fieldnames(fileNames)'
+            if ischar(fileNames.(f{1})), fileNames.(f{1}) = cellstr(fileNames.(f{1})); end
         end
     end
 
+    % Trim absolute path if it has been provided
+    hashFiles = {};
+    for f = fieldnames(fileNames)'
+        for i = 1:numel(fileNames.(f{1}))
+            if isAbsolutePath(fileNames.(f{1}){i})
+                fileNames.(f{1}){i} = readLink(fileNames.(f{1}){i}); % make sure that the path is canonical
+                if startsWith(fileNames.(f{1}){i},taskPath)
+                    fileNames.(f{1}){i} = strrep(fileNames.(f{1}){i},[taskPath filesep],'');
+                else
+                    logging.error('File %s does not seems to be in the task folder %s',fileNames.(f{1}){i},taskPath);
+                end
+            end
+        end
+        hashFiles = [hashFiles reshape(fileNames.(f{1}),1,[])];
+    end
+
     % Calculate hash
-    hashStream = getHashByFiles(fileNames,'localroot',taskPath);
+    hashStream = getHashByFiles(hashFiles,'localroot',taskPath);
 
     % Write stream streamDescriptor
-    fid = fopen(streamDescriptor,'w');
-    fprintf(fid,'#\t%s\n',hashStream);
-    cellfun(@(pth) fprintf(fid,'%s\n',pth), fileNames);
-    fclose(fid);
+    jsonwrite(streamDescriptor,struct('hash',hashStream,'content',fileNames));
 
     % And propgate to remote filesystem
     switch rap.directoryconventions.remotefilesystem
@@ -53,5 +61,5 @@ function  putFileByStream(rap,domain,indices,streamName,fileNames)
     end
 
     logsafe_path = strrep(streamDescriptor, '\', '\\');
-    logging.info('\toutput stream %s %s written with %d file(s)',streamName,logsafe_path,numel(fileNames));
+    logging.info('\toutput stream %s %s written with %d file(s)',streamName,logsafe_path,numel(hashFiles));
 end

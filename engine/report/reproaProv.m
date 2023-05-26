@@ -280,6 +280,7 @@ classdef reproaProv < handle
                 streamDomain = stream.domain;
             end
             indices = indices(1:size(getDependencyByDomain(rap,streamDomain),2));
+            if iscell(stream.name), stream.name = stream.name{1}; end
             if ~isempty(getFileByStream(rap,streamDomain,indices,stream.name,'streamType','output','isProbe',true))
                 [fileList hashList streamDescriptor] = getFileByStream(rap,streamDomain,indices,stream.name,'streamType','output');
             end
@@ -289,6 +290,7 @@ classdef reproaProv < handle
                 idInd = 0;
                 return;
             end
+            if isstruct(fileList), fileList = cellstr(char(struct2cell(fileList))); end
 
             % Add stream
             idName = ['id' stream.name];

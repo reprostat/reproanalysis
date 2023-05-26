@@ -1,7 +1,8 @@
 % Get file(s) from input- or outputstream
-%  function getFileByStream(rap,domain,indices,streamName,['streamType','input'|'output'],['checkHash',false|true],['isProbe',false|true])
+%  function getFileByStream(rap,domain,indices,streamName,['streamType','input'|'output'],['content',{<content1>[,<content2> ...]}],['checkHash',false|true],['isProbe',false|true])
 %  e.g.,
 %   getFileByStream(rap,'subject',[1],'structural')
+%   getFileByStream(rap,'subject',[1],'native_segmentations','content',{'GM'})
 %   getFileByStream(rap,'fmrirun',[1,1],'fmri','output')
 %   getFileByStream(rap,'subject',[1],'fmri','output')
 %
@@ -14,6 +15,7 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
 
     argParse = inputParser;
     argParse.addParameter('streamType',{'input' 'output'},@(x) ischar(x) & any(strcmp({'input','output'},x)));
+    argParse.addParameter('content',{},@iscellstr);
     argParse.addParameter('checkHigherDomain',false,@islogical);
     argParse.addParameter('checkHash',true,@islogical);
     argParse.addParameter('isProbe',false,@islogical);
@@ -49,7 +51,7 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
         streamDescriptor = cellstr(spm_select('FPList',taskPath,sprintf('^stream_%s_%s.*.txt$',streamName,io{1})));
         if ~isempty(streamDescriptor{1}), break; end
     end
-    if ~isempty(streamDescriptor{1})
+    if exist('streamDescriptor','var') && ~isempty(streamDescriptor{1})
         logging.info('\tFound at%s',sprintf(' %s',streamDescriptor{:}));
         if argParse.Results.isProbe, fileList = 'x'; return; end
     else
@@ -58,27 +60,48 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
         end
     end
 
-    fileList = {};
+    fileList = struct();
     hashList = {};
     for s = streamDescriptor'
         taskPath = spm_file(s{1},'path');
 
         % Check hash
-        inStream = strsplit(fileRetrieve(s{1},rap.options.maximumretry,'content'),'\n');
-        descHash = regexp(inStream{1},'(?<=(#\t))[0-9a-f]*','match');
-        if ~isempty(descHash)
-            hashList = [hashList descHash(1)];
-            fileList = [fileList; reshape(inStream(2:end-1),[],1)]; % last is newline
-            if argParse.Results.checkHash
-                fileHash = getHashByFiles(fileList,'localroot',taskPath);
-                if ~strcmp(descHash{1},fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
-            end
-            fileList = fullfile(taskPath,fileList);
-        else
-            if ~argParse.Results.isProbe, logging.error('\t%s stream %s is empty',io{1},streamName);
-            else, logging.info('\t%s stream %s is empty',io{1},streamName); return;
+        strStream = fileRetrieve(s{1},rap.options.maximumretry,'content');
+        try
+            inStream = jsondecode(strStream);
+            descHash = inStream.hash;
+        catch
+            if ~argParse.Results.isProbe, logging.error('\tunable to read %s stream %s',io{1},streamName);
+            else, logging.info('\tunable to read %s stream %s',io{1},streamName); return;
             end
         end
-    end
+        hashList = [hashList cellstr(descHash)];
 
+        if argParse.Results.checkHash
+            listFiles = {};
+            for f = fieldnames(inStream.content)', listFiles = [listFiles; reshape(inStream.content.(f{1}),[],1)]; end
+            fileHash = getHashByFiles(listFiles,'localroot',taskPath);
+            if ~strcmp(descHash,fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
+        end
+
+        if ~isempty(argParse.Results.content) % specific content of the stream
+            missingContent = strjoin(setdiff(argParse.Results.content,fieldnames(inStream.content)),',');
+            if ~isempty(missingContent)
+                if ~argParse.Results.isProbe, logging.error('\t%s stream %s has no content %s',io{1},streamName,missingContent);
+                else, logging.info('\t%s stream %s has no content %s',io{1},streamName,missingContent); return;
+                end
+            end
+            inStream.content = rmfield(inStream.content,setdiff(fieldnames(inStream.content),argParse.Results.content));
+        end
+
+        for f = fieldnames(inStream.content)'
+            if ~isfield(fileList,f{1}), fileList.(f{1}) = fullfile(taskPath,inStream.content.(f{1}));
+            else, fileList.(f{1}) = [fileList.(f{1}); fullfile(taskPath,inStream.content.(f{1}))];
+            end
+        end
+
+    end
+    if numel(fieldnames(fileList)) == 1 && strcmp(fieldnames(fileList),'files')
+        fileList = fileList.files;
+    end
 end
