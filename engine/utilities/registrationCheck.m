@@ -33,8 +33,13 @@ function registrationCheck(rap,domain,indices,background,varargin)
     if ~exist(background,'file') && ~exist(spm_file(background,'number',''),'file'), background = getFileByStream(rap,domain,indices,background,'checkHash',false); end
     toExcl = [];
     for o = 1:numel(output)
-        testO = strsplit(output{o},','); testO = testO{1}; % volume might be selected
-        if ~exist(testO,'file'), output{o} = getFileByStream(rap,domain,indices,output{o},'streamType','output','checkHash',false); end
+        testO = strsplit(output{o},','); % volume might be selected
+        if ~exist(testO{1},'file')
+            testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','output','checkHash',false,'isProbe',true);
+            if isempty(testO{1}) || strcmp(testO{1},'x'), testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','input','checkHash',false); end
+            testO{1}  = testO{1}{1};
+        end
+        output{o} = strjoin(testO,',');
         try
             spm_vol(output{o});
         catch
@@ -43,9 +48,6 @@ function registrationCheck(rap,domain,indices,background,varargin)
         end
     end
     output(toExcl) = [];
-    for oInd = 1:numel(output)
-        if iscell(output{oInd}), output{oInd} = output{oInd}{1}; end
-    end
 
     diag = getSetting(rap,'diagnostics');
     if ~isempty(diag) && ((~isstruct(diag) && ~diag) || (isstruct(diag) && ~diag.streamindex))
