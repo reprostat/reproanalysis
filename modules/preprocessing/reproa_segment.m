@@ -227,24 +227,25 @@ function diagnostics(rap,subj)
     Timg = which(Timg);
 
     nativeSeg = getFileByStream(rap,'subject',subj,'native_segmentations','content',{'GM' 'WM' 'CSF'});
-    normSeg = getFileByStream(rap,'subject',subj,'normaliseddensity_segmentations');
+    normSeg = getFileByStream(rap,'subject',subj,'normaliseddensity_segmentations','content',{'GM' 'WM'});
+    nSeg = numel(fieldnames(nativeSeg));
+    [~, indGMWM] = ismember({'GM' 'WM'},fieldnames(nativeSeg));
 
     % Only for GM WM
-    registrationCheck(rap,'subject',1,Simg{1},nativeSeg{1:2},'mode','combined');
-    registrationCheck(rap,'subject',1,Timg,normSeg{1:2},'mode','combined');
+    registrationCheck(rap,'subject',1,Simg{1},nativeSeg.GM{1},nativeSeg.WM{1},'mode','combined');
+    registrationCheck(rap,'subject',1,Timg,normSeg.GM{1},normSeg.WM{1},'mode','combined');
 
     %% Another diagnostic image, looking at how well the segmentation worked...
-    nSeg = 3; % Only for GM, WM, CSF
     Pthresh = 0.95;
     visFig = 'on';
     if rap.internal.isdeployed, visFig = 'off'; end
-
+    
     YS = spm_read_vols(spm_vol(Simg{1}));
-    YSeg = cellfun(@(seg) YS(spm_read_vols(spm_vol(seg))>=Pthresh), nativeSeg(1:nSeg),'UniformOutput',false);
+    YSeg = cellfun(@(seg) YS(spm_read_vols(spm_vol(nativeSeg.(seg){1}))>=Pthresh), fieldnames(nativeSeg),'UniformOutput',false);
     f = figure('visible',visFig); hold on; LUT = distinguishable_colors(nSeg,[0 0 0; 0.5 0.5 0.5; 1 1 1]);
     arrayfun(@(s) hist(YSeg{s}, 100, "facecolor", LUT(s,:), "edgecolor", "none"), 1:nSeg);
 
-    [~, p, ~, stats] = ttest2(YSeg{1:2});
+    [~, p, ~, stats] = ttest2(YSeg{indGMWM});
     title(sprintf('GM vs WM... T(%d)=%0.1f, p=%1.3f', stats.df, stats.tstat, p))
 
     print(f,'-djpeg','-r150',...
