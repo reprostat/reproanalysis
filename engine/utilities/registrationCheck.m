@@ -36,7 +36,9 @@ function registrationCheck(rap,domain,indices,background,varargin)
         testO = strsplit(output{o},','); % volume might be selected
         if ~exist(testO{1},'file')
             testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','output','checkHash',false,'isProbe',true);
-            if isempty(testO{1}) || strcmp(testO{1},'x'), testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','input','checkHash',false); end
+            if ~isempty(testO{1}), testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','output','checkHash',false);
+            else, testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','input','checkHash',false); 
+            end
             testO{1}  = testO{1}{1};
         end
         output{o} = strjoin(testO,',');

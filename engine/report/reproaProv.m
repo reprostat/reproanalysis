@@ -290,7 +290,7 @@ classdef reproaProv < handle
                 idInd = 0;
                 return;
             end
-            if isstruct(fileList), fileList = cellstr(char(struct2cell(fileList))); end
+            if isstruct(fileList), fileList = cellfun(@(f) fileList.(f), fieldnames(fileList)); end
 
             % Add stream
             idName = ['id' stream.name];
