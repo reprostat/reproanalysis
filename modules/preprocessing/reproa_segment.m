@@ -173,14 +173,17 @@ function rap = reproa_segment(rap, command, subj)
             %% Describe outputs
             global defaults
             putFileByStream(rap,'subject',subj,'segmentation_estimates',segestFn);
-            putFileByStream(rap,'subject',subj,'native_segmentations',...
-                cellstr(spm_select('FPList',localPath,['^c[0-9]' spm_file(img1,'filename') '$'])));
-            putFileByStream(rap,'subject',subj,'dartelimported_segmentations',...
-                cellstr(spm_select('FPList',localPath,['^rc[0-9]' spm_file(img1,'filename') '$'])));
-            putFileByStream(rap,'subject',subj,'normaliseddensity_segmentations', ...
-                cellstr(spm_select('FPList',localPath,['^' defaults.normalise.write.prefix 'c[0-9]' spm_file(img1,'filename') '$'])));
-            putFileByStream(rap,'subject',subj,'normalisedvolume_segmentations', ...
-                cellstr(spm_select('FPList',localPath,['^m' defaults.normalise.write.prefix 'c[0-9]' spm_file(img1,'filename') '$'])));
+
+            descStr = {'GM' 'WM' 'CSF' 'Bone' 'Soft' 'OOH'};
+            descType = {'' 'native_segmentations';...
+                       'r' 'dartelimported_segmentations';...
+                       defaults.normalise.write.prefix 'normaliseddensity_segmentations';...
+                       ['m' defaults.normalise.write.prefix] 'normalisedvolume_segmentations' };
+            for t = 1:size(descType,1)
+                files = cellstr(spm_select('FPList',localPath,['^' descType{t,1} 'c[0-9]' spm_file(img1,'filename') '$']));
+                cStruct = reshape([descStr; files'],1,[]);
+                putFileByStream(rap,'subject',subj,descType{t,2},struct(cStruct{:}));
+            end
 
             pfx = '';
             if ~isempty(getSetting(rap,'writecombined')), pfx = ['c' pfx]; end
@@ -223,7 +226,7 @@ function diagnostics(rap,subj)
     if ~exist(Timg,'file'), logging.error('Couldn''t find template T1 image %s.', Timg); end
     Timg = which(Timg);
 
-    nativeSeg = getFileByStream(rap,'subject',subj,'native_segmentations');
+    nativeSeg = getFileByStream(rap,'subject',subj,'native_segmentations','content',{'GM' 'WM' 'CSF'});
     normSeg = getFileByStream(rap,'subject',subj,'normaliseddensity_segmentations');
 
     % Only for GM WM
@@ -233,16 +236,18 @@ function diagnostics(rap,subj)
     %% Another diagnostic image, looking at how well the segmentation worked...
     nSeg = 3; % Only for GM, WM, CSF
     Pthresh = 0.95;
+    visFig = 'on';
+    if rap.internal.isdeployed, visFig = 'off'; end
 
     YS = spm_read_vols(spm_vol(Simg{1}));
     YSeg = cellfun(@(seg) YS(spm_read_vols(spm_vol(seg))>=Pthresh), nativeSeg(1:nSeg),'UniformOutput',false);
-    hold on; LUT = distinguishable_colors(nSeg,[0 0 0; 0.5 0.5 0.5; 1 1 1]);
+    f = figure('visible',visFig); hold on; LUT = distinguishable_colors(nSeg,[0 0 0; 0.5 0.5 0.5; 1 1 1]);
     arrayfun(@(s) hist(YSeg{s}, 100, "facecolor", LUT(s,:), "edgecolor", "none"), 1:nSeg);
 
     [~, p, ~, stats] = ttest2(YSeg{1:2});
     title(sprintf('GM vs WM... T(%d)=%0.1f, p=%1.3f', stats.df, stats.tstat, p))
 
-    print(gcf,'-djpeg','-r150',...
+    print(f,'-djpeg','-r150',...
         fullfile(getPathByDomain(rap,'subject',subj),['diagnostic_' rap.tasklist.currenttask.name '_histogram.jpg']));
-    close(gcf);
+    close(f);
 end
