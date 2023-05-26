@@ -1,7 +1,4 @@
 function rap = processBIDS(rap,varargin)
-% https://github.com/bids-standard/bids-matlab
-% https://github.com/automaticanalysis/automaticanalysis/blob/0969fe35f6c355b35ccb76d68f77df1e02f93ab7/aa_engine/aas_processBIDS.m
-
 % Allow specify Subjects, Sessions and Events from Brain Imaging Data Structure (BIDS)
 %
 %       rap = processBIDS(rap,[[<Name>,<Value>][,<Name>,<Value>]...])

@@ -41,7 +41,7 @@ function rap = reproa_coregextended(rap,command,subj)
                 Simg = spm_file(Simg,'basename','tmpStruct');
             end
             if hasStream(rap,'subject',subj,coregStream)
-                mfMRIimg = getFileByStream(rap,'subject',subj,coregStream); mfMRIimg = mfMRIimg{1};
+                mfMRIimg = getFileByStream(rap,'subject',subj,coregStream); mfMRIimg = mfMRIimg{1}; % use only the first
                 if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),coregStream) % preserve original image
                     copyfile(mfMRIimg,spm_file(mfMRIimg,'basename','tmpCoreg'));
                     mfMRIimg = spm_file(mfMRIimg,'basename','tmpCoreg');

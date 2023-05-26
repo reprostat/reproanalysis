@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
     <header mfile='reproa_normwrite' domain='fmrirun' desc='Applying normalisation estimates on fMRI' modality='FMRI'/>
-            
+
     <hpc>
         <timeBase>1</timeBase>
         <memoryBase>0.5</memoryBase>
@@ -16,14 +16,14 @@
             <interp>4</interp>
         </write>
     </settings>
-            
+
     <inputstreams>
         <stream domain='subject' tobemodified='0'>forward_deformationfield</stream>
-        <stream domain='subject' tobemodified='0' isrenameable='1'>structural</stream> 
+        <stream domain='subject' tobemodified='0' isrenameable='1'>structural</stream>
         <stream domain='fmrirun' tobemodified='0'>fmri</stream>
     </inputstreams>
-            
+
     <outputstreams>
-        <stream>fmri</stream>                
+        <stream domain='fmrirun'>fmri</stream>
     </outputstreams>
 </rap>

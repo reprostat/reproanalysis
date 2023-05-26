@@ -5,7 +5,7 @@ function hashMD5 = getHashByFiles(fileList, varargin)
     argParse.addParameter('tocheck','data',@(x) ischar(x) & any(strcmp({'data','filestat'},x)));
     argParse.parse(varargin{:});
 
-    if (~iscell(fileList)), fileList = cellstr(fileList); end
+    if ~iscell(fileList), fileList = cellstr(fileList); end
     if ~isempty(argParse.Results.localroot), fileList = fullfile(argParse.Results.localroot,fileList); end
 
     if any(cellfun(@(pth) ~exist(pth,'file'), fileList))
