@@ -134,7 +134,6 @@ function rap = reproa_segment(rap, command, subj)
                     Y = spm_read_vols(V).*mask;
                     V.fname = spm_file(V.fname,'prefix','c');
                     spm_write_vol(V,Y);
-                    img{c} = V.fname;
                 end
             end
 
@@ -239,7 +238,7 @@ function diagnostics(rap,subj)
     Pthresh = 0.95;
     visFig = 'on';
     if rap.internal.isdeployed, visFig = 'off'; end
-    
+
     YS = spm_read_vols(spm_vol(Simg{1}));
     YSeg = cellfun(@(seg) YS(spm_read_vols(spm_vol(nativeSeg.(seg){1}))>=Pthresh), fieldnames(nativeSeg),'UniformOutput',false);
     f = figure('visible',visFig); hold on; LUT = distinguishable_colors(nSeg,[0 0 0; 0.5 0.5 0.5; 1 1 1]);
