@@ -16,13 +16,13 @@
 
     <inputstreams>
         <stream domain="subject">structural</stream>
-        <stream domain="subject" isessential="0">meanfmri</stream>
-        <stream domain="fmrirun">fmri</stream>
+        <stream domain="subject">meanfmri</stream>
+        <stream domain="fmrirun" isessential="0">fmri</stream>
     </inputstreams>
 
     <outputstreams>
-        <stream domain="subject">structural</stream>
-        <stream domain="subject">meanfmri</stream>
-        <stream domain="fmrirun">fmri</stream>
+        <stream domain="subject" isessential="0">structural</stream>
+        <stream domain="subject" isessential="0">meanfmri</stream>
+        <stream domain="fmrirun" isessential="0">fmri</stream>
     </outputstreams>
 </rap>

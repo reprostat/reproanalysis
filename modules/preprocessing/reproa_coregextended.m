@@ -7,9 +7,10 @@
 function rap = reproa_coregextended(rap,command,subj)
 
   % Configure
-    if hasStream(rap,'fmri'), coregStream = 'meanfmri'; otherStream = 'fmri'; bTimg = 'EPI';
-    elseif hasStream(rap,'t2'), coregStream = 't2'; otherStream = ''; bTimg = 'T2';
+    if hasStream(rap,'meanfmri'), coregStream = 'meanfmri'; bTimg = 'EPI'; otherDomain = 'fmrirun';
+    elseif hasStream(rap,'t2'), coregStream = 't2'; bTimg = 'T2'; otherDomain = 'subject'
     end
+    otherStream = setdiff({rap.tasklist.currenttask.inputstreams.name},{'structural' coregStream},'stable'); % first other is used for diagnostics
 
     switch command
         case 'report' % [TA]
@@ -40,19 +41,11 @@ function rap = reproa_coregextended(rap,command,subj)
                 copyfile(Simg,spm_file(Simg,'basename','tmpStruct'));
                 Simg = spm_file(Simg,'basename','tmpStruct');
             end
-            if hasStream(rap,'subject',subj,coregStream)
-                mfMRIimg = getFileByStream(rap,'subject',subj,coregStream); mfMRIimg = mfMRIimg{1}; % use only the first
-                if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),coregStream) % preserve original image
-                    copyfile(mfMRIimg,spm_file(mfMRIimg,'basename','tmpCoreg'));
-                    mfMRIimg = spm_file(mfMRIimg,'basename','tmpCoreg');
-                end
-            else % create from otherStream (1st run only, assumes coregsitered/realigned runs)
-                fMRIimg = char(getFileByStream(rap,[otherStream 'run'],[subj rap.acqdetails.selectedruns(1)],otherStream));
-                mfMRIimg = spm_file(fMRIimg,'prefix','mean_');
-                V = spm_vol(fMRIimg);
-                Y = spm_read_vols(V);
-                V = V(1); Y = mean(Y,4); V.fname = mfMRIimg;
-                spm_write_vol(V,Y);
+
+            mfMRIimg = getFileByStream(rap,'subject',subj,coregStream); mfMRIimg = mfMRIimg{1}; % use only the first
+            if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),coregStream) % preserve original image
+                copyfile(mfMRIimg,spm_file(mfMRIimg,'basename','tmpCoreg'));
+                mfMRIimg = spm_file(mfMRIimg,'basename','tmpCoreg');
             end
 
             preMstruct = runCoreg(Simg,sTimg,'Structural to template');
@@ -83,51 +76,64 @@ function rap = reproa_coregextended(rap,command,subj)
             end
 
             if ~isempty(otherStream) && doCoregOther
-                % Apply transformation to fMRI
+                % Apply transformation to others
 
                 % - get space of mean functional
                 MM = spm_get_space(mfMRIimg);
 
-                fMRIimg = cell(1,numel(rap.acqdetails.fmriruns));
                 % Locate all the fMRIs we want to coregister
                 for run = rap.acqdetails.selectedruns
-                    fMRIimg{run} = getFileByStream(rap,[otherStream 'run'],[subj,run],otherStream);
+                    for s = otherStream
+                        img = getFileByStream(rap,otherDomain,[subj,run],s{1});
 
-                    % For each image, apply the space of the mean fMRI image
-                    for e = 1:numel(fMRIimg{run})
-                        % Apply the space of the coregistered mean fMRI to the
-                        % remaining fMRIs (safest solution!, assumes coregsitered/realigned runs)
-                        spm_get_space(fMRIimg{run}{e}, MM);
+                        % For each image, apply the space of the mean fMRI image
+                        for e = 1:numel(img)
+                            % Apply the space of the coregistered mean fMRI to the
+                            % remaining fMRIs (safest solution!, assumes coregsitered/realigned runs)
+                            spm_get_space(img{e}, MM);
+                        end
+
+                        % Describe the outputs
+                        putFileByStream(rap,otherDomain,[subj run],s{1},img);
                     end
                 end
 
-                % Describe the outputs
-                for run = rap.acqdetails.selectedruns
-                    putFileByStream(rap,[otherStream 'run'],[subj run],otherStream,fMRIimg{run});
-                end
-
                 % Diagnostics
-                registrationCheck(rap,'subject',subj,'structural',coregStream,spm_file(fMRIimg{rap.acqdetails.selectedruns(1)}{1},'number',',1'));
+                registrationCheck(rap,'subject',subj,'structural',coregStream,[otherStream{1} ',1']);
             else
 
                 % Diagnostics
-                if hasStream(rap,'subject',subj,coregStream), registrationCheck(rap,'subject',subj,'structural',coregStream);
-                else
-                    if iscell(fMRIimg), fMRIimg = fMRIimg{rap.acqdetails.selectedruns(1)}{1}; end
-                    registrationCheck(rap,'subject',subj,'structural',spm_file(fMRIimg,'number',',1'));
-                end
+                registrationCheck(rap,'subject',subj,'structural',coregStream);
             end
 
         case 'checkrequirements'
+            % Ensure that all (new) others are outputs
+            for s = otherStream
+                if ~ismember(s{1},{rap.tasklist.currenttask.outputstreams.name})
+                    rap = renameStream(rap,rap.tasklist.currenttask.name,'output','append',...
+                                       [s{1} ':domain-' rap.tasklist.currenttask.inputstreams(strcmp({rap.tasklist.currenttask.inputstreams.name},s{1})).streamdomain]);
+                    logging.info('NEW: %s output stream: %s', rap.tasklist.currenttask.name,s{1});
+                end
+            end
+
+            % Remove target from outputs and others in the space space from inputs and outputs, if not to be reoriented.
             if ~getSetting(rap,'reorienttotemplate')
                 targetStream = getSetting(rap,'target');
                 if ismember(targetStream,{rap.tasklist.currenttask.outputstreams.name})
                     rap = renameStream(rap,rap.tasklist.currenttask.name,'output',targetStream,[]);
                     logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,targetStream);
                 end
-                if strcmp(targetStream,'meanfmri') && ismember('fmri',{rap.tasklist.currenttask.outputstreams.name})
-                    rap = renameStream(rap,rap.tasklist.currenttask.name,'output','fmri',[]);
-                    logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,'fmri');
+                if ~strcmp(targetStream,'structural')
+                    for s = otherStream
+                        if ismember(s{1},{rap.tasklist.currenttask.inputstreams.name})
+                            rap = renameStream(rap,rap.tasklist.currenttask.name,'input',s{1},[]);
+                            logging.info('REMOVED: %s input stream: %s', rap.tasklist.currenttask.name,s{1});
+                        end
+                        if ismember(s{1},{rap.tasklist.currenttask.outputstreams.name})
+                            rap = renameStream(rap,rap.tasklist.currenttask.name,'output',s{1},[]);
+                            logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,s{1});
+                        end
+                    end
                 end
             end
     end

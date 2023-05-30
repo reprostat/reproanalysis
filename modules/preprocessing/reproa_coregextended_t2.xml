@@ -20,7 +20,7 @@
     </inputstreams>
 
     <outputstreams>
-        <stream domain="subject">structural</stream>
-        <stream domain="subject">t2</stream>
+        <stream domain="subject" isessential="0">structural</stream>
+        <stream domain="subject" isessential="0">t2</stream>
     </outputstreams>
 </rap>
