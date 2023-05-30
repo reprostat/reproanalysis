@@ -189,7 +189,7 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
                             annotation('textbox',[0 0.5 0.5 0.5],'String',getSetting(rap,'overlay.description'),'FitBoxToText','on','fontweight','bold','color','y','fontsize',18,'backgroundcolor','k');
                         end
 
-                        spm_print(fullfile(localRoot, sprintf('diagnostic_%s_C%02d_%s_overlay_%d.jpg',rap.tasklist.currenttask.name,c,conName,a)),fig,'jpg');
+                        print(fig,'-noui',fullfile(localRoot, sprintf('diagnostic_%s_C%02d_%s_overlay_%d.jpg',rap.tasklist.currenttask.name,c,conName,a)),'-djpeg','-r300');
                     end
                     dlmwrite(fullfile(localRoot, sprintf('diagnostic_%s_C%02d_%s.txt',rap.tasklist.currenttask.name,c,conName)),[min(v(v~=0)), max(v)]);
 
