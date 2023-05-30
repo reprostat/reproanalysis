@@ -33,15 +33,15 @@ function registrationCheck(rap,domain,indices,background,varargin)
     if ~exist(background,'file') && ~exist(spm_file(background,'number',''),'file'), background = getFileByStream(rap,domain,indices,background,'checkHash',false); end
     toExcl = [];
     for o = 1:numel(output)
-        testO = strsplit(output{o},','); % volume might be selected
-        if ~exist(testO{1},'file')
-            testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','output','checkHash',false,'isProbe',true);
-            if ~isempty(testO{1}), testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','output','checkHash',false);
-            else, testO{1} = getFileByStream(rap,domain,indices,output{o},'streamType','input','checkHash',false); 
+        output{o} = strsplit(output{o},','); % volume might be selected
+        if ~exist(output{o}{1},'file')
+            fnTest = getFileByStream(rap,domain,indices,output{o}{1},'streamType','output','checkHash',false,'isProbe',true);
+            if ~isempty(fnTest), fnTest = getFileByStream(rap,domain,indices,output{o}{1},'streamType','output','checkHash',false);
+            else, fnTest = getFileByStream(rap,domain,indices,output{o}{1},'streamType','input','checkHash',false);
             end
-            testO{1}  = testO{1}{1};
+            output{o}{1}  = fnTest{1}; % first image within the stream
         end
-        output{o} = strjoin(testO,',');
+        output{o} = strjoin(output{o},',');
         try
             spm_vol(output{o});
         catch
