@@ -26,6 +26,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     if indTask < 0 % initialisation
         logging.info('INITIALISATION - %s',taskDescription);
     else
+        logging.info('%s - %s',upper(command),taskDescription);
         if strcmp(command,'doit')
             taskRoot = getPathByDomain(rap,rap.tasklist.currenttask.domain,indices);
 
@@ -106,8 +107,6 @@ function rap = runModule(rap,indTask,command,indices,varargin)
             end
 
         end
-
-        logging.info('%s - %s',upper(command),taskDescription);
     end
 
     % run task
