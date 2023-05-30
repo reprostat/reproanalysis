@@ -134,6 +134,11 @@ classdef batchClass < queueClass
             end
         end
 
+        function close(this)
+            logging.info('Cancelling jobs...');
+            cellfun(@(j) j.cancel(), queue.pool.jobs);
+        end
+
         function p = getAdditionalPaths(this)
             global reproacache
 
