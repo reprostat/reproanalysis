@@ -48,7 +48,13 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
         deps = getDependencyByDomain(rap,streamDomain,domain,indices);
         taskPath = arrayfun(@(d) readLink(getPathByDomain(rap,streamDomain,deps(d,:))),1:size(deps,1),'UniformOutput',false);
 
-        streamDescriptor = cellstr(spm_select('FPList',taskPath,sprintf('^stream_%s_%s.*.txt$',streamName,io{1})));
+        if contains(streamName,'.')
+            streamName = strsplit(streamName,'.'); [streamSource streamName] = deal(streamName{:});
+        else
+            streamSource = '.*';
+        end
+
+        streamDescriptor = cellstr(spm_select('FPList',taskPath,sprintf('^stream_%s_%sfrom_%s\.txt$',streamName,io{1},streamSource)));
         if ~isempty(streamDescriptor{1}), break; end
     end
     if exist('streamDescriptor','var') && ~isempty(streamDescriptor{1})

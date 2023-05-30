@@ -31,16 +31,17 @@ function rap = buildWorkflow(rap,varargin)
             inputstream = rap.tasklist.main(indTask).inputstreams(indInput);
             if iscell(inputstream.name), inputstream.name = inputstream.name{1}; end % ingore original name after renaming
             indSource = [];
+            sourceToCheck = taskToCheck;
 
             % if fully specified
             if any(inputstream.name == '.')
-                tmp = strsplit(inputstream.name,'[_|.]','delimitertype','regularexpression');
+                tmp = regexp(inputstream.name,'^.*(?=_[0-9])|[0-9]{5}|(?<=\.).*','match');
                 [sourceTaskName sourceTaskIndex inputstream.name] = deal(tmp{:}); sourceTaskIndex = sscanf(sourceTaskIndex,'%05d');
-                taskToCheck = taskToCheck & strcmp({rap.tasklist.main(1:indTask-1).name},sourceTaskName) & ({rap.tasklist.main(1:indTask-1).index}==sourceTaskIndex);
+                sourceToCheck = sourceToCheck & strcmp({rap.tasklist.main(1:indTask-1).name},sourceTaskName) & ([rap.tasklist.main(1:indTask-1).index]==sourceTaskIndex);
             end
 
-            if any(taskToCheck)
-                indSource = find(arrayfun(@(i) taskToCheck(i) && ~isempty(rap.tasklist.main(i).outputstreams) && any(strcmp(cellstr({rap.tasklist.main(i).outputstreams.name}),inputstream.name)), 1:indTask-1),1,'last');
+            if any(sourceToCheck)
+                indSource = find(arrayfun(@(i) sourceToCheck(i) && ~isempty(rap.tasklist.main(i).outputstreams) && any(strcmp(cellstr({rap.tasklist.main(i).outputstreams.name}),inputstream.name)), 1:indTask-1),1,'last');
             end
 
             if isempty(indSource) && ~isempty(rap.acqdetails.input.remotepipeline(1).path) % Check remote
