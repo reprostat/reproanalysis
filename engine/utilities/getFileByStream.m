@@ -21,7 +21,7 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
     argParse.addParameter('isProbe',false,@islogical);
     argParse.parse(varargin{:});
 
-    streamType = argParse.Results.streamType; if ~iscell(streamType), streamType = {streamType}; end
+    streamType = argParse.Results.streamType; if ~iscellstr(streamType), streamType = cellstr(streamType); end
 
     fileList = '';
 
@@ -54,7 +54,7 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
             streamSource = '.*';
         end
 
-        streamDescriptor = cellstr(spm_select('FPList',taskPath,sprintf('^stream_%s_%sfrom_%s\.txt$',streamName,io{1},streamSource)));
+        streamDescriptor = cellstr(spm_select('FPList',taskPath,sprintf('^stream_%s_%sfrom_%s\\.txt$',streamName,io{1},streamSource)));
         if ~isempty(streamDescriptor{1}), break; end
     end
     if exist('streamDescriptor','var') && ~isempty(streamDescriptor{1})
@@ -67,47 +67,49 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
     end
 
     fileList = struct();
-    hashList = {};
+    hashList = struct();
     for s = streamDescriptor'
         taskPath = spm_file(s{1},'path');
 
-        % Check hash
-        strStream = fileRetrieve(s{1},rap.options.maximumretry,'content');
+        % Read stream
         try
-            inStream = jsondecode(strStream);
-            descHash = inStream.hash;
+            inStream = readStream(s{1},rap.options.maximumretry);
         catch
             if ~argParse.Results.isProbe, logging.error('\tunable to read %s stream %s',io{1},streamName);
             else, logging.info('\tunable to read %s stream %s',io{1},streamName); return;
             end
         end
-        hashList = [hashList cellstr(descHash)];
 
-        if argParse.Results.checkHash
-            listFiles = {};
-            for f = fieldnames(inStream.content)', listFiles = [listFiles; reshape(inStream.content.(f{1}),[],1)]; end
-            fileHash = getHashByFiles(listFiles,'localroot',taskPath);
-            if ~strcmp(descHash,fileHash), logging.error('%s stream %s has changed since its retrieval',io{1},streamName); end
-        end
-
-        if ~isempty(argParse.Results.content) % specific content of the stream
-            missingContent = strjoin(setdiff(argParse.Results.content,fieldnames(inStream.content)),',');
+        % Filter for content
+        if ~isempty(argParse.Results.content)
+            missingContent = strjoin(setdiff(argParse.Results.content,fieldnames(inStream)),',');
             if ~isempty(missingContent)
                 if ~argParse.Results.isProbe, logging.error('\t%s stream %s has no content %s',io{1},streamName,missingContent);
                 else, logging.info('\t%s stream %s has no content %s',io{1},streamName,missingContent); return;
                 end
             end
-            inStream.content = rmfield(inStream.content,setdiff(fieldnames(inStream.content),argParse.Results.content));
+            inStream = rmfield(inStream,setdiff(fieldnames(inStream),argParse.Results.content));
         end
 
-        for f = fieldnames(inStream.content)'
-            if ~isfield(fileList,f{1}), fileList.(f{1}) = fullfile(taskPath,inStream.content.(f{1}));
-            else, fileList.(f{1}) = [fileList.(f{1}); fullfile(taskPath,inStream.content.(f{1}))];
+        % Process stream
+        for f = fieldnames(inStream)'
+            if argParse.Results.checkHash
+                if ~strcmp(inStream.(f{1}).hash,getHashByFiles(inStream.(f{1}).files,'localroot',taskPath))
+                    logging.error('%s stream %s.%s has changed since its retrieval',io{1},streamName,f{1});
+                end
+            end
+            if ~isfield(fileList,f{1})
+                fileList.(f{1}) = fullfile(taskPath,inStream.(f{1}).files);
+                hashList.(f{1}) = cellstr(inStream.(f{1}).hash);
+            else
+                fileList.(f{1}) = [fileList.(f{1}); fullfile(taskPath,inStream.(f{1}).files)];
+                hashList.(f{1}) = [hashList.(f{1}); cellstr(inStream.(f{1}).hash)];
             end
         end
 
     end
     if numel(fieldnames(fileList)) == 1 && strcmp(fieldnames(fileList),'files')
         fileList = fileList.files;
+        hashList = hashList.files;
     end
 end

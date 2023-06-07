@@ -42,7 +42,19 @@ function rap = runModule(rap,indTask,command,indices,varargin)
             for s = rap.tasklist.currenttask.inputstreams
                 % obtain streams
                 if iscell(s.name), s.name = s.name{1}; end
-                streamName = strsplit(s.name,'.'); streamName = streamName{end};
+                streamName = strsplit(s.name,'.'); content = '';
+                switch numel(streamName)
+                    case 3
+                        [streamName content] = deal(streamName{2:3});
+                    case 2
+                        if ~isempty(regexp(streamName{1},'[0-9]{5}')) % first is module
+                            streamName = streamName{2};
+                        else % first is stream
+                            [streamName content] = deal(streamName{1:2});
+                        end
+                    case 1
+                        streamName = streamName{1};
+                end
 
                 if s.taskindex == -1 % remote
                     logging.error('NYI');
@@ -55,11 +67,8 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     srcStreamPath = getPathByDomain(srcrap,s.streamdomain,deps(d,:));
                     srcStreamPath = readLink(srcStreamPath); % make sure the path is canonical
                     srcStreamDescriptor = fullfile(srcStreamPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name));
-                    srcStream = jsondecode(fileRetrieve(srcStreamDescriptor,rap.options.maximumretry,'content'));
-                    srcHash = srcStream.hash;
-                    srcFile = {};
-                    for f = fieldnames(srcStream.content)', srcFile = [srcFile; reshape(srcStream.content.(f{1}),[],1)]; end
-                    srcFile = srcFile';
+                    srcStream = readStream(srcStreamDescriptor,rap.options.maximumretry);
+                    if ~isempty(content), srcStream = rmfield(srcStream,setdiff(fieldnames(srcStream),content)); end
 
                     % Destination
                     destStreamPath = getPathByDomain(rap,s.streamdomain,deps(d,:));
@@ -71,16 +80,30 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
                     logging.info('Input - %s',destStreamName);
 
+                    % Compare hashes of input at source and destination
                     if exist(destStreamDescriptor,'file')
-                        % compare hashes of input at source and destination
-                        destHash = jsondecode(fileRetrieve(destStreamDescriptor,rap.options.maximumretry,'content')); destHash = destHash.hash;
-                        if strcmp(destHash,getHashByFiles(srcFile,'localroot',destStreamPath)) && strcmp(srcHash,destHash), continue;
-                        else, logging.warning('\tInput has changed at source - re-copying');
+                        destStream = readStream(destStreamDescriptor,rap.options.maximumretry);
+                        srcHash = cellfun(@(f) srcStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
+                        destHash = cellfun(@(f) destStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
+                        try fileHash = cellfun(@(f) getHashByFiles(srcStream.(f).files,'localroot',destStreamPath), fieldnames(srcStream),'UniformOutput',false);
+                        catch, logging.warning('\tInput cannot be found - re-copying'); fileHash = repmat({''},size(destHash));
+                        end
+                        if all(strcmp(destHash,fileHash)) && all(strcmp(srcHash,destHash)), continue;
+                        else, logging.warning('\tInput has changed - re-copying');
                         end
                     else, logging.info('\tretrieving');
                     end
-                    copyfile(srcStreamDescriptor,destStreamDescriptor);
-                    for f = srcFile
+
+                    % Copy stream
+                    if ~isempty(content) % re-create stream
+                        jsonwrite(destStreamDescriptor,srcStream);
+                    else
+                        copyfile(srcStreamDescriptor,destStreamDescriptor);
+                    end
+
+                    % Copy files
+                    srcFile = cellfun(@(f) srcStream.(f).files, fieldnames(srcStream),'UniformOutput',false);
+                    for f = vertcat(srcFile{:})'
                         currDestStreamPath = destStreamPath;
                         subDir = spm_file(f{1},'path');
                         if ~isempty(subDir) % subdirectory detected

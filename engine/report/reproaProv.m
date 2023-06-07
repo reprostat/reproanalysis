@@ -290,9 +290,12 @@ classdef reproaProv < handle
                 idInd = 0;
                 return;
             end
-            if isstruct(fileList), fileList = cellfun(@(f) fileList.(f), fieldnames(fileList)); end
+            if isstruct(fileList)
+                fileList = cellfun(@(f) fileList.(f), fieldnames(fileList));
+                hashList = cellfun(@(f) hashList.(f), fieldnames(hashList));
+            end
 
-            % Add stream
+            % Add stream (only first file to represent)
             idName = ['id' stream.name];
             idAttr = {...
                 'streamname',stream.name,...

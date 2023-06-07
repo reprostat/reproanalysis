@@ -34,11 +34,13 @@ function rap = buildWorkflow(rap,varargin)
             sourceToCheck = taskToCheck;
 
             % if fully specified
-            if any(inputstream.name == '.')
+            if any(inputstream.name == '.') && ~isempty(regexp(inputstream.name,'[0-9]{5}(?=\.)'))
                 tmp = regexp(inputstream.name,'^.*(?=_[0-9])|[0-9]{5}|(?<=\.).*','match');
                 [sourceTaskName sourceTaskIndex inputstream.name] = deal(tmp{:}); sourceTaskIndex = sscanf(sourceTaskIndex,'%05d');
                 sourceToCheck = sourceToCheck & strcmp({rap.tasklist.main(1:indTask-1).name},sourceTaskName) & ([rap.tasklist.main(1:indTask-1).index]==sourceTaskIndex);
             end
+            % if content
+            if any(inputstream.name == '.'), inputstream.name = regexp(inputstream.name,'^.*(?=\.)','match','once'); end
 
             if any(sourceToCheck)
                 indSource = find(arrayfun(@(i) sourceToCheck(i) && ~isempty(rap.tasklist.main(i).outputstreams) && any(strcmp(cellstr({rap.tasklist.main(i).outputstreams.name}),inputstream.name)), 1:indTask-1),1,'last');
