@@ -4,9 +4,11 @@
 % 3) Coregister input with structural (any direction)
 % 4) Apply transformation matrix to other inputs
 
-function rap = reproa_coregextended(rap,command,subj)
+function rap = reproa_coregextended(rap,command,varargin)
 
   % Configure
+    subj = varargin{1};
+    localPath = getPathByDomain(rap,rap.tasklist.currenttask.domain,cell2mat(varargin));
     if hasStream(rap,'meanfmri'), coregStream = 'meanfmri'; bTimg = 'EPI'; otherDomain = 'fmrirun';
     elseif hasStream(rap,'t2'), coregStream = 't2'; bTimg = 'T2'; otherDomain = 'subject'
     end
@@ -14,7 +16,7 @@ function rap = reproa_coregextended(rap,command,subj)
 
     switch command
         case 'report' % [TA]
-            rap = registrationReport(rap,subj);
+            rap = registrationReport(rap,varargin{:});
 
         case 'doit'
             global reproacache
@@ -34,18 +36,20 @@ function rap = reproa_coregextended(rap,command,subj)
             eTimg = which(eTimg);
 
             % Coregister
+            % - structural
             Simg = getFileByStream(rap,'subject',subj,'structural');
             if numel(Simg) > 1, logging.error('Found more than 1 structural images. Make sure you set rap.options.autoidentifystructural correctly.'); end
             Simg = Simg{1};
             if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),'structural') % preserve original image
-                copyfile(Simg,spm_file(Simg,'basename','tmpStruct'));
-                Simg = spm_file(Simg,'basename','tmpStruct');
+                copyfile(Simg,spm_file(Simg,'path',localPath,'basename','tmpStruct'));
+                Simg = spm_file(Simg,'path',localPath,'basename','tmpStruct');
             end
 
-            mfMRIimg = getFileByStream(rap,'subject',subj,coregStream); mfMRIimg = mfMRIimg{1}; % use only the first
+            % - coreg data
+            mfMRIimg = getFileByStream(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),coregStream); mfMRIimg = mfMRIimg{1}; % use only the first
             if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),coregStream) % preserve original image
-                copyfile(mfMRIimg,spm_file(mfMRIimg,'basename','tmpCoreg'));
-                mfMRIimg = spm_file(mfMRIimg,'basename','tmpCoreg');
+                copyfile(mfMRIimg,spm_file(mfMRIimg,'path',localPath,'basename','tmpCoreg'));
+                mfMRIimg = spm_file(mfMRIimg,'path',localPath,'basename','tmpCoreg');
             end
 
             preMstruct = runCoreg(Simg,sTimg,'Structural to template');
@@ -61,7 +65,7 @@ function rap = reproa_coregextended(rap,command,subj)
                     spm_get_space(mfMRIimg, inv(preMstruct)*spm_get_space(mfMRIimg));
                 end
 
-                putFileByStream(rap,'subject',subj,coregStream,mfMRIimg);
+                putFileByStream(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),coregStream,mfMRIimg);
             else
                 runCoreg(Simg,mfMRIimg,'Structural to Input');
                 if getSetting(rap,'reorienttotemplate')
@@ -82,7 +86,10 @@ function rap = reproa_coregextended(rap,command,subj)
                 MM = spm_get_space(mfMRIimg);
 
                 % Locate all the fMRIs we want to coregister
-                for run = rap.acqdetails.selectedruns
+                if numel(varargin) == 1, runs = rap.acqdetails.selectedruns;
+                else, runs = varargin{2};
+                end
+                for run = runs
                     for s = otherStream
                         img = getFileByStream(rap,otherDomain,[subj,run],s{1});
 
@@ -99,11 +106,11 @@ function rap = reproa_coregextended(rap,command,subj)
                 end
 
                 % Diagnostics
-                registrationCheck(rap,'subject',subj,'structural',coregStream,[otherStream{1} ',1']);
+                registrationCheck(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),'structural',coregStream,[otherStream{1} ',1']);
             else
 
                 % Diagnostics
-                registrationCheck(rap,'subject',subj,'structural',coregStream);
+                registrationCheck(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),'structural',coregStream);
             end
 
         case 'checkrequirements'
