@@ -12,10 +12,7 @@ function rap = reproa_fromnifti_fieldmap(rap,command,subj,run)
             visitNum = getSeriesNumber(rap,subj,run);
             fieldmaps = [rap.acqdetails.subjects(subj).fieldmaps(visitNum:end) rap.acqdetails.subjects(subj).fieldmaps(1:visitNum-1)];
             for n = horzcat(fieldmaps{:})
-                if any(strcmp(n{1}.run,...
-                       {[getRunType(rap) '-' rap.acqdetails.([getRunType(rap) 's'])(run).name] ...
-                       [getRunType(rap) '-*']
-                       }))
+                if ~isempty(regexp([getRunType(rap) '-' rap.acqdetails.([getRunType(rap) 's'])(run).name],strrep(n{1}.run,'*','.*')))
                     if ~isempty(getSetting(rap,'pattern')) && isempty(regexp(n{1}.fname{1},getSetting(rap,'pattern'))), continue; end
                     niftistruct = n{1};
                     break;

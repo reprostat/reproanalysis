@@ -123,6 +123,7 @@ for subj = SUBJ
         for sfx = intersect(strsplit(rap.tasksettings.reproa_fromnifti_structural.sfxformodality,':'), bids.query(BIDS, 'suffixes', 'modality', 'anat'),'stable')
             for sessInd = 1:numel(SESS)
                 image = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix',sfx{1});
+                if isempty(image), continue; end
                 hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix',sfx{1});
                 if isempty(fieldnames(hdr)), hdr = [];
                 else, hdr = repmat({hdr},1,numel(image));
@@ -236,7 +237,8 @@ for subj = SUBJ
                 if ~exist(images{3},'file'), images(end) = []; end
                 hdr = jsonread(strrep(images{1},'.nii.gz','.json'));
                 hdr.EchoTime = [hdr.EchoTime1 hdr.EchoTime2];
-                runName = regexp(hdr.IntendedFor,'(?<=task-)[^_]*','match','once');
+                runName = '';
+                if isfield(hdr,'IntendedFor'), runName = regexp(hdr.IntendedFor,'(?<=task-)[^_]*','match','once'); end
                 if isempty(runName)
                     logging.warning('No task specification found for fieldmap %s -> assuming all run',images{1});
                     runName = '*';
@@ -248,6 +250,7 @@ for subj = SUBJ
                 rapFmap.run = runName;
 
                 if BIDSsettings.combinemultiple
+                    rapFmap.run = [rapFmap.run '_' SESS{sessInd}];
                     fieldmapimages = horzcat(fieldmapimages,rapFmap);
                 else
                     fieldmapimages{sessInd} = horzcat(fieldmapimages{sessInd},rapFmap);
@@ -268,20 +271,25 @@ for subj = SUBJ
                         hdr = jsonread(strrep(images{1},'.nii.gz','.json'));
                         hdr2 = jsonread(strrep(images{2},'.nii.gz','.json'));
                         hdr.PhaseEncodingDirection = {hdr.PhaseEncodingDirection hdr2.PhaseEncodingDirection};
-                        switch spm_file(spm_file(hdr.IntendedFor,'path'),'basename')
-                            case 'func'
-                                runName = regexp(hdr.IntendedFor,'(?<=task-)[^_]*','match','once');
-                                if ~isempty(runName)
-                                    runNum = regexp(hdr.IntendedFor,'(?<=run-)[^_]*','match','once');
-                                    if ~isempty(runNum), runName = [runName '-' runNum]; end
-                                else
-                                    logging.warning('No task specification found for fieldmap  %s -> assuming all run',images{1});
-                                    runName = '*';
-                                end
-                                runName = ['fmrirun-' runName];
-                            case 'dwi'
-                                logging.warning('Fieldmap %s detected for diffusion -> assuming all run',images{1});
-                                runName = 'diffusionrun-*';
+                        if ~isfield(hdr,'IntendedFor')
+                            logging.warning('No task specification found for fieldmap  %s -> assuming all run',images{1});
+                            runName = '*';
+                        else
+                            switch spm_file(spm_file(hdr.IntendedFor,'path'),'basename')
+                                case 'func'
+                                    runName = regexp(hdr.IntendedFor,'(?<=task-)[^_]*','match','once');
+                                    if ~isempty(runName)
+                                        runNum = regexp(hdr.IntendedFor,'(?<=run-)[^_]*','match','once');
+                                        if ~isempty(runNum), runName = [runName '-' runNum]; end
+                                    else
+                                        logging.warning('No task specification found for fieldmap  %s -> assuming all run',images{1});
+                                        runName = '*';
+                                    end
+                                    runName = ['fmrirun-' runName];
+                                case 'dwi'
+                                    logging.warning('Fieldmap %s detected for diffusion -> assuming all run',images{1});
+                                    runName = 'diffusionrun-*';
+                            end
                         end
 
                         rapFmap.fname = images;
@@ -289,6 +297,7 @@ for subj = SUBJ
                         rapFmap.run = runName;
 
                         if BIDSsettings.combinemultiple
+                            rapFmap.run = [rapFmap.run '_' SESS{sessInd}];
                             fieldmapimages = horzcat(fieldmapimages,rapFmap);
                         else
                             fieldmapimages{sessInd} = horzcat(fieldmapimages{sessInd},rapFmap);

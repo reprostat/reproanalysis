@@ -11,7 +11,7 @@ function [visitNum, seriesNum] = getSeriesNumber(rap,subj,run)
         end
     end
 
-    if iscell(currRuns), seriesnum = runs{outRun};
-    else, seriesnum = runs(outRun);
+    if iscell(currRuns), seriesnum = runs{visitNum}{outRun};
+    else, seriesnum = runs{visitNum}(outRun);
     end
 end
