@@ -28,7 +28,7 @@ if nargin < 2, condaenv = 'base'; end
 if nargin < 4, varargin = {}; end
 
 if runFsl
-    [s, w] = runFslCommand(rap,pycmd,{},['shellprefix',[condasetup 'conda activate ' condaenv ';'] varargin]);
+    [s, w] = runFslCommand(rap,pycmd,{},'shellprefix',[condasetup 'conda activate ' condaenv ';'],varargin{:});
 else
     [s, w] = shell(pycmd,'shellprefix',[condasetup 'conda activate ' condaenv ';'],varargin{:});
 end
