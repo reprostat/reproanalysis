@@ -1,7 +1,7 @@
 {
-    "name": "reproanalysis",
-    "version": "0.0.1",
-    "date": "Sep 2022",
+    "name": "Reproducibility Analysis",
+    "version": "0.1.0",
+    "date": "Jun 2023",
    	"manuscriptRef": "coming. coming. coming",
     "manuscriptURL": "http:\/\/doi.org",
     "url": "http:\/\/reproanalysis.github.io",
@@ -16,10 +16,11 @@
     ],
     "keywords": [
         "neuroimaging",
-        "multimodal",
+        "OCTAVE",        
         "MATLAB",
         "workflow",
-        "pipeline"
+        "pipeline",
+        "reproducibility"
     ],
     "license": "MIT",
     "upload_type": "software",
