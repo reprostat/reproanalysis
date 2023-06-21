@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
     <header domain='subject' desc='SPM "Unified Segmentation and Normalisation' modality='MRI'/>
-            
+
     <hpc>
         <timeBase>10</timeBase>
         <memoryBase>2</memoryBase>
     </hpc>
 
     <permanenceofoutput>2</permanenceofoutput>
-    
+
     <settings>
         <biascorrection>
             <biasfwhm desc='FWHM of the bias field'>60</biasfwhm>
@@ -28,8 +28,8 @@
             <mrf desc='Markov Random Field argument'>1</mrf>
             <write desc='Write out deformation fields [forward inverse]?'>1 1</write>
             <cleanup desc='Extracting the brain from segmented images'>0</cleanup>
-        </normalisation>        
-        
+        </normalisation>
+
         <writecombined desc='Write outputs masked with a (combination of) thresholded tissue probabilities, [1x6] array of thresholds, negative threshold means upper threshold, zero means exclusion'></writecombined>
         <writenormalised>
             <method desc="Normalisation method to apply, 'none' omits this step, 'push' and 'pull are only interpreted SPM12 (they give the same output in SPM8)" options='push|pull|none' ui='optionlist'>pull</method>
@@ -37,20 +37,22 @@
             <preserve desc='0 = preserve concentration (unmodulated), 1 = preserved total (modulated) - only for SPM12/push'>1</preserve>
         </writenormalised>
     </settings>
-    
+
     <inputstreams>
         <stream domain="subject" tobemodified="0">structural</stream>
-        <stream domain="subject" tobemodified="0" isessential="0">t2</stream> 
+        <stream domain="subject" tobemodified="0" isessential="0">t2</stream>
+        <stream domain="subject" tobemodified="0" isessential="0">pd</stream>
     </inputstreams>
-    
+
     <outputstreams>
         <stream domain="subject" isrenameable="1">structural</stream>
         <stream domain="subject" isrenameable="1">t2</stream>
-        
+        <stream domain="subject" isrenameable="1">pd</stream>
+
         <stream domain="subject">segmentation_estimates</stream>
         <stream domain="subject">forward_deformationfield</stream>
         <stream domain="subject">inverse_deformationfield</stream>
-        
+
         <stream domain="subject">native_segmentations</stream>
         <stream domain="subject">dartelimported_segmentations</stream>
         <stream domain="subject">normaliseddensity_segmentations</stream>

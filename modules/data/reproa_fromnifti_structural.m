@@ -122,10 +122,16 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
             allseries = getSeries(rap.acqdetails.subjects(subj).structural);
             allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(contains(allstreams,'header')) = [];
             sfxs = strsplit(getSetting(rap,'sfxformodality'),':');
-            if numel(sfxs) ~= numel(allstreams), logging.error('streams and suffices do not match'); end
+
+            % correspond data
             noData = cellfun(@(s) ~any(contains({allseries.fname},s)), sfxs);
             rap.tasksettings.reproa_fromnifti_structural.sfxformodality = strjoin(sfxs(~noData),':');
-            for s = find(noData)
+
+            % correspond outputstreams
+            streamSFX = sfxs(~noData); streamSFX{strcmp(streamSFX,'T1w')} = 'structural'; streamSFX = lower(regexprep(streamSFX,'w$',''));
+            noSFX = cellfun(@(s) ~any(contains(streamSFX,s)), allstreams)
+
+            for s = find(noSFX)
                 rap = renameStream(rap,rap.tasklist.currenttask.name,'output',allstreams{s},'');
                 logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,allstreams{s});
                 rap = renameStream(rap,rap.tasklist.currenttask.name,'output',[allstreams{s} '_header'],'');

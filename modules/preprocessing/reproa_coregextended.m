@@ -11,6 +11,7 @@ function rap = reproa_coregextended(rap,command,varargin)
     localPath = getPathByDomain(rap,rap.tasklist.currenttask.domain,cell2mat(varargin));
     if hasStream(rap,'meanfmri'), coregStream = 'meanfmri'; bTimg = 'EPI'; otherDomain = 'fmrirun';
     elseif hasStream(rap,'t2'), coregStream = 't2'; bTimg = 'T2'; otherDomain = 'subject'
+    elseif hasStream(rap,'pd'), coregStream = 'pd'; bTimg = 'PD'; otherDomain = 'subject'
     end
     otherStream = setdiff({rap.tasklist.currenttask.inputstreams.name},{'structural' coregStream},'stable'); % first other is used for diagnostics
 
