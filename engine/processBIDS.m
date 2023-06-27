@@ -159,6 +159,10 @@ for subj = SUBJ
                     rap = addRun(rap, 'fmri', taskname);
 
                     image = bids.query(BIDS, 'data', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'bold', 'task', task{1});
+                    if isempty(image)
+                        logging.warning('subj-%s/ses-%s has no %s',subj{1},SESS{sessInd},task{1});
+                        continue;
+                    end
                     hdr = bids.query(BIDS, 'metadata', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'bold', 'task', task{1}); if isempty(fieldnames(hdr)), hdr = []; end
                     eventfile = bids.query(BIDS, 'data', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'events', 'task', task{1});
 
