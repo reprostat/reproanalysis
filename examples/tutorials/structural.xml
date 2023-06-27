@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <!-- data -->
+    <module><name>reproa_fromnifti_structural</name></module>
+
+    <!-- preprocessing -->
+    <module><name>reproa_coregextended_t2</name></module>
+    <module><name>reproa_segment</name></module>
+    <module><name>reproa_dartelcreatetemplate</name></module>
+    <!-- module><name>reproa_normwrite_segmentations</name></module>
+    <module><name>reproa_normalisebytotalgrey</name></module -->
+</rap>
