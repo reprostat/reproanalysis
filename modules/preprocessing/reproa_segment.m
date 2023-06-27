@@ -231,8 +231,8 @@ function diagnostics(rap,subj)
     [~, indGMWM] = ismember({'GM' 'WM'},fieldnames(nativeSeg));
 
     % Only for GM WM
-    registrationCheck(rap,'subject',1,Simg{1},nativeSeg.GM{1},nativeSeg.WM{1},'mode','combined');
-    registrationCheck(rap,'subject',1,Timg,normSeg.GM{1},normSeg.WM{1},'mode','combined');
+    registrationCheck(rap,'subject',subj,Simg{1},nativeSeg.GM{1},nativeSeg.WM{1},'mode','combined');
+    registrationCheck(rap,'subject',subj,Timg,normSeg.GM{1},normSeg.WM{1},'mode','combined');
 
     %% Another diagnostic image, looking at how well the segmentation worked...
     Pthresh = 0.95;

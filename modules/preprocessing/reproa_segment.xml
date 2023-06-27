@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
-    <header domain='subject' desc='SPM "Unified Segmentation and Normalisation' modality='MRI'/>
+    <header domain='subject' desc='SPM "Unified Segmentation and Normalisation"' modality='MRI'/>
 
     <hpc>
         <timeBase>10</timeBase>

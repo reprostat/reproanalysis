@@ -125,7 +125,7 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
 
             % correspond data
             noData = cellfun(@(s) ~any(contains({allseries.fname},s)), sfxs);
-            rap.tasksettings.reproa_fromnifti_structural.sfxformodality = strjoin(sfxs(~noData),':');
+            rap.tasksettings.reproa_fromnifti_structural(rap.tasklist.currenttask.index).sfxformodality = strjoin(sfxs(~noData),':');
 
             % correspond outputstreams
             streamSFX = sfxs(~noData); streamSFX{strcmp(streamSFX,'T1w')} = 'structural'; streamSFX = lower(regexprep(streamSFX,'w$',''));
