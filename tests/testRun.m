@@ -1,6 +1,7 @@
 function testRun(testScript,taskList,varargin)
 
     argParse = inputParser;
+    argParse.addParameter('subset',{},@iscell);
     argParse.addParameter('deletePrevious',false,@(x) islogical(x) || isnumeric(x));
     argParse.addParameter('whereToProcess','localsingle',@(x) ischar(x) && ismember(x, {'localsingle' 'batch'}));
     argParse.parse(varargin{:});
@@ -13,7 +14,7 @@ function testRun(testScript,taskList,varargin)
     rap.directoryconventions.rawdatadir = fullfile(rap.directoryconventions.rawdatadir, dataName);
     rap.directoryconventions.analysisid = testScript;
 
-    downloadData(rap, dataName);
+    downloadData(rap, dataName, argParse.Results.subset);
 
     analysisDir = fullfile(rap.acqdetails.root,rap.directoryconventions.analysisid);
     if argParse.Results.deletePrevious && exist(analysisDir,'dir')
