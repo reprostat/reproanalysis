@@ -1,6 +1,7 @@
 classdef hashClass < handle
     properties
         hashFunc = 'MD5'
+        buffSize = 1024*1024; % 1MB
         maximumRetry = 5;
     end
 
@@ -22,19 +23,27 @@ classdef hashClass < handle
 
         function update(this,data)
             if ischar(data) && exist(data,'file')
-                this.md.update(uint8(fileRetrieve(data,this.maximumRetry,'content')));
+                for r = 1:this.maximumRetry
+                    fid = fopen(data);
+                    if fid ~= -1, break;
+                    else, pause(1);
+                    end
+                end
+                if fid == -1, logging.error('Could not find or read %s', data); end
+                while ~feof(fid)
+                    [currData,len] = fread(fid, this.buffSize, '*uint8');
+                    if ~isempty(currData)
+                        this.md.update(currData, 0, len);
+                    end
+                end
+                fclose(fid);
             else
-                this.md.update(uint8(data));
+                this.md.update(typecast(uint16(data),'uint8'));
             end
         end
 
         function resp = getHash(this)
-            if this.isOctave % OCTAVE
-                o = javaObject('java.math.BigInteger',1,this.md.digest);
-            else % MATLAB
-                o = java.math.BigInteger(1,this.md.digest);
-            end
-            resp = o.toString(16);
+            resp = lower(reshape(dec2hex(typecast(this.md.digest(),'uint8'))',1,[]));
         end
     end
 

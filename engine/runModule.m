@@ -80,16 +80,22 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
                     logging.info('Input - %s',destStreamName);
 
+                    % Check hashes at source
+                    srcHash = cellfun(@(f) srcStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
+                    fileHash = cellfun(@(f) getHashByFiles(srcStream.(f).files,'localroot',srcStreamPath), fieldnames(srcStream),'UniformOutput',false);
+                    if ~all(strcmp(srcHash,fileHash))
+                        logging.error('\tInput has changed at source %s',srcrap.tasklist.currenttask.name);
+                    end
+
                     % Compare hashes of input at source and destination
                     if exist(destStreamDescriptor,'file')
                         destStream = readStream(destStreamDescriptor,rap.options.maximumretry);
-                        srcHash = cellfun(@(f) srcStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
                         destHash = cellfun(@(f) destStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
                         try fileHash = cellfun(@(f) getHashByFiles(srcStream.(f).files,'localroot',destStreamPath), fieldnames(srcStream),'UniformOutput',false);
-                        catch, logging.warning('\tInput cannot be found - re-copying'); fileHash = repmat({''},size(destHash));
+                        catch, fileHash = repmat({''},size(destHash));
                         end
                         if all(strcmp(destHash,fileHash)) && all(strcmp(srcHash,destHash)), continue;
-                        else, logging.warning('\tInput has changed - re-copying');
+                        else, logging.warning('\tInput cannot be found or has changed - re-copying');
                         end
                     else, logging.info('\tretrieving');
                     end
