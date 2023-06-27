@@ -129,7 +129,7 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
 
             % correspond outputstreams
             streamSFX = sfxs(~noData); streamSFX{strcmp(streamSFX,'T1w')} = 'structural'; streamSFX = lower(regexprep(streamSFX,'w$',''));
-            noSFX = cellfun(@(s) ~any(contains(streamSFX,s)), allstreams)
+            noSFX = cellfun(@(s) ~any(contains(streamSFX,s)), allstreams);
 
             for s = find(noSFX)
                 rap = renameStream(rap,rap.tasklist.currenttask.name,'output',allstreams{s},'');
