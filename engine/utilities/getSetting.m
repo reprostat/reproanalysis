@@ -1,4 +1,4 @@
-function [val, index] = getSetting(rap,settingstring,varargin)
+function [val, index, attr] = getSetting(rap,settingstring,varargin)
 % Obtain (data-specific) task setting while running the task
 % [val, index] = getSetting(rap,settingstring);
 % [val, index] = getSetting(rap,settingstring,index);
@@ -9,6 +9,14 @@ function [val, index] = getSetting(rap,settingstring,varargin)
         val = [];
         return
     end
+
+    % Read spcification
+    if isfield(rap.tasklist.currenttask,'aliasfor') && ~isempty(rap.tasklist.currenttask.aliasfor)
+        spec = readxml([rap.tasklist.currenttask.aliasfor '.xml']);
+    else
+        spec = readxml([regexp(rap.tasklist.currenttask.name,'.*(?=_[0-9]{5})','match','once') '.xml']);
+    end
+    spec = spec.settings;
 
     % Parse setting path
     settingpath = strsplit(settingstring,'.');
@@ -23,6 +31,19 @@ function [val, index] = getSetting(rap,settingstring,varargin)
             val = [];
             return
         end
+        if isfield(spec,f{1})
+            spec = spec.(f{1});
+        elseif isfield(spec,'CONTENT') && isfield(spec.CONTENT,f{1})
+            spec = spec.CONTENT.(f{1});
+        else
+            spec = [];
+        end
+    end
+    if isstruct(spec) && isfield(spec,'ATTRIBUTE')
+        attr = spec.ATTRIBUTE;
+    else
+        logging.warning('Attribute for setting <%s> is not specified.',settingstring);
+        attr = [];
     end
 
     if nargin > 2 % index
