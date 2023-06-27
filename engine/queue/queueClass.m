@@ -39,8 +39,12 @@ classdef queueClass < statusClass
         end
 
         function close(this)
-            logger.info('Queue is closed!');
-            this.isOpen = false;
+            logging.info('Queue is closed!');
+
+            % Restore logfile
+            global reproacache; reproa = reproacache('reproa');
+            global reproaworker
+            reproaworker.logFile = spm_file(reproaworker.logFile,'path',reproa.configdir);
         end
 
         function set.taskQueue(this,j)

@@ -132,11 +132,15 @@ classdef batchClass < queueClass
                 this.pStatus = this.STATUS('finished');
                 logging.info('Task queue is finished!');
             end
+            this.close(false);
         end
 
-        function close(this)
-            logging.info('Cancelling jobs...');
-            cellfun(@(j) j.cancel(), queue.pool.jobs);
+        function close(this,doCloseJobs)
+            if nargin < 2 || doCloseJobs
+                logging.info('Cancelling jobs...');
+                cellfun(@(j) j.cancel(), queue.pool.jobs);
+            end
+            close@queueClass(this);
         end
 
         function p = getAdditionalPaths(this)
