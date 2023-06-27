@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header domain='study' desc='SPM DARTEL - create template' modality='MRI'/>
+
+    <hpc>
+        <timeBase>10</timeBase>
+        <memoryBase>2</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>2</permanenceofoutput>
+
+    <settings>
+        <rform desc="Regularisation type" options="LinearElasticEnergy|MembraneEnergy|BendingEnergy" ui="optionlist">LinearElasticEnergy</rform>
+        <exclude desc="list of subjects to exclude from template generation (cell array or colon-seperated list of subject names)"></exclude>
+    </settings>
+
+    <inputstreams>
+        <stream domain="study" isessential="0">darteltemplate</stream>
+        <stream domain="subject" tobemodified="0">dartelimported_segmentations</stream>
+    </inputstreams>
+
+    <outputstreams>
+        <stream domain="study">darteltemplate</stream>
+        <stream domain="study">dartelflowfield</stream>
+        <stream domain="study">darteltemplatetomni</stream>
+    </outputstreams>
+</rap>
