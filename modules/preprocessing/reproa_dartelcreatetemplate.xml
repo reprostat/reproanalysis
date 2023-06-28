@@ -21,7 +21,7 @@
 
     <outputstreams>
         <stream domain="study">darteltemplate</stream>
-        <stream domain="study">dartelflowfield</stream>
         <stream domain="study">darteltemplatetomni</stream>
+        <stream domain="subject">dartelflowfield</stream>
     </outputstreams>
 </rap>
