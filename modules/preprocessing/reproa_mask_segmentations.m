@@ -3,7 +3,7 @@
 % 2) Threshold them at one of the 3 different levels (zero level, strict [e.g. 99%],
 % or an exclusive [highest tissue probability wins])
 
-function rap = reproa_mask_segmentation(rap,command,subj)
+function rap = reproa_mask_segmentations(rap,command,subj)
 
 switch command
     case 'doit'
