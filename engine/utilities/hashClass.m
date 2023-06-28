@@ -1,6 +1,6 @@
 classdef hashClass < handle
     properties
-        hashFunc = 'MD5'
+        hashFunc = 'MD5' % MD5 SHA-1 SHA-256
         buffSize = 1024*1024; % 1MB
         maximumRetry = 5;
     end
@@ -21,8 +21,8 @@ classdef hashClass < handle
             end
         end
 
-        function update(this,data)
-            if ischar(data) && exist(data,'file')
+        function update(this,data,forceString)
+            if (nargin < 3 || ~forceString) && ischar(data) && exist(data,'file')
                 for r = 1:this.maximumRetry
                     fid = fopen(data);
                     if fid ~= -1, break;

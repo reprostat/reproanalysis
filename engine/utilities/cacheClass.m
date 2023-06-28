@@ -83,9 +83,8 @@ classdef cacheClass < containers.Map
 end
 
 function resp = doHash(hashFunc,str)
-    if isOctave()
-        resp = hash(hashFunc,str);
-    else
-        resp = char(mlreportgen.utils.hash(str));
-    end
+    md = hashClass();
+    md.hashFunc = hashFunc;
+    md.update(str,true);
+    resp = char(md.getHash());
 end
