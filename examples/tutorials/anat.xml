@@ -6,7 +6,8 @@
     <!-- preprocessing -->
     <module><name>reproa_coregextended_t2</name></module>
     <module><name>reproa_segment</name></module>
+    <module><name>reproa_stat_segmentations</name></module>
     <module><name>reproa_dartelcreatetemplate</name></module>
     <module><name>reproa_dartelnormwrite_segmentations</name></module>
-    <!-- module><name>reproa_normalisebytotalgrey</name></module -->
+    <module><name>reproa_normalise_segmentations</name></module>
 </rap>
