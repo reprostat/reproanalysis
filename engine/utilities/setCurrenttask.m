@@ -89,6 +89,9 @@ if argParse.Results.task
     rap.tasklist.currenttask.mfile =            funcname;
     rap.tasklist.currenttask.index =            module.index;
     rap.tasklist.currenttask.tasknumber =       indTask;
+    if isfield(module,'branchid')
+        rap.tasklist.currenttask.branchid =     module.branchid;
+    end
     rap.tasklist.currenttask.domain =           module.header.domain;
     rap.tasklist.currenttask.modality =         modality;
 
