@@ -21,14 +21,6 @@ function rap = reproa_segment(rap, command, subj)
             cfgBiascorrection = getSetting(rap,'biascorrection');
 
             cfgSegmentation = getSetting(rap,'segmentation');
-            if ~exist(cfgSegmentation.tpm, 'file')
-                logging.warning('Specified TPM %s not found.\n\tTrying SPM12 default.', cfgSegmentation.tpm);
-                cfgSegmentation.tpm = fullfile(spm('dir'),'tpm','TPM.nii');
-            end
-            if ~exist(cfgSegmentation.tpm, 'file')
-                logging.warning('Specified TPM %s not found.\n\tTrying SPM8 default.', cfgSegmentation.tpm);
-                cfgSegmentation.tpm = fullfile(spm('dir'),'toolbox','Seg','TPM.nii');
-            end
             if ~exist(cfgSegmentation.tpm, 'file'), logging.error('Specified TPM %s not found.', cfgSegmentation.tpm); end
             logging.info('Segmenting using TPMs from %s.', cfgSegmentation.tpm);
             cfgSegmentation.native = [1 1]; % [native DARTEL_imported]
@@ -206,6 +198,19 @@ function rap = reproa_segment(rap, command, subj)
             diagnostics(rap,subj);
 
         case 'checkrequirements'
+            % Template
+            tpm = getSetting(rap,'segmentation.tpm');
+            if ~exist(tpm, 'file')
+                logging.warning('Specified TPM %s not found.\n\tTrying SPM12 default.', tpm);
+                tpm = fullfile(spm('dir'),'tpm','TPM.nii');
+            end
+            if ~exist(tpm, 'file')
+                logging.warning('Specified TPM %s not found.\n\tTrying SPM8 default.', tpm);
+                tpm = fullfile(spm('dir'),'toolbox','Seg','TPM.nii');
+            end
+            if ~exist(tpm, 'file'), logging.error('Specified TPM %s not found.', tpm); end
+            rap.tasksettings.(regexp(rap.tasklist.currenttask.name,'.*(?=_[0-9]{5})','match','once'))(rap.tasklist.currenttask.index).segmentation.tpm = tpm;
+
             % Remove "input as output" stream not to be created
             if strcmp(getSetting(rap,'writenormalised.method'),'none') && isempty(getSetting(rap,'writecombined'))
                 for input = {rap.tasklist.currenttask.inputstreams.name}

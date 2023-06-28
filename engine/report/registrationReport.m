@@ -11,6 +11,7 @@ function rap = registrationReport(rap,varargin)
 
     % Find out what streams we should normalise
     streamToReport = {rap.tasklist.currenttask.outputstreams.name};
+    if iscell(streamToReport{1}), streamToReport{1} = streamToReport{1}{end}; end % renamed -> used original
     streamToReport(strcmp(streamToReport,'structural')) = []; % avoid double-reporting structural (see also line 15)
     if ~isempty(getSetting(rap,'diagnostic.streamInd'))
         streamToReport = streamToReport(getSetting(rap,'diagnostic.streamInd'));
@@ -19,13 +20,25 @@ function rap = registrationReport(rap,varargin)
     if isempty(streamToReport), return; end
 
     % Compile list of filename patterns to images
-    % - we assume (normalised) structural is the default to test against
-    imgToReport = {...
-            [streamToReport{1} ' to structural'] strjoin(['^diagnostic_.*' spm_file(getFileByStream(rap,domain,indices,'structural','checkHash',false),'basename') '.*\.jpg$'],'') ...
-            };
+    if hasStream(rap,domain,indices,'structural') % (normalised) structural
+        imgToReport = {...
+                       [streamToReport{1} ' to structural'] ['^diagnostic_.*' spm_file(char(getFileByStream(rap,domain,indices,'structural','checkHash',false)),'basename') '.*\.jpg$'] ...
+                       };
+    else % T1
+        imgToReport = {...
+                       [streamToReport{1} ' to structural'] '^diagnostic_.*T1\.jpg$' ...
+                       };
+    end
+
     for s = streamToReport
+        if iscell(s{1}), s{1} = s{1}{end}; end % renamed -> used original
+        if contains(s{1},'segmentations'), content = {'GM'};
+        else, content = {};
+        end
+        img = getFileByStream(rap,domain,indices,s{1},'content',content,'checkHash',false);
+        if isstruct(img), img = img.(content{1}); end
         imgToReport = [ imgToReport ;...
-            {['structural to ' s{1}]} strjoin(['^diagnostic_.*' spm_file(getFileByStream(rap,domain,indices,s{1},'checkHash',false),'basename') '.*\.jpg$'],'') ...
+            {['structural to ' s{1}]} ['^diagnostic_.*' spm_file(char(img),'basename') '.*\.jpg$'] ...
             ];
     end
 

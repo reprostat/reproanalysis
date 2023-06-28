@@ -4,7 +4,7 @@ function test_LEMON_MRI_structural(rap)
     rap.tasksettings.reproa_coregextended_t2.reorienttotemplate = 1;
 
     rap.tasksettings.reproa_segment.writenormalised.method = 'none';
-%    rap.tasksettings.reproa_normwrite_segmentations.fwhm = 1;
+    rap.tasksettings.reproa_dartelnormwrite_segmentations.fwhm = [1 1 1];
 
     rap = processBIDS(rap);
 
