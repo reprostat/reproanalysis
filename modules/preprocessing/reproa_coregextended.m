@@ -10,8 +10,9 @@ function rap = reproa_coregextended(rap,command,varargin)
     subj = varargin{1};
     localPath = getPathByDomain(rap,rap.tasklist.currenttask.domain,cell2mat(varargin));
     if hasStream(rap,'meanfmri'), coregStream = 'meanfmri'; bTimg = 'EPI'; otherDomain = 'fmrirun';
-    elseif hasStream(rap,'t2'), coregStream = 't2'; bTimg = 'T2'; otherDomain = 'subject'
-    elseif hasStream(rap,'pd'), coregStream = 'pd'; bTimg = 'PD'; otherDomain = 'subject'
+    elseif hasStream(rap,'t2'), coregStream = 't2'; bTimg = 'T2'; otherDomain = 'subject';
+    elseif hasStream(rap,'pd'), coregStream = 'pd'; bTimg = 'PD'; otherDomain = 'subject';
+    elseif hasStream(rap,'flair'), coregStream = 'flair'; bTimg = 'PD'; otherDomain = 'subject'; % PD is the closest to FLAIR
     end
     otherStream = setdiff({rap.tasklist.currenttask.inputstreams.name},{'structural' coregStream},'stable'); % first other is used for diagnostics
 

@@ -42,12 +42,14 @@
         <stream domain="subject" tobemodified="0">structural</stream>
         <stream domain="subject" tobemodified="0" isessential="0">t2</stream>
         <stream domain="subject" tobemodified="0" isessential="0">pd</stream>
+        <stream domain="subject" tobemodified="0" isessential="0">flair</stream>
     </inputstreams>
 
     <outputstreams>
         <stream domain="subject" isrenameable="1">structural</stream>
         <stream domain="subject" isrenameable="1">t2</stream>
         <stream domain="subject" isrenameable="1">pd</stream>
+        <stream domain="subject" isrenameable="1">flair</stream>
 
         <stream domain="subject">segmentation_estimates</stream>
         <stream domain="subject">forward_deformationfield</stream>
