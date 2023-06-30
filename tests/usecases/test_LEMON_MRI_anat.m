@@ -14,6 +14,9 @@ function test_LEMON_MRI_structural(rap)
     rap.tasksettings.reproa_normalise_segmentations.normaliseby = 'each';
     rap.tasksettings.reproa_normalise_segmentations.estimatefrom = 'spm';
 
+    rap = renameStream(rap,'reproa_smooth_00001','input','fmri','normaliseddensity_segmentations');
+    rap.tasksettings.reproa_smooth.FWHM = 8;
+
     rap = processBIDS(rap);
 
     processWorkflow(rap);

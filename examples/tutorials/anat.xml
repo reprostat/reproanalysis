@@ -10,4 +10,5 @@
     <module><name>reproa_dartelcreatetemplate</name></module>
     <module><name>reproa_dartelnormwrite_segmentations</name></module>
     <module><name>reproa_normalise_segmentations</name></module>
+    <module><name>reproa_smooth</name></module>
 </rap>

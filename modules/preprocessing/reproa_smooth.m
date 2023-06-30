@@ -7,13 +7,23 @@ function rap = reproa_smooth(rap,command,varargin)
 
             streams = {rap.tasklist.currenttask.inputstreams.name};
             for streamInd = 1:numel(streams)
-                P = getFileByStream(rap,rap.tasklist.currenttask.domain,indices,streams{streamInd},'streamType','input');
+                % input
+                if iscell(streams{streamInd}), streams{streamInd} = streams{streamInd}{end}; end % renamed -> used original
+                imgs = getFileByStream(rap,rap.tasklist.currenttask.domain,indices,streams{streamInd},'streamType','input'); imgs0 = imgs;
+                if isstruct(imgs), imgs = struct2cell(imgs); imgs = cat(1,imgs{:}); end
 
                 % now smooth
-                outputF = spm_file(P,'prefix','s');
-                arrayfun(@(f) spm_smooth(P{f},outputF{f},getSetting(rap,'FWHM',streamInd)), 1:numel(P));
+                simgs = spm_file(imgs,'prefix','s');
+                arrayfun(@(f) spm_smooth(imgs{f},simgs{f},getSetting(rap,'FWHM',streamInd)), 1:numel(imgs));
 
-                putFileByStream(rap,rap.tasklist.currenttask.domain,indices,streams{streamInd},outputF);
+                % output
+                if isstruct(imgs0)
+                    simgs = struct;
+                    for f = fieldnames(imgs0)'
+                        simgs.(f{1}) = spm_file(imgs0.(f{1}),'prefix','s');
+                    end
+                end
+                putFileByStream(rap,rap.tasklist.currenttask.domain,indices,streams{streamInd},simgs);
             end
 
         case 'checkrequirements'
