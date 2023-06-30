@@ -3,7 +3,7 @@ classdef batchClass < queueClass
     properties % (Access = private)
         pool
         taskFlags % 0 - in queue; job.ID - submitted; -inf - finished; -1 error
-        updateTime = 10 % s to wait for the scheduler to update job states
+        updateTime = 10 % s to wait between job submissions
         waitBeforeNext = 60 % s to wait when no task or worker is available
     end
 
@@ -62,7 +62,7 @@ classdef batchClass < queueClass
                 end
 
                 if isOctave()
-                    nAvailableWorkers = this.pool.numWorkers - this.pool.getJobState('running');
+                    nAvailableWorkers = this.pool.numWorkers - this.pool.getJobState('running') - this.pool.getJobState('pending');
                 else
                     logging.error('NYI');
                 end
@@ -89,10 +89,11 @@ classdef batchClass < queueClass
                     end
                     this.reportTasks('submitted',i);
                     this.taskFlags(i) = j.id;
+
+                    pause(this.updateTime);
                 end
 
                 % Wait before checking
-                pause(this.updateTime);
                 if toWait, pause(this.waitBeforeNext-this.updateTime); end
 
                 % Monitor jobs
