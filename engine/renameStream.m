@@ -10,6 +10,8 @@ function rap = renameStream(rap,taskName,streamType,originalStream,newStream)
     taskName = strjoin(taskName(1:end-1),'_');
     selectTask = strcmp({rap.tasklist.main.name},taskName) & ([rap.tasklist.main.index] == index);
 
+    if ~any(selectTask), logging.error('Task %s_%05d cannot be found',taskName,index); end
+
     if strcmp(originalStream,'append')
         selectStream = numel(rap.tasklist.main(selectTask).([streamType 'streams']))+1;
         newStreamSpec = struct(...
@@ -21,7 +23,7 @@ function rap = renameStream(rap,taskName,streamType,originalStream,newStream)
             'taskindex',[]...
             );
     else
-        selectStream = strcmp({rap.tasklist.main(selectTask).([streamType 'streams']).name},originalStream);
+        selectStream = arrayfun(@(s) any(strcmp(s.name,originalStream)),rap.tasklist.main(selectTask).([streamType 'streams']));
         if ~any(selectStream), logging.error('%s stream %s of task %s not found',streamType,originalStream,rap.tasklist.main(selectTask).name); end
         if ~strcmp(regexp(char(newStream),'(?<=\.).*','match','once'),originalStream) && ... % do not check if it only fully specification
             ~rap.tasklist.main(selectTask).([streamType 'streams'])(selectStream).isrenameable && ...
