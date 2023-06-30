@@ -93,6 +93,8 @@ function [val, index, attr] = getSetting(rap,settingstring,varargin)
             logging.warning('%s(%d) has been requested, but only %d value(s) are defined in the current settings.\n\tThe first value (%0.9g) will be returned.', settingstring, index, numel(val),val{1});
             val = val{1};
         end
+    else
+        index = 1;
     end
 end
 
