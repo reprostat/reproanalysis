@@ -39,11 +39,13 @@ function [val, index, attr] = getSetting(rap,settingstring,varargin)
             spec = [];
         end
     end
-    if isstruct(spec) && isfield(spec,'ATTRIBUTE')
-        attr = spec.ATTRIBUTE;
-    else
-        logging.warning('Attribute for setting <%s> is not specified.',settingstring);
-        attr = [];
+    if nargout > 2
+        if isstruct(spec) && isfield(spec,'ATTRIBUTE')
+            attr = spec.ATTRIBUTE;
+        else
+            logging.warning('Attribute for setting <%s> is not specified.',settingstring);
+            attr = [];
+        end
     end
 
     if nargin > 2 % index
