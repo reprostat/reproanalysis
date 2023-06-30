@@ -58,7 +58,7 @@ function rap = reproa_normwrite(rap,command,varargin)
             for streamInd = 1:numel(streams)
                 if iscell(streams{streamInd}), streams{streamInd} = streams{streamInd}{end}; end % renamed -> used original
                 imgs = getFileByStream(rap,rap.tasklist.currenttask.domain,indices,regexprep(streams{streamInd},'normalised.*(?=_)','native')); imgs0 = imgs;
-                if isstruct(imgs), imgs = cellstr(char(struct2cell(imgs))); end
+                if isstruct(imgs), imgs = struct2cell(imgs); imgs = cat(1,imgs{:}); end
 
                 % delete previous because otherwise nifti write routine doesn't
                 % save disc space when you reslice to a coarser voxel
