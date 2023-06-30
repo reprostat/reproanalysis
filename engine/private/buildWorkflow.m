@@ -43,7 +43,9 @@ function rap = buildWorkflow(rap,varargin)
             if any(inputstream.name == '.'), inputstream.name = regexp(inputstream.name,'^.*(?=\.)','match','once'); end
 
             if any(sourceToCheck)
-                indSource = find(arrayfun(@(i) sourceToCheck(i) && ~isempty(rap.tasklist.main(i).outputstreams) && any(strcmp(cellstr({rap.tasklist.main(i).outputstreams.name}),inputstream.name)), 1:indTask-1),1,'last');
+
+
+                indSource = find(arrayfun(@(i) sourceToCheck(i) && ~isempty(rap.tasklist.main(i).outputstreams) && any(arrayfun(@(s) any(strcmp(s.name,inputstream.name)),rap.tasklist.main(i).outputstreams)), 1:indTask-1),1,'last');
             end
 
             if isempty(indSource) && ~isempty(rap.acqdetails.input.remotepipeline(1).path) % Check remote
