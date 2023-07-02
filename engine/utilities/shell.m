@@ -74,7 +74,7 @@ function [s,w] = shell(cmd,varargin)
 
     % - ln returns s=1 on "file exists" -- this shouldn't be treated as
     % an error when using the -f option (and aas_retrieve_intputs does)
-    if contains(cmd,'ln -f') && contains(w,'File exists'); s = 0; w = ''; end
+    if lookFor(cmd,'ln -f') && lookFor(w,'File exists'); s = 0; w = ''; end
 
     if ~s
         %% Process output if we're in non-quiet mode
@@ -95,10 +95,10 @@ function [s,w] = shell(cmd,varargin)
         l = textscan(w,'%s','delimiter',char(10)); l = l{1};
 
         % strip off "<shell>: errors" at start (see http://www.mathworks.com/support/solutions/data/1-18DNL.html?solution=1-18DNL)
-        toRem = contains(l,'mathworks'); if any(toRem), l(toRem) = []; end
+        toRem = lookFor(l,'mathworks'); if any(toRem), l(toRem) = []; end
 
         % put the last shell error to the last
-        toShow = find(contains(l,'tcsh:') | contains(l,'/bin/sh:') | contains(l,'/bin/bash:'),1,'last');
+        toShow = find(lookFor(l,'tcsh:') | lookFor(l,'/bin/sh:') | lookFor(l,'/bin/bash:'),1,'last');
         if ~isempty(toShow), l = l([toShow+1:end toShow]); end
 
         w = sprintf('%s\n',l{:});

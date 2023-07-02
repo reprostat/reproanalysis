@@ -164,7 +164,7 @@ function [h f] = getContextmenuCallback(h,menuPath)
     for i = 1:numel(menuPath)
         ch = get(h,'children');
         l = get(ch,'label');
-        h = ch(contains(l,menuPath{i}));
+        h = ch(lookFor(l,menuPath{i}));
     end
 
     f = get(h,'callback');

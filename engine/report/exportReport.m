@@ -15,7 +15,7 @@ function exportReport(studyPath, target)
 
     reportFields = fieldnames(rap.report);
 
-    for repDir = reshape(reportFields(contains(fieldnames(rap.report),'Dir')),1,[])
+    for repDir = reshape(reportFields(lookFor(fieldnames(rap.report),'Dir')),1,[])
         dirMake(fullfile(strrep(rap.report.(repDir{1}),oldRoot,target)));
     end
 
@@ -24,7 +24,7 @@ function exportReport(studyPath, target)
     if ~isempty(rap.report.summaries), topHMLSs = [topHMLSs rap.report.summaries(:,1)']; end
 
     % HTMLs in subfolders
-    subHTMLs = reportFields(contains(reportFields,'(con[1-9])|(sub[1-9])','regularExpression',true))';
+    subHTMLs = reportFields(lookFor(reportFields,'(con[1-9])|(sub[1-9])','regularExpression',true))';
 
     for html = [topHMLSs subHTMLs]
         switch html{1}

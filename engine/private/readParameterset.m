@@ -16,7 +16,7 @@ if isstruct(node)
                 switch attr.ui
                     case {'text' 'dir' 'dir_allowwildcards' 'dir_part_allowwildcards' 'dir_part' 'file'}
                         node = char(node);
-                        if contains(node,pathsep), node = strsplit(node,pathsep); end
+                        if lookFor(node,pathsep), node = strsplit(node,pathsep); end
                         % TODO
                         %                     case {'dir_list','optionlist'}
                         %                     case {'structarray'}

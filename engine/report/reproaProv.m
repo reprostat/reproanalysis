@@ -385,7 +385,7 @@ classdef reproaProv < handle
 
             ind = [];
             if ~isempty(idName)
-                ind = find(contains(cellfun(@(id) id.id, this.IDs, 'UniformOutput',false),idName));
+                ind = find(lookFor(cellfun(@(id) id.id, this.IDs, 'UniformOutput',false),idName));
                 idNum = numel(ind);
             else
                 ind = 1:numel(this.IDs);

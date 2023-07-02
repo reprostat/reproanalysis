@@ -33,12 +33,12 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
                 if isempty(conFiles{1}), continue; end
                 statMinMax = dlmread(conFiles{endsWith(conFiles,'txt')});
                 addReport(rap,reportStore,sprintf('Range of statistics: %1.3f - %1.3f',statMinMax));
-                rap = addReportMedia(rap,reportStore,conFiles(contains(conFiles,'table')),'scaling',1/3,'displayFileName',false);
-                rap = addReportMedia(rap,reportStore,conFiles(contains(conFiles,'overlay')),'scaling',1/3,'displayFileName',false);
+                rap = addReportMedia(rap,reportStore,conFiles(lookFor(conFiles,'table')),'scaling',1/3,'displayFileName',false);
+                rap = addReportMedia(rap,reportStore,conFiles(lookFor(conFiles,'overlay')),'scaling',1/3,'displayFileName',false);
 
                 % Summary - axial and table(s)
                 addReport(rap,sprintf('con%d',conInd),rap.acqdetails.subjects(subj).subjname);
-                addReportMedia(rap,sprintf('con%d',conInd),conFiles(contains(conFiles,'overlay_3') | contains(conFiles,'table')),'scaling',1/3,'displayFileName',false);
+                addReportMedia(rap,sprintf('con%d',conInd),conFiles(lookFor(conFiles,'overlay_3') | lookFor(conFiles,'table')),'scaling',1/3,'displayFileName',false);
             end
 
         case 'doit'

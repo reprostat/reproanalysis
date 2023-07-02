@@ -32,7 +32,7 @@ function rap = registrationReport(rap,varargin)
 
     for s = streamToReport
         if iscell(s{1}), s{1} = s{1}{end}; end % renamed -> used original
-        if contains(s{1},'segmentations'), content = {'GM'};
+        if lookFor(s{1},'segmentations'), content = {'GM'};
         else, content = {};
         end
         img = getFileByStream(rap,domain,indices,s{1},'content',content,'checkHash',false);
@@ -62,7 +62,7 @@ function rap = registrationReport(rap,varargin)
     end
 
     % Summary - only the first
-    if contains(varargin(selFlag),'addToSummary')
+    if lookFor(varargin(selFlag),'addToSummary')
         % Initialise task report
         taskReportName = rap.tasklist.currenttask.name;
         if ~isempty(rap.tasklist.currenttask.extraparameters)

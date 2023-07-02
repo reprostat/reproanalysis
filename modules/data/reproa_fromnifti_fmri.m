@@ -115,10 +115,10 @@ switch command
 
         if isfield(header{1},'PhaseEncodingDirection') && ~isempty(header{1}.PhaseEncodingDirection(1))
             sliceaxes = {'x' 'y'};
-            ind = cellfun(@(t) contains(header{1}.PhaseEncodingDirection(1),t), sliceaxes);
+            ind = cellfun(@(t) lookFor(header{1}.PhaseEncodingDirection(1),t), sliceaxes);
             if ind == 0 % newer BIDS spec uses this format instead
                 sliceaxes = {'i' 'j'};
-                ind = cellfun(@(t) contains(header{1}.PhaseEncodingDirection(1),t), sliceaxes);
+                ind = cellfun(@(t) lookFor(header{1}.PhaseEncodingDirection(1),t), sliceaxes);
             end
             if ind == 0
                 logging.error('Could not parse PhaseEncodingDirection: %s', header{1}.PhaseEncodingDirection(1));

@@ -126,7 +126,7 @@ function rap = reproa_normwrite(rap,command,varargin)
                 streamToReport = {rap.tasklist.currenttask.outputstreams.name};
                 for s = 1:numel(streamToReport)
                     if iscell(streamToReport{s}), streamToReport{s} = streamToReport{s}{end}; end % renamed -> used original
-                    if contains(streamToReport{s},'segmentations'), content{s} = {'GM'};
+                    if lookFor(streamToReport{s},'segmentations'), content{s} = {'GM'};
                     else, content{s} = {};
                     end
                 end

@@ -7,5 +7,5 @@ thisrun.name = name;
 if numel(rap.acqdetails.([runtype 'runs'])) == 1 && isempty(rap.acqdetails.([runtype 'runs']).name)
     rap.acqdetails.([runtype 'runs']) = thisrun;
 else
-    if ~contains({rap.acqdetails.([runtype 'runs']).name},name), rap.acqdetails.([runtype 'runs'])(end+1) = thisrun; end
+    if ~lookFor({rap.acqdetails.([runtype 'runs']).name},name), rap.acqdetails.([runtype 'runs'])(end+1) = thisrun; end
 end

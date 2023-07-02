@@ -18,7 +18,7 @@ if isstruct(node)
         if isfield(node,'CONTENT')
             attr = node.ATTRIBUTE;
             node = node.CONTENT;
-            %if isa(node,'char') && contains(node,':'), node = strsplit(node,':'); end % TODO central handling while avoiding processing paths
+            %if isa(node,'char') && lookFor(node,':'), node = strsplit(node,':'); end % TODO central handling while avoiding processing paths
             return
         else
             node = rmfield(node,'ATTRIBUTE');

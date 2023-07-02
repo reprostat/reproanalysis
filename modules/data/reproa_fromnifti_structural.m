@@ -5,7 +5,7 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
     switch command
         case 'doit'
             allseries = getSeries(rap.acqdetails.subjects(subj).structural);
-            allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(contains(allstreams,'header')) = [];
+            allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(lookFor(allstreams,'header')) = [];
             sfxs = strsplit(getSetting(rap,'sfxformodality'),':');
 
             for m = 1:numel(sfxs)
@@ -120,16 +120,16 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
             end
         case 'checkrequirements'
             allseries = getSeries(rap.acqdetails.subjects(subj).structural);
-            allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(contains(allstreams,'header')) = [];
+            allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(lookFor(allstreams,'header')) = [];
             sfxs = strsplit(getSetting(rap,'sfxformodality'),':');
 
             % correspond data
-            noData = cellfun(@(s) ~any(contains({allseries.fname},s)), sfxs);
+            noData = cellfun(@(s) ~any(lookFor({allseries.fname},s)), sfxs);
             rap.tasksettings.(regexp(rap.tasklist.currenttask.name,'.*(?=_[0-9]{5})','match','once'))(rap.tasklist.currenttask.index).sfxformodality = strjoin(sfxs(~noData),':');
 
             % correspond outputstreams
             streamSFX = sfxs(~noData); streamSFX{strcmp(streamSFX,'T1w')} = 'structural'; streamSFX = lower(regexprep(streamSFX,'w$',''));
-            noSFX = cellfun(@(s) ~any(contains(streamSFX,s)), allstreams);
+            noSFX = cellfun(@(s) ~any(lookFor(streamSFX,s)), allstreams);
 
             for s = find(noSFX)
                 rap = renameStream(rap,rap.tasklist.currenttask.name,'output',allstreams{s},'');

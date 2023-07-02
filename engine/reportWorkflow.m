@@ -45,12 +45,12 @@ function reportWorkflow(study,tasksToReport)
     rap.report.sub0.fname = spm_file(rap.report.main.fname,'suffix','_subjects');
     rap.report.subjDir = fullfile(fileparts(rap.report.main.fname),'report_subjects'); dirMake(rap.report.subjDir);
     rap.report.summaries = {};
-    hasFirstlevelMaps = any(contains(tasksToReport,'firstlevelthreshold'));
-    if any(contains(tasksToReport,'realign'))
+    hasFirstlevelMaps = any(lookFor(tasksToReport,'firstlevelthreshold'));
+    if any(lookFor(tasksToReport,'realign'))
         rap.report.moco.fname = spm_file(rap.report.main.fname,'suffix','_moco');
         rap.report.summaries = [rap.report.summaries; {'moco' 'Motion correction summary'}];
     end
-    if any(contains(tasksToReport,'normwrite'))
+    if any(lookFor(tasksToReport,'normwrite'))
         rap.report.norm.fname = spm_file(rap.report.main.fname,'suffix','_norm');
         rap.report.norm.tasks = {};
         rap.report.summaries = [rap.report.summaries; {'norm' 'Registration summary'}];
@@ -60,7 +60,7 @@ function reportWorkflow(study,tasksToReport)
         rap.report.conDir = fullfile(fileparts(rap.report.main.fname),'report_firstlevel'); dirMake(rap.report.conDir);
         rap.report.summaries = [rap.report.summaries; {'con0' 'First-level results'}];
     end
-    if any(contains(tasksToReport,'epochs'))
+    if any(lookFor(tasksToReport,'epochs'))
         rap.report.er.fname = spm_file(rap.report.main.fname,'suffix','_meeger');
         rap.report.summaries = [rap.report.summaries; {'er' 'M/EEG epoch summary'}];
     end
@@ -84,7 +84,7 @@ function reportWorkflow(study,tasksToReport)
         logging.info('Fetching report for %s...',taskReportName);
 
         deps = getDependencyByDomain(rap,rap.tasklist.main(indTask).header.domain); % get all instances required by the study (destination domain)
-        inRun = contains(rap.tasklist.main(indTask).header.domain,'run');
+        inRun = lookFor(rap.tasklist.main(indTask).header.domain,'run');
 
         for depInd = 1:size(deps,1) % iterate through all instances
             if size(deps,2) == 0
@@ -131,7 +131,7 @@ function reportWorkflow(study,tasksToReport)
     for subj = 1:getNByDomain(rap,'subject'), rap = addReport(rap,sprintf('sub%d',subj),'EOF'); end
     for s = 1:size(rap.report.summaries,1), rap = addReport(rap,rap.report.summaries{s,1},'EOF'); end
     if hasFirstlevelMaps
-        conReports = fieldnames(rap.report); conReports = conReports(contains(conReports,'con[1-9]','regularExpression',true));
+        conReports = fieldnames(rap.report); conReports = conReports(lookFor(conReports,'con[1-9]','regularExpression',true));
         for con = reshape(conReports,1,[]), rap = addReport(rap,con{1},'EOF'); end
     end
 

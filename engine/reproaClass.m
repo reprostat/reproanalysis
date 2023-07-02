@@ -306,7 +306,7 @@ classdef reproaClass < toolboxClass
                 for p = fieldnames(tbx.extraparameters)
                     val = tbx.extraparameters.(p{1});
                     if isempty(val), continue; end
-                    if ischar(val) && contains(val,pathsep), val = strsplit(val,pathsep); end
+                    if ischar(val) && lookFor(val,pathsep), val = strsplit(val,pathsep); end
                     params{end+1} = p{1};
                     params{end+1} = val;
                 end

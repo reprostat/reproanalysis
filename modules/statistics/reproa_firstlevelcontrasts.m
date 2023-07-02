@@ -59,7 +59,7 @@ function rap = reproa_firstlevelcontrasts(rap,command,subj)
                         for origReg = unique(cellfun(@(s) regexp(s,'(?<=[0-9]\) ).*','match'), SPM.xX.name(SPM.xX,iC)),'stable')
                             contrasts(end+1)= struct(...
                                 'format','uniquebyrun',...
-                                'vector',contains(SPM.xX.name,origReg{1}),...
+                                'vector',lookFor(SPM.xX.name,origReg{1}),...
                                 'session',[],...
                                 'type','T',...
                                 'name',sprintf('%s-o-baseline',SPM.xX.name{SPM.xX.iC(cInd)})...
@@ -105,7 +105,7 @@ function rap = reproa_firstlevelcontrasts(rap,command,subj)
                                         convec = [convec runCon(indRun)*contrasts(cInd).vector];
                                     end
                                 elseif ischar(contrasts(cInd).vector) || iscell(contrasts(cInd).vector) % (cell)string
-                                    regInRun = SPM.xX.name(contains(SPM.xX.name, sprintf('Sn(%d)',indRunInSPM)));
+                                    regInRun = SPM.xX.name(lookFor(SPM.xX.name, sprintf('Sn(%d)',indRunInSPM)));
                                     if numel(regInRun) ~= nRegInRun, logging.error('Mismatch between regressors and number of columns in run %d', indRun); end % this should never been triggered
                                     convec = [convec contrastSpecificationToContrastVector(regInRun,contrasts(cInd).vector,runCon(indRun))];
                                 else
@@ -198,8 +198,8 @@ function convec = contrastSpecificationToContrastVector(regNames,conSpec,conWeig
                 nMatch = 1;
             end
 
-            match = find(contains(regNames,regPttrn));
-            if isempty(match), match = find(contains(regNames,regPttrn(1:end-1))); end % covariates
+            match = find(lookFor(regNames,regPttrn));
+            if isempty(match), match = find(lookFor(regNames,regPttrn(1:end-1))); end % covariates
             if isempty(match), logging.error('Model (in run) has no reggessor matching %s', regPttrn); end
 
             % Identify the nMatch-th match within each run
