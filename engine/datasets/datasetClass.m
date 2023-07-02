@@ -39,8 +39,8 @@ classdef datasetClass
                         logging.error('AWS CLI is not installed. See <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI Installation</a>' );
                     end
                     % Retrieve common files (if exist)
-                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude ''*'' --include ''task-*'' --no-sign-request',this.URL,this.tmpdir,this.ID));
-                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude ''*'' --include ''dwi*'' --no-sign-request',this.URL,this.tmpdir,this.ID));
+                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "task-*" --no-sign-request',this.URL,this.tmpdir,this.ID));
+                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "dwi*" --no-sign-request',this.URL,this.tmpdir,this.ID));
 
                     if isempty(this.subset) % obtain the whole dataset
                         shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --no-sign-request',this.URL,this.tmpdir,this.ID));
