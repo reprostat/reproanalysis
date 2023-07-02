@@ -245,10 +245,27 @@ classdef reproaClass < toolboxClass
                 % Where to store the new parameters file
                 destination = resp;
 
-                % Get value for acq_details.root
-                % Initialise the save dialogue in the current rap.acq_details.root if specified
                 xml = readxml(seedparam);
+                spmroot = expandPathByVars(xml.directoryconventions.toolbox.dir.CONTENT);
+                rawdataroot = expandPathByVars(xml.directoryconventions.rawdatadir.CONTENT);
                 analysisroot = expandPathByVars(xml.acqdetails.root.CONTENT);
+
+                % Check SPM
+                if isBaseDefaults || isempty(spmroot) || ~exist(spmroot,'dir')
+                    ui_msg = 'Root directory of spm installation';
+                    spmroot = userinput('uigetdir',analysisroot,ui_msg,'GUI',useGUI);
+                    assert(ischar(spmroot), 'Exiting, user cancelled');
+                end
+
+                % Check folder for data
+                if isBaseDefaults || isempty(rawdataroot) || ~exist(rawdataroot,'dir')
+                    ui_msg = 'Directory where raw input data can be found / will be stored';
+                    rawdataroot = userinput('uigetdir',analysisroot,ui_msg,'GUI',useGUI);
+                    assert(ischar(rawdataroot), 'Exiting, user cancelled');
+                end
+                
+                % Get value for acq_details.root
+                % Initialise the save dialogue in the current rap.acqdetails.root if specified
                 previous = '';
                 while ~isempty(analysisroot) && ~strcmp(previous, analysisroot)
                     if exist(analysisroot, 'dir'), break; end
@@ -258,22 +275,6 @@ classdef reproaClass < toolboxClass
                 ui_msg = 'Location where intermediate and final analysis results will be stored';
                 analysisroot = userinput('uigetdir',analysisroot,ui_msg,'GUI',useGUI);
                 assert(ischar(analysisroot), 'Exiting, user cancelled');
-
-                % Get values for other required directories.
-                rawdataroot = '';
-                spmroot = '';
-                if isBaseDefaults
-                    % Only when the base file was selected as seed. When a specific
-                    % location's file was selected, assume that these values are already ok
-                    % for that location.
-                    ui_msg = 'Directory where raw input data can be found / will be stored';
-                    rawdataroot = userinput('uigetdir',analysisroot,ui_msg,'GUI',useGUI);
-                    assert(ischar(rawdataroot), 'Exiting, user cancelled');
-
-                    ui_msg = 'Root directory of spm installation';
-                    spmroot = userinput('uigetdir',analysisroot,ui_msg,'GUI',useGUI);
-                    assert(ischar(spmroot), 'Exiting, user cancelled');
-                end
 
                 % Generate new parameters file
                 create_minimalXML(seedparam, destination, analysisroot, rawdataroot, spmroot);
@@ -354,7 +355,7 @@ function create_minimalXML(seedparam,destination,analysisroot, rawdataroot, spmr
         if (v<7)
           error('Your MATLAB version is too old. You need version 7.0 or newer.');
         end
-        DOMnode = com.mathworks.xml.XMLUtils.createDocument(RootName);
+        DOMnode = com.mathworks.xml.XMLUtils.createDocument('rap');
     end
 
     rap = DOMnode.getDocumentElement;
