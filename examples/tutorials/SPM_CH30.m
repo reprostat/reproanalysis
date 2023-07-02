@@ -136,7 +136,7 @@ rap.tasksettings.reproa_segment.normalisation.affreg = '';
 
 % the SPM manual specifies a smoothing kernal of 6 mm. We can set this
 % here in the rap struct.
-rap.tasksettings.reproa_smooth.FWHM = 6;
+rap.tasksettings.reproa_smooth_fmri.FWHM = 6;
 
 % UNITS can be 'secs' or 'scans' (the SPM auditory tutorial has it set
 % for 'scans' in the manual but a BIDS tsv is always specified in secs)
