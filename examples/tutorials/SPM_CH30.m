@@ -69,7 +69,7 @@ rap = reproaWorkflow('SPM_CH30.xml');
 DATA_PATH = '/fullpath/to/MoAEpilot';
 rap.directoryconventions.rawdatadir = DATA_PATH;
 
-% If you would like to have aa attempt to automatically download the
+% If you would like to have reproa attempt to automatically download the
 % data for you, set autodownloadflag to true
 autodownloadflag = false;
 
