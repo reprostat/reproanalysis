@@ -174,22 +174,38 @@ jobs:
           destination: octave
           path: /home/circleci/build/octave.tar.gz
     
-  usecase_octave_SPM:
+  usecase_octave_SPMdemo:
     executor: ubuntu    
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
           command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
-  usecase_MATLAB_SPM:
+  usecase_MATLAB_SPMdemo:
     executor: ubuntu    
     steps:
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
           command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
+  usecase_octave_anat:
+    executor: ubuntu    
+    steps:
+      - testubuntuoctave:
+          parameter_xml: parameters_circleci_minimal_ubuntu.xml
+          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat', 'sub-032303/ses-01/anat', 'sub-032304/ses-01/anat'})
+
+  usecase_MATLAB_anat:
+    executor: ubuntu    
+    steps:
+      - testubuntumatlab:
+          parameter_xml: parameters_circleci_minimal_ubuntu.xml
+          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat', 'sub-032303/ses-01/anat', 'sub-032304/ses-01/anat'})
+
 workflows:
   test:
     jobs:
-      - usecase_octave_SPM
-      - usecase_MATLAB_SPM
+      - usecase_octave_SPMdemo
+      - usecase_MATLAB_SPMdemo
+      - usecase_octave_anat
+      - usecase_MATLAB_anat
