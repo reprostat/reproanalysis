@@ -1,4 +1,4 @@
-function rap = reproa_normalise_segmentations(rap, command, subj)
+function rap = reproa_scale_segmentations(rap, command, subj)
 
     switch command
         case 'report'
@@ -9,13 +9,13 @@ function rap = reproa_normalise_segmentations(rap, command, subj)
 
             pfxEst = getSetting(rap,'estimatefrom');
             for s = fieldnames(seg)'
-                switch getSetting(rap,'normaliseby')
+                switch getSetting(rap,'scaleby')
                     case 'each'
                         sc = stats(strcmp({stats.desc},s{1})).([pfxEst '_mm3']);
                     case 'TIV'
                         sc = stats(4).([pfxEst '_mm3']);
                     otherwise
-                        sc = stats(strcmp({stats.desc},getSetting(rap,'normaliseby'))).([pfxEst '_mm3']);
+                        sc = stats(strcmp({stats.desc},getSetting(rap,'scaleby'))).([pfxEst '_mm3']);
                 end
                 sc = sc/1e3; % mm3 -> l
 

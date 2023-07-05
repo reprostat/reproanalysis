@@ -6,8 +6,8 @@ function test_LEMON_MRI_anat(rap)
 
     rap.tasksettings.reproa_dartelnormwrite_segmentations.fwhm = [1 1 1];
 
-    rap.tasksettings.reproa_normalise_segmentations.normaliseby = 'each';
-    rap.tasksettings.reproa_normalise_segmentations.estimatefrom = 'spm';
+    rap.tasksettings.reproa_scale_segmentations.scaleby = 'each';
+    rap.tasksettings.reproa_scale_segmentations.estimatefrom = 'spm';
 
     rap = renameStream(rap,'reproa_smooth_00001','input','fmri','normaliseddensity_segmentations');
     rap.tasksettings.reproa_smooth.FWHM = 8;

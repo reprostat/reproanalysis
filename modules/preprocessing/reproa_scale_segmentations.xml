@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
-    <header domain='subject' desc='Normalise segmentations (GM,WM,CSF)' modality='MRI'/>
+    <header domain='subject' desc='Scale segmentations (GM,WM,CSF)' modality='MRI'/>
 
     <hpc>
         <timeBase>1</timeBase>
@@ -10,7 +10,7 @@
     <permanenceofoutput>2</permanenceofoutput>
 
     <settings>
-        <normaliseby options='each|TIV|[content]' ui='optionlist'>each</normaliseby>
+        <scaleby options='each|TIV|[content]' ui='optionlist'>each</scaleby>
         <estimatefrom options='vol|spm' ui='optionlist'>spm</estimatefrom>
     </settings>
 
