@@ -1,7 +1,9 @@
 % FILE: SPM_CH30.m
 %
 % This script runs the Auditory fMRI example from the SPM manual
-% (chapter 30, as of this writing).
+% (chapter 30, as of this writing). 
+%
+% It takes about 15-30 min. depending on your computer.
 %
 % Make a copy of this file to edit and put it somewhere in your MATLAB/Octave
 % path along with a copy of the task list SPM_CH30.xml

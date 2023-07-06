@@ -2,6 +2,8 @@
 %
 % This script runs the structural preprocessing using SPM.
 %
+% It can take up to 4 hours depending on your computer.
+%
 % Make a copy of this file to edit and put it somewhere in your MATLAB/Octave
 % path along with a copy of the task list anat.xml
 %

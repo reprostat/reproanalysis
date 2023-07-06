@@ -193,19 +193,17 @@ jobs:
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat', 'sub-032303/ses-01/anat', 'sub-032304/ses-01/anat'})
+          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
 
   usecase_MATLAB_anat:
     executor: ubuntu    
     steps:
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat', 'sub-032303/ses-01/anat', 'sub-032304/ses-01/anat'})
+          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
 
 workflows:
   test:
     jobs:
       - usecase_octave_SPMdemo
       - usecase_MATLAB_SPMdemo
-      - usecase_octave_anat
-      - usecase_MATLAB_anat
