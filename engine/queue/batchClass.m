@@ -139,7 +139,7 @@ classdef batchClass < queueClass
         function close(this,doCloseJobs)
             if nargin < 2 || doCloseJobs
                 logging.info('Cancelling jobs...');
-                cellfun(@(j) j.cancel(), queue.pool.jobs);
+                cellfun(@(j) j.cancel(), this.pool.jobs);
             end
             close@queueClass(this);
         end
