@@ -35,7 +35,7 @@ function processWorkflow(rap)
     end
 
     % Connect modules and save rap
-    rap = updateWorkflow(rap);
+    rap = updateWorkflow(rap,true);
 
     % Check disk space
     if isOctave
@@ -48,7 +48,7 @@ function processWorkflow(rap)
 
     for command = {'checkrequirements' 'doit'}
         if strcmp(command{1},'doit')
-            rap = updateWorkflow(rap);
+            rap = updateWorkflow(rap,false);
 
             % Create queue
             if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
@@ -106,8 +106,8 @@ function rap = backupWorkflow(rap)
     rap.internal.rap_initial = bcprap;
 end
 
-function rap = updateWorkflow(rap)
-    rap = buildWorkflow(rap);
+function rap = updateWorkflow(rap,isInital)
+    rap = buildWorkflow(rap,'isProbe',isInital);
 
     switch rap.directoryconventions.remotefilesystem
         case 'none'

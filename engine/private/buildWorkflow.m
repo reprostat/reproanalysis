@@ -91,7 +91,7 @@ function rap = buildWorkflow(rap,varargin)
             end
         end
 
-        rap.tasklist.main(indTask).inputstreams(inputToOmit) = [];
+        if ~argParse.Results.isProbe, rap.tasklist.main(indTask).inputstreams(inputToOmit) = []; end
 
         % update domain and modality of generic modules based on the main input, which is expected to be the last inputstream
         if strcmp(rap.tasklist.main(indTask).header.domain, '?') && ~isempty(rap.tasklist.main(indTask).inputstreams)
