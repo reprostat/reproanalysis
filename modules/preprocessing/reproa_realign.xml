@@ -50,6 +50,7 @@
 
     <outputstreams>
         <stream domain="subject">meanfmri</stream>
+        <stream domain="subject">brainmask</stream>
         <stream domain="fmrirun">fmri</stream>
         <stream domain="fmrirun">movementparameters</stream>
         <stream domain="fmrirun">fd</stream>
