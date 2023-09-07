@@ -40,7 +40,7 @@ commands:
             export DEBIAN_FRONTEND=noninteractive
             sudo apt remove needrestart
             sudo apt update
-            sudo apt install libqhull-dev libfltk1.3-dev libglpk-dev libhdf5-dev libsundials-dev portaudio19-dev libsndfile1-dev openjdk-8-jdk libgraphicsmagick++1-dev libgl2ps-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools libqscintilla2-qt5-dev -y
+            sudo apt install libarpack2-dev libfltk1.3-dev libgl2ps-dev libglpk-dev libgraphicsmagick++1-dev libhdf5-dev libopenblas-dev libqhull-dev libqrupdate-dev libqscintilla2-qt5-dev libsndfile1-dev libsundials-dev openjdk-8-jdk portaudio19-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools -y
             if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
             if [[ ! -d $HOME/build ]]; then mkdir $HOME/build; fi
             wget https://osf.io/download/dg6pj -O $HOME/build/octave.tar.gz
