@@ -19,6 +19,7 @@ classdef hashClass < handle
             else % MATLAB
                 this.md = java.security.MessageDigest.getInstance(this.hashFunc);
             end
+            this.md.reset();
         end
 
         function update(this,data,forceString)

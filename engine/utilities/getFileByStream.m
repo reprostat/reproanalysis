@@ -21,6 +21,8 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
     argParse.addParameter('isProbe',false,@islogical);
     argParse.parse(varargin{:});
 
+    if ~rap.options.checkinputstreamconsistency, argParse.Results.checkHash = false; end
+
     streamType = argParse.Results.streamType; if ~iscellstr(streamType), streamType = cellstr(streamType); end
 
     fileList = '';

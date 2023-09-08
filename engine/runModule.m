@@ -81,10 +81,12 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     logging.info('Input - %s',destStreamName);
 
                     % Check hashes at source
-                    srcHash = cellfun(@(f) srcStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
-                    fileHash = cellfun(@(f) getHashByFiles(srcStream.(f).files,'localroot',srcStreamPath), fieldnames(srcStream),'UniformOutput',false);
-                    if ~all(strcmp(srcHash,fileHash))
-                        logging.error('\tInput has changed at source %s',srcrap.tasklist.currenttask.name);
+                    if rap.options.checkinputstreamconsistency
+                        srcHash = cellfun(@(f) srcStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
+                        fileHash = cellfun(@(f) getHashByFiles(srcStream.(f).files,'localroot',srcStreamPath), fieldnames(srcStream),'UniformOutput',false);
+                        if ~all(strcmp(srcHash,fileHash))
+                            logging.error('\tInput has changed at source %s.\n\tMake sure that destination module(s) specifies input with tobemodified="1"',srcrap.tasklist.currenttask.name);
+                        end
                     end
 
                     % Compare hashes of input at source and destination
