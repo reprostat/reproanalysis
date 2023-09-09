@@ -16,15 +16,15 @@
             <sep desc="Seperation between sampled points">4</sep>
             <fwhm desc="FWHM of smooting kernel">5</fwhm>
             <rtm desc="Registered to the mean">0</rtm>
-            <interp desc="Interpolation method">2</interp>
-            <wrap desc="Wrapping">[0 0 0]</wrap>
+            <einterp desc="Interpolation method">2</einterp>
+            <ewrap desc="Wrapping">[0 0 0]</ewrap>
         </eoptions>
 
         <!-- Weighting considers only voxels with weight > 0.01 (see https://github.com/spm/spm12/blob/3085dac00ac804adb190a7e82c6ef11866c8af02/spm_realign.m#L217) -->
         <invertweighting desc="Take the reciprocal of the weighting image (e.g., for SD)">0</invertweighting>
 
         <!--Unwarping parameters-->
-        <uweoptions>
+        <uoptions>
             <basfcn desc="Number of basis functions in the first two dimensions" options="8|10|12|14" ui="optionlist">12</basfcn>
             <regorder desc="Regularisation order" options="0|1|2|3" ui="optionlist">1</regorder>
             <lambda desc="Regularisation factor" options="10000|100000|1000000" ui="optionlist">100000</lambda>
@@ -35,16 +35,16 @@
             <rem desc="Re-estimate movement at each unwarping iteration" ui="yesno">1</rem>
             <noi desc="Maximum number of iterations">5</noi>
             <expround desc="Point in position space to perform Taylor-expansion around. Somewhat relates to which timepoint is the closest to the fieldmap" options="first|average|last" ui="optionlist">average</expround>
-        </uweoptions>
+        </uoptions>
 
         <!--Reslicing parameters-->
-        <uwroptions>
-            <which desc="Images to reslice [input mean]">[2 1]</which>
-            <interp desc="Interpolation method">7</interp>
+        <roptions>
+            <uwwhich desc="Images to reslice [input mean]">[2 1]</uwwhich>
+            <rinterp desc="Interpolation method">7</rinterp>
             <wrap desc="Wrapping">[0 1 0]</wrap>
             <mask>1</mask>
             <prefix>u</prefix>
-        </uwroptions>
+        </roptions>
 
         <reslicewhich>2</reslicewhich>
         <writemean>1</writemean>
@@ -59,13 +59,12 @@
 
     <inputstreams>
         <stream domain="fmrirun" isessential="0" isrenameable="1">weighting_image</stream>
-        <stream domain="fmrirun" isessential="0">fieldmap</stream>
-        <stream domain="fmrirun" tobemodified="0">fmri</stream>
+        <stream domain="fmrirun" tobemodified="0">fieldmap</stream>
+        <stream domain="fmrirun" tobemodified="1">fmri</stream>
     </inputstreams>
 
     <outputstreams>
         <stream domain="subject">meanfmri</stream>
-        <stream domain="subject">brainmask</stream>
         <stream domain="fmrirun">fmri</stream>
         <stream domain="fmrirun">movementparameters</stream>
         <stream domain="fmrirun">fd</stream>

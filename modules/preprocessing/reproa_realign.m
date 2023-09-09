@@ -112,9 +112,8 @@ switch command
             addReport(rap,'moco','</tr></table>');
         end
     case 'doit'
-
-        % Get realignment defaults from the XML!
         estFlags = getSetting(rap,'eoptions');
+        uwestFlags = getSetting(rap,'uoptions');
         resFlags = getSetting(rap,'roptions');
         resFlags.which = [getSetting(rap,'reslicewhich') getSetting(rap,'writemean')];
 
@@ -154,23 +153,40 @@ switch command
                 logging.error('NYI');
             end
 
-            estFlags.PW = wImgFile{1};
+            estFlags.weight = wImgFile{1};
+        else
+            estFlags.weight = '';
         end
 
-        % Run the realignment
-        spm_realign(imgs, estFlags);
+        job.eoptions = estFlags;
 
-        % Run the reslicing
-        spm_reslice(imgs, resFlags);
+        % Check if we are unwarping
+        if isstruct(uwestFlags)
+            job.data = [];
+            for r = rap.acqdetails.selectedruns
+                job.data(end+1).scans = getFileByStream(rap,'fmrirun',[subj,r],'fmri');
+                job.data(end).pmscan = getFileByStream(rap,'fmrirun',[subj,r],'fieldmap');
+            end
+            job.uweoptions = uwestFlags;
+            job.uweoptions.basfcn = repmat(job.uweoptions.basfcn,1,2);
+            job.uweoptions.expround = strrep(lower(job.uweoptions.expround),'''','');
+            job.uwroptions = resFlags;
+            spm_run_realignunwarp(job);
+        else
+            job.data = imgs;
+            job.roptions = resFlags;
+            spm_run_realign(job);
+        end
 
         %% Describe outputs
-        putFileByStream(rap,'subject',subj,'meanfmri',spm_select('FPList',getPathByDomain(rap,'fmrirun',[subj,min(rap.acqdetails.selectedruns)]),'^mean.*.nii$'));
+        putFileByStream(rap,'subject',subj,'meanfmri',...
+                        spm_select('FPList',getPathByDomain(rap,'fmrirun',[subj,min(rap.acqdetails.selectedruns)]),'^mean.*.nii$'));
 
         for run = rap.acqdetails.selectedruns
             logging.info('Working with run %d: %s', run, rap.acqdetails.fmriruns(run).name)
 
             rimgs = imgs{rap.acqdetails.selectedruns==run};
-            if rap.tasklist.currenttask.settings.reslicewhich ~= 0, rimgs = spm_file(rimgs,'prefix','r'); end
+            if rap.tasklist.currenttask.settings.reslicewhich ~= 0, rimgs = spm_file(rimgs,'prefix',resFlags.prefix); end
             putFileByStream(rap,'fmrirun',[subj run],'fmri',rimgs);
 
             outpars = spm_select('FPList',getPathByDomain(rap,'fmrirun',[subj,run]),'^rp_.*.txt$');
@@ -191,6 +207,7 @@ switch command
             else
                 % Get the realignment transformations (it also includes between-run movement, unlike the rp-files)...
                 load(spm_file(imgs{rap.acqdetails.selectedruns==run},'ext','.mat'),'mat');
+                mocomat = [];
                 V1 = spm_vol(spm_file(imgs{1},'number',',1'));
                 for v = 2:size(mat,3), mocomat(v,:) = spm_imatrix(mat(:,:,v)/V1.mat); end
                 mocomat(:,7:end) = [];
