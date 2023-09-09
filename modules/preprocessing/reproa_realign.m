@@ -173,7 +173,7 @@ switch command
             job.uwroptions = resFlags;
             spm_run_realignunwarp(job);
         else
-            job.data = imgs;
+            job.data = cellfun(@(c) {c}, imgs,'UniformOutput',false);
             job.roptions = resFlags;
             spm_run_realign(job);
         end
