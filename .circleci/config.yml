@@ -9,7 +9,13 @@ executors:
     machine:
       image: 'ubuntu-2204:2022.04.1' # if you change version you may need to update the command installing OCTAVE dependencies
     resource_class: medium
+    environment:
+      GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
 
+  docker-octave:
+    docker:
+      - image: gnuoctave/octave:8.1.0
+    resource_class: medium+
     environment:
       GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
 
@@ -33,20 +39,6 @@ commands:
       - run: 
           name: Checkout with submodules
           command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
-
-      - run:
-          name: Install OCTAVE (from build in /home/circleci/build/octave)
-          command: |
-            export DEBIAN_FRONTEND=noninteractive
-            sudo apt remove needrestart
-            sudo apt update
-            sudo apt install libarpack2-dev libfltk1.3-dev libgl2ps-dev libglpk-dev libgraphicsmagick++1-dev libhdf5-dev libopenblas-dev libqhull-dev libqrupdate-dev libqscintilla2-qt5-dev libsndfile1-dev libsundials-dev openjdk-8-jdk portaudio19-dev rapidjson-dev qtbase5-dev qttools5-dev qttools5-dev-tools -y
-            if [[ ! -d $HOME/tools ]]; then mkdir $HOME/tools; fi
-            if [[ ! -d $HOME/build ]]; then mkdir $HOME/build; fi
-            wget https://osf.io/download/dg6pj -O $HOME/build/octave.tar.gz
-            tar -xzf $HOME/build/octave.tar.gz --directory $HOME/build
-            cd $HOME/build/octave/.build
-            make install
 
       - run:
           name: Install tools and configure reproa
@@ -141,41 +133,8 @@ commands:
           path: /tmp/output.tar.gz
 
 jobs:
-  build_octave:
-    executor: ubuntu    
-    steps:
-      - run: 
-          name: Build OCTAVE
-          command: |           
-            mkdir ~/build
-            cd ~/build
-            export DEBIAN_FRONTEND=noninteractive
-            sudo apt remove needrestart
-            sudo apt update
-            sudo apt install gcc g++ autoconf automake bison dvipng epstool fig2dev flex gfortran gnuplot-x11 gperf gzip icoutils libarpack2-dev libbison-dev libopenblas-dev libcurl4-gnutls-dev libfftw3-dev libfltk1.3-dev libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libgl2ps-dev libglpk-dev libgraphicsmagick++1-dev libhdf5-dev liblapack-dev libosmesa6-dev libpcre3-dev libqhull-dev libqscintilla2-qt5-dev libqrupdate-dev libreadline-dev librsvg2-bin libsndfile1-dev libsuitesparse-dev libsundials-dev libtool libxft-dev make openjdk-8-jdk perl portaudio19-dev pstoedit qtbase5-dev qttools5-dev qttools5-dev-tools rapidjson-dev rsync tar texinfo texlive-latex-extra zlib1g-dev -y
-            wget https://ftp.gnu.org/gnu/octave/octave-8.1.0.tar.gz
-            tar -xzf octave-8.1.0.tar.gz
-            rm octave-8.1.0.tar.gz
-            mv octave-8.1.0 octave
-            cd octave
-            mkdir .build
-            cd .build
-            ./../configure --prefix=$HOME/tools/octave CPPFLAGS="-I/usr/include/suitesparse" --with-hdf5-includedir=/usr/include/hdf5/serial --with-hdf5-libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/hdf5/serial
-            make -j2
-            make check
-            cd $HOME/build
-            tar -czf octave.tar.gz octave
-
-      - persist_to_workspace:
-          root: /home/circleci/build
-          paths: octave.tar.gz
-      
-      - store_artifacts:
-          destination: octave
-          path: /home/circleci/build/octave.tar.gz
-    
   usecase_octave_SPMdemo:
-    executor: ubuntu    
+    executor: docker-octave
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
@@ -189,7 +148,7 @@ jobs:
           command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
   usecase_octave_anat:
-    executor: ubuntu    
+    executor: docker-octave
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
