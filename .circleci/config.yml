@@ -51,14 +51,13 @@ commands:
           name: Install tools and configure reproa
           command: |
             export DEBIAN_FRONTEND=noninteractive
-            sudo apt remove needrestart
             mkdir ~/.reproa
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
-            sudo apt update
-            sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev
-            sudo apt install python2
-            sudo ln -s /usr/bin/python2 /usr/bin/python
+            apt update
+            apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev -y
+            apt install python2 -y
+            ln -s /usr/bin/python2 /usr/bin/python
             python trigger_install.py            
             cd ~/tools/spm12/src
             make PLATFORM=octave
