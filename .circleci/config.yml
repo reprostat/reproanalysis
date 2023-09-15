@@ -36,6 +36,9 @@ commands:
         type: string
         default: reproaClose()
     steps:
+      - run:
+          name: Add github.com to known hosts (for docker)
+          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run: 
           name: Checkout with submodules
           command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
