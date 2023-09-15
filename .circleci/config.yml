@@ -17,7 +17,7 @@ executors:
       - image: gnuoctave/octave:8.1.0
     resource_class: medium+
     environment:
-      GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
+      GITHUB_WORKSPACE: /root/tools/reproanalysis
 
 commands:
   testubuntuoctave:
@@ -37,17 +37,14 @@ commands:
         default: reproaClose()
     steps:
       - run:
-          name: Prepare environment (for docker)
+          name: Authenticate GitHub (for docker)
           command: |
-            useradd -ms /bin/bash circleci
-            echo "circleci ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-            su circleci
             mkdir ~/.ssh
             ssh-keyscan github.com >> ~/.ssh/known_hosts
+
       - run: 
           name: Checkout with submodules
           command: |
-            echo $HOME
             git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
       - run:
@@ -75,7 +72,7 @@ commands:
           name: Run test
           command: |
             echo "addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
-            $HOME/tools/octave/bin/octave ~/test_run.m
+            octave ~/test_run.m
           no_output_timeout: 1h
 
 

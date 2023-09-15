@@ -3,17 +3,17 @@
     <xi:include href="/home/circleci/tools/reproanalysis/parametersets/parameters_linux.xml" parse="xml"/>
     <local>
         <directoryconventions>
-            <rawdatadir desc="Directory to find raw MRI data" ui="dir_list">/home/circleci/data</rawdatadir>
+            <rawdatadir desc="Directory to find raw MRI data" ui="dir_list">$HOME/data</rawdatadir>
             <T1template desc="Location of T1 template, now relative to SPM path" ui="dir">toolbox/OldNorm/T1.nii</T1template>
             <mailerserver desc="Path to file containing E-mail address and password for the mailer account for sending notifications (empty means sending no emails)" ui="text">$HOME/.reproa/mailerserver</mailerserver>
             <toolbox desc="Toolbox with implemented interface in extrafunctions/toolboxes" ui="custom">
                 <name desc="Name corresponding to the name of the interface without the 'Class' suffix" ui="text">spm</name>
-                <dir ui="dir">/home/circleci/tools/spm12</dir>
+                <dir ui="dir">$HOME/tools/spm12</dir>
             </toolbox>
         </directoryconventions>
 
         <acqdetails>
-            <root desc="Root on local machine for processed data" ui="dir">/home/circleci/analyses</root>
+            <root desc="Root on local machine for processed data" ui="dir">$HOME/analyses</root>
         </acqdetails>
     </local>
 </rap>
