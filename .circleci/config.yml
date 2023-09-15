@@ -37,15 +37,22 @@ commands:
         default: reproaClose()
     steps:
       - run:
-          name: Add github.com to known hosts (for docker)
-          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
+          name: Prepare environment (for docker)
+          command: |
+            useradd -ms /bin/bash circleci
+            echo "circleci ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+            su circleci
+            mkdir ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
       - run: 
           name: Checkout with submodules
-          command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
+          command: |
+            echo $HOME
+            git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
       - run:
           name: Install tools and configure reproa
-          command: |          
+          command: |
             export DEBIAN_FRONTEND=noninteractive
             sudo apt remove needrestart
             mkdir ~/.reproa
