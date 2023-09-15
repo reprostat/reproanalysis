@@ -55,7 +55,7 @@ commands:
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
             apt update
-            apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev liboctave-dev -y
+            apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev -y
             apt install python2 -y
             ln -s /usr/bin/python2 /usr/bin/python
             python trigger_install.py            
@@ -171,4 +171,3 @@ workflows:
   test:
     jobs:
       - usecase_octave_SPMdemo
-      - usecase_MATLAB_SPMdemo
