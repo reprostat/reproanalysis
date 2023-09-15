@@ -51,6 +51,18 @@ function [s,w] = shell(cmd,varargin)
 
     % Environment
     if ~isempty(ENV)
+        % Special cases
+        for e = 1:size(ENV,1)
+            switch ENV{e,1}
+                case 'PATH'
+                    [~,pthSys] = system('echo $PATH'); pthSys = strsplit(pthSys,pathsep);
+                    for pth = strsplit(ENV{e,2},pathsep)
+                        pthSys(strcmp(pth,pthSys)) = [];
+                        pthSys = [pth pthSys];
+                    end
+                    ENV{e,2} = strjoin(pthSys,pathsep);
+            end
+        end
         if startsWith(prefix,'export')
             for e = 1:size(ENV,1)
                 cmd = [sprintf('export %s=%s;',ENV{e,1},ENV{e,2}) cmd];
