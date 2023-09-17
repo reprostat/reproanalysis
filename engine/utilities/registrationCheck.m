@@ -56,8 +56,7 @@ function registrationCheck(rap,domain,indices,background,varargin)
         logging.info('Diagnostics is disabled. Check rap.tasksettings.<module>.diagnostics!');
     else
         % Resize slice display for optimal fit
-        fig = spm_figure('GetWin','Graphics');
-        set(fig,'visible',visFig);
+        fig = spm_figure('CreateWin','Graphics','',visFig);
         windowSize = get(0,'ScreenSize');
         windowSize(4) = windowSize(4) - windowSize(2) - 50 - 50; % 50 for system menu and statusbar, 50 for figure menu
         windowSize(2) = 50;
