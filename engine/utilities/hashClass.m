@@ -34,7 +34,7 @@ classdef hashClass < handle
                 while ~feof(fid)
                     [currData,len] = fread(fid, this.buffSize, '*uint8');
                     if ~isempty(currData)
-                        this.md.update(currData, 0, len);
+                        this.md.update(currData);
                     end
                 end
                 fclose(fid);
