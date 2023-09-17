@@ -266,9 +266,7 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
                 end
                 if ~exist(bgFile,'file'), bgFile = ''; end
             end
-            if isempty(bgFile), logging.error('No background has been found');
-            else, bgFile = readLink(bgFile);
-            end
+            if isempty(bgFile), logging.error('No background has been found'); end
 
             rap.tasksettings.reproa_firstlevelthreshold(rap.tasklist.currenttask.index).overlay.background = bgFile;
 

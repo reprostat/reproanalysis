@@ -48,7 +48,7 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
 
         % locate streamfolder
         deps = getDependencyByDomain(rap,streamDomain,domain,indices);
-        taskPath = arrayfun(@(d) readLink(getPathByDomain(rap,streamDomain,deps(d,:))),1:size(deps,1),'UniformOutput',false);
+        taskPath = arrayfun(@(d) getPathByDomain(rap,streamDomain,deps(d,:)),1:size(deps,1),'UniformOutput',false);
 
         if lookFor(streamName,'.')
             streamName = strsplit(streamName,'.'); [streamSource, streamName] = deal(streamName{:});

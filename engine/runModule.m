@@ -65,7 +65,6 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                 for d = 1:size(deps,1)
                     % Source
                     srcStreamPath = getPathByDomain(srcrap,s.streamdomain,deps(d,:));
-                    srcStreamPath = readLink(srcStreamPath); % make sure the path is canonical
                     srcStreamDescriptor = fullfile(srcStreamPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name));
                     srcStream = readStream(srcStreamDescriptor,rap.options.maximumretry);
                     if ~isempty(content), srcStream = rmfield(srcStream,setdiff(fieldnames(srcStream),content)); end
@@ -73,9 +72,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     % Destination
                     destStreamPath = getPathByDomain(rap,s.streamdomain,deps(d,:));
                     destStreamName = sprintf('stream_%s_inputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name);
-                    if exist(destStreamPath,'dir'), destStreamPath = readLink(destStreamPath); % make sure the path is canonical
-                    else, dirMake(destStreamPath);
-                    end
+                    if ~exist(destStreamPath,'dir'), dirMake(destStreamPath); end
                     destStreamDescriptor = fullfile(destStreamPath,destStreamName);
 
                     logging.info('Input - %s',destStreamName);

@@ -17,9 +17,6 @@ function  putFileByStream(rap,domain,indices,streamName,files)
 
     taskPath = getPathByDomain(rap,domain,indices);
 
-    % make sure the path is canonical
-    taskPath = readLink(taskPath);
-
     streamDescriptor = fullfile(taskPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,rap.tasklist.currenttask.name));
 
     % Unify format as a struct with description as fieldnames and file(s) as cellstring values
@@ -37,7 +34,6 @@ function  putFileByStream(rap,domain,indices,streamName,files)
     for f = fieldnames(files)'
         for i = 1:numel(files.(f{1}))
             if isAbsolutePath(files.(f{1}){i})
-                files.(f{1}){i} = readLink(files.(f{1}){i}); % make sure that the path is canonical
                 if startsWith(files.(f{1}){i},taskPath)
                     files.(f{1}){i} = strrep(files.(f{1}){i},[taskPath filesep],'');
                 else
