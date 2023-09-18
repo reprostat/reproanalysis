@@ -246,21 +246,23 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
             end
 
         case 'checkrequirements'
+            global reproacache
+            reproa = reproacache('reproa');
+
             % Background (structural -> FSLT1 -> SPMT1)
             bgFile = '';
             if strcmp(getSetting(rap,'overlay.background'),'structural') && hasStream(rap,'subject',subj,'structural')
                 logging.warning('(%s): You should verify background ''structural'' is in the same space as ''fmri''.', mfilename);
                 bgFile = char(getFileByStream(rap,'subject',subj,'structural'));
             end
-            if (strcmp(getSetting(rap,'overlay.background'),'FSLT1') || isempty(bgFile)) && isfield(rap.directoryconventions,'FSLdir')
+            if (strcmp(getSetting(rap,'overlay.background'),'FSLT1') || isempty(bgFile)) && ismember('fsl',reproa.extensions)
                 bgFile = fullfile(rap.directoryconventions.FSLT1);
-                if ~exist(bgFile,'file'), bgFile = fullfile(rap.directoryconventions.FSLdir,bgFile); end
+                if ~exist(bgFile,'file'), bgFile = fullfile(rap.directoryconventions.fsldir,bgFile); end
                 if ~exist(bgFile,'file'), bgFile = ''; end
             end
-            if isempty(bgFile)
-                bgFile = fullfile(rap.directoryconventions.SPMT1);
-                if ~exist(bgFile,'file')
-                    global reproacache
+            if (strcmp(getSetting(rap,'overlay.background'),'SPMT1') || isempty(bgFile)
+                bgFile = rap.directoryconventions.SPMT1;
+                if ~isAbsolutePath(bgFile)
                     tSPM = reproacache('toolbox.spm');
                     bgFile = fullfile(tSPM.toolPath,bgFile);
                 end
