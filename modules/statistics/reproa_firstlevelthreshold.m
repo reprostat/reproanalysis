@@ -260,7 +260,7 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
                 if ~exist(bgFile,'file'), bgFile = fullfile(rap.directoryconventions.fsldir,bgFile); end
                 if ~exist(bgFile,'file'), bgFile = ''; end
             end
-            if (strcmp(getSetting(rap,'overlay.background'),'SPMT1') || isempty(bgFile)
+            if strcmp(getSetting(rap,'overlay.background'),'SPMT1') || isempty(bgFile)
                 bgFile = rap.directoryconventions.SPMT1;
                 if ~isAbsolutePath(bgFile)
                     tSPM = reproacache('toolbox.spm');
