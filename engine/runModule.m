@@ -39,7 +39,8 @@ function rap = runModule(rap,indTask,command,indices,varargin)
             end
 
             % obtain inputstream
-            for s = rap.tasklist.currenttask.inputstreams
+            for indInput = 1:numel(rap.tasklist.currenttask.inputstreams)
+                s = rap.tasklist.currenttask.inputstreams(indInput);
                 % obtain streams
                 if iscell(s.name), s.name = s.name{1}; end
                 streamName = strsplit(s.name,'.'); content = '';
@@ -55,6 +56,17 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     case 1
                         streamName = streamName{1};
                 end
+                if ~isempty(content)
+                    rap.tasklist.currenttask.inputstreams(indInput).name{1} = streamName;  % remove content specification
+                    content = strsplit(content,'-');
+
+                    % content renaming -> contents as rows ->
+                    % - Nx1 -> no renaming
+                    % - 1x2 -> renaming
+                    content = cellfun(@(c) strsplit(c,'~'), content,'UniformOutput',false);
+                    content = vertcat(content{:});
+                end
+
 
                 if s.taskindex == -1 % remote
                     logging.error('NYI');
@@ -67,7 +79,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     srcStreamPath = getPathByDomain(srcrap,s.streamdomain,deps(d,:));
                     srcStreamDescriptor = fullfile(srcStreamPath,sprintf('stream_%s_outputfrom_%s.txt',streamName,srcrap.tasklist.currenttask.name));
                     srcStream = readStream(srcStreamDescriptor,rap.options.maximumretry);
-                    if ~isempty(content), srcStream = rmfield(srcStream,setdiff(fieldnames(srcStream),content)); end
+                    if ~isempty(content), srcStream = rmfield(srcStream,setdiff(fieldnames(srcStream),content(:,1))); end
 
                     % Destination
                     destStreamPath = getPathByDomain(rap,s.streamdomain,deps(d,:));
@@ -101,6 +113,12 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
                     % Copy stream
                     if ~isempty(content) % re-create stream
+                        if size(content,2) == 2 % content renaming
+                            for c = 1:size(content,1)
+                                newStream.(content{c,2}) = srcStream.(content{c,1});
+                            end
+                            srcStream = newStream;
+                        end
                         jsonwrite(destStreamDescriptor,srcStream);
                     else
                         copyfile(srcStreamDescriptor,destStreamDescriptor);

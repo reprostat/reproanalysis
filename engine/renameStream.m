@@ -1,6 +1,9 @@
 % To rename stream: renameStream(rap,taskName,'input'|'output',originalStream,newStream[:attribute-value])
 % To remove stream: renameStream(rap,taskName,'input'|'output',originalStream,'')
 % To add stream:    renameStream(rap,taskName,'input'|'output','append',newStream[:attribute-value])
+% To select content (for input only): renameStream(rap,taskName,'input',originalStream,originalStream.content1[-content2][:attribute-value])
+% Rename content (for input only): renameStream(rap,taskName,'input',originalStream,originalStream.oldcontent~newcontent[:attribute-value])
+%     N.B.: You can reduce stream to a single content by renaming the selected content to 'files'.
 
 function rap = renameStream(rap,taskName,streamType,originalStream,newStream)
 
