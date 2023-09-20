@@ -33,7 +33,7 @@
         <matlabtoolsdir desc="Path(s) to MATLAB tools (colon separated list)" ui="dir"></matlabtoolsdir>
         <toolbox desc="Toolbox with implemented interface in extrafunctions/toolboxes" ui="custom">
             <name desc="Name corresponding to the name of the interface without the 'Class' suffix" ui="text">spm</name>
-            <dir ui="dir"></dir>
+            <dir desc="Toolbox path. Specification is ignored if empty" ui="dir"></dir>
             <extraparameters ignorecheck='1'/>
         </toolbox>
         <condasetup desc="Path to conda setup script, executing before any Python command, see help runPyCommand" ui="text"></condasetup>
