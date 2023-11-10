@@ -34,6 +34,9 @@ commands:
           name: Checkout with submodules
           command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
+      - attach_workspace:
+          at: /home/circleci/build
+
       - run:
           name: Install OCTAVE (from build in /home/circleci/build/octave)
           command: |
@@ -205,5 +208,8 @@ jobs:
 workflows:
   test:
     jobs:
-      - usecase_octave_SPMdemo
+      - build_octave
+      - usecase_octave_SPMdemo:
+          requires:
+            - build_octave
       - usecase_MATLAB_SPMdemo
