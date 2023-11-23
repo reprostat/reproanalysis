@@ -39,7 +39,9 @@ commands:
     steps:
       - run:
           name: Authenticate GitHub (for docker)
-          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
+          command: |
+            mkdir ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - run: 
           name: Checkout with submodules
@@ -52,10 +54,10 @@ commands:
             mkdir ~/.reproa
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
-            sudo apt update
-            sudo apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev -y
-            sudo apt install python2 -y
-            sudo ln -s /usr/bin/python2 /usr/bin/python
+            apt update
+            apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev -y
+            apt install python2 -y
+            ln -s /usr/bin/python2 /usr/bin/python
             python trigger_install.py
             cd ~/tools/spm12/src
             make PLATFORM=octave
@@ -69,7 +71,7 @@ commands:
           name: Run test
           command: |
             echo "addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
-            $HOME/tools/octave/bin/octave ~/test_run.m
+            octave ~/test_run.m
           no_output_timeout: 1h
 
       - run:
@@ -137,7 +139,7 @@ commands:
 
 jobs:
   usecase_octave_SPMdemo:
-    executor: ubuntu    
+    executor: docker-octave    
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
@@ -151,7 +153,7 @@ jobs:
           command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
   usecase_octave_anat:
-    executor: ubuntu    
+    executor: docker-octave    
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
