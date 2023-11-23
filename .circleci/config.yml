@@ -39,9 +39,7 @@ commands:
     steps:
       - run:
           name: Authenticate GitHub (for docker)
-          command: |
-            mkdir ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
+          command: ssh-keyscan github.com >> ~/.ssh/known_hosts
 
       - run: 
           name: Checkout with submodules
