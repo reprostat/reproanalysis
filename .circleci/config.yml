@@ -70,7 +70,7 @@ commands:
       - run:
           name: Run test
           command: |
-            echo "graphics_toolkit("qt"); addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
+            echo "graphics_toolkit('qt'); addpath(getenv('GITHUB_WORKSPACE')); reproaSetup(); << parameters.command >>" > ~/test_run.m
             octave ~/test_run.m
           no_output_timeout: 1h
 
