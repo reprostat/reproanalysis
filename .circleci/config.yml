@@ -19,6 +19,7 @@ executors:
     resource_class: medium+
     environment:
       GITHUB_WORKSPACE: /root/tools/reproanalysis
+      DISPLAY: $DISPLAY
 
 commands:
   testubuntuoctave:
