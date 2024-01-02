@@ -128,7 +128,7 @@ jobs:
     executor: ubuntu    
     steps:
       - testubuntuoctave:
-          parameter_xml: parameters_circleci_minimal_docker.xml
+          parameter_xml: parameters_circleci_minimal_ubuntu.xml
           command: testRun('test_MoAEpilot_fmri','SPM_CH30')
 
   usecase_MATLAB_SPMdemo:
@@ -142,7 +142,7 @@ jobs:
     executor: ubuntu    
     steps:
       - testubuntuoctave:
-          parameter_xml: parameters_circleci_minimal_docker.xml
+          parameter_xml: parameters_circleci_minimal_ubuntu.xml
           command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
 
   usecase_MATLAB_anat:
