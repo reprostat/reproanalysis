@@ -15,16 +15,16 @@ classdef batchClass < queueClass
         function this = batchClass(rap)
             this = this@queueClass(rap);
 
-            if isOctave()
-                poolProfile = strsplit(rap.directoryconventions.poolprofile,':');
+            poolProfile = strsplit(rap.directoryconventions.poolprofile,':');
+            if isOctave()                
                 if ispc()
                     if numel(poolProfile{1}) == 1 % pool profile is a full path
                         poolProfile{1} = strjoin(poolProfile(1:2),':');
                         poolProfile(2) = [];
                     end
-                    this.pool = poolClass('local_PS');
+                    this.pool = poolClass('local_PS'); % only local_PS is supported
                 elseif isunix()
-                    this.pool = poolClass('slurm');
+                    this.pool = poolClass(poolProfile{1});
                 elseif ismac()
                     logging.error('NYI');
                 end
