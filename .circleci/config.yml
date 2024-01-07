@@ -129,14 +129,14 @@ jobs:
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
+          command: testRun('test_MoAEpilot_fmri','SPM_CH30','whereToProcess','batch')
 
   usecase_MATLAB_SPMdemo:
     executor: ubuntu    
     steps:
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
+          command: testRun('test_MoAEpilot_fmri','SPM_CH30','whereToProcess','localsingle')
 
   usecase_octave_anat:
     executor: ubuntu    
