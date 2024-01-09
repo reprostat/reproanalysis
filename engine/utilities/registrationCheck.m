@@ -111,12 +111,13 @@ function registrationCheck(rap,domain,indices,background,varargin)
 
         % Orthoview summary
         % - collect frames
+        isOKgetframe = true;
         for sInd = slicesIndToSummary
             spm_orthviews('reposition', slicesToVideo(:,sInd));
             spm_orthviews('Xhairs','off');
             for v = 1:nVols
                 for a = 1:3
-                    fr = getframe(st.vols{v}.ax{a}.ax);
+                    try fr = getframe(st.vols{v}.ax{a}.ax); catch, logging.warning('getframe error --> skipping'); isOKgetframe = false; fr.cdata = []; end;
                     slicesSummary{v}{a} = horzcat(slicesSummary{v}{a}, fr.cdata);
                 end
             end
@@ -124,16 +125,18 @@ function registrationCheck(rap,domain,indices,background,varargin)
         end
 
         % - create image
-        for v = 1:numel(slicesSummary)
-            slicesFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s%s_%s.jpg',rap.tasklist.currenttask.name,pfx,spm_file(st.vols{v}.fname,'basename')));
-            img = slicesSummary{v}{3};
-            img(1:size(slicesSummary{v}{2},1),end+1:end+size(slicesSummary{v}{2},2),:) = slicesSummary{v}{2};
-            img(1:size(slicesSummary{v}{1},1),end+1:end+size(slicesSummary{v}{1},2),:) = slicesSummary{v}{1};
-            f = figure('visible',visFig);
-            set(f,'Position',[1 1 size(img,2) size(img,1)],'PaperPositionMode','auto','InvertHardCopy','off');
-            imshow(img,'Border','tight');
-            print(f,'-djpeg','-r150',slicesFilename);
-            close(f);
+        if isOKgetframe
+            for v = 1:numel(slicesSummary)
+                slicesFilename = fullfile(getPathByDomain(rap,domain,indices),sprintf('diagnostic_%s%s_%s.jpg',rap.tasklist.currenttask.name,pfx,spm_file(st.vols{v}.fname,'basename')));
+                img = slicesSummary{v}{3};
+                img(1:size(slicesSummary{v}{2},1),end+1:end+size(slicesSummary{v}{2},2),:) = slicesSummary{v}{2};
+                img(1:size(slicesSummary{v}{1},1),end+1:end+size(slicesSummary{v}{1},2),:) = slicesSummary{v}{1};
+                f = figure('visible',visFig);
+                set(f,'Position',[1 1 size(img,2) size(img,1)],'PaperPositionMode','auto','InvertHardCopy','off');
+                imshow(img,'Border','tight');
+                print(f,'-djpeg','-r150',slicesFilename);
+                close(f);
+            end
         end
 
         % Video
