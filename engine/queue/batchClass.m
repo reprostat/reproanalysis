@@ -131,9 +131,13 @@ classdef batchClass < queueClass
                         safeTaskPath = strrep(fullfile(this.pool.jobStorageLocation, this.pool.jobs{jID}.name,this.pool.jobs{jID}.tasks{1}.name),'\','\\');
                         msg = sprintf('Job%d on %s had an error: %s\n',jID,safeTaskPath,this.pool.jobs{jID}.tasks{1}.errorMessage);
                         error = this.pool.jobs{jID}.tasks{1}.error;
-                        for e = 1:numel(error.stack)
-                            msg = [msg sprintf('in %s (line %d)\n', ...
-                                strrep(error.stack(e).file,'\','\\'), error.stack(e).line)];
+                        if ~isempty(error)
+                            for e = 1:numel(error.stack)
+                                msg = [msg sprintf('in %s (line %d)\n', ...
+                                    strrep(error.stack(e).file,'\','\\'), error.stack(e).line)];
+                            end
+                        else
+                            msg = [msg 'No error file has been generated.'];
                         end
                         logging.info([msg '\n']);
                     end
