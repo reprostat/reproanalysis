@@ -12,7 +12,7 @@
 function registrationCheck(rap,domain,indices,background,varargin)
 
     visFig = 'on';
-    if rap.internal.isdeployed, visFig = 'off'; end
+    if ~isOctave() && rap.internal.isdeployed, visFig = 'off'; end
 
     % Parse
     output = varargin;

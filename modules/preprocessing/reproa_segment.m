@@ -242,7 +242,7 @@ function diagnostics(rap,subj)
     %% Another diagnostic image, looking at how well the segmentation worked...
     Pthresh = 0.95;
     visFig = 'on';
-    if rap.internal.isdeployed, visFig = 'off'; end
+    if ~isOctave() && rap.internal.isdeployed, visFig = 'off'; end
 
     YS = spm_read_vols(spm_vol(Simg{1}));
     YSeg = cellfun(@(seg) YS(spm_read_vols(spm_vol(nativeSeg.(seg){1}))>=Pthresh), fieldnames(nativeSeg),'UniformOutput',false);
