@@ -16,7 +16,7 @@ classdef batchClass < queueClass
             this = this@queueClass(rap);
 
             poolProfile = strsplit(rap.directoryconventions.poolprofile,':');
-            if isOctave()                
+            if isOctave()
                 if ispc()
                     if numel(poolProfile{1}) == 1 % pool profile is a full path
                         poolProfile{1} = strjoin(poolProfile(1:2),':');
@@ -126,6 +126,17 @@ classdef batchClass < queueClass
                 this.reportTasks('finished',find(doneTask));
                 if any(failedTask)
                     this.reportTasks('failed',find(failedTask));
+                    % - detailed report
+                    for jID = this.taskFlags(failedTask)
+                        safeTaskPath = strrep(fullfile(this.pool.jobStorageLocation, this.pool.jobs{jID}.name,this.pool.jobs{jID}.tasks{1}.name),'\','\\');
+                        msg = sprintf('Job%d on %s had an error: %s\n',jID,safeTaskPath,this.pool.jobs{jID}.tasks{1}.errorMessage);
+                        error = this.pool.jobs{jID}.tasks{1}.error;
+                        for e = 1:numel(error.stack)
+                            msg = [msg sprintf('in %s (line %d)\n', ...
+                                strrep(error.stack(e).file,'\','\\'), error.stack(e).line)];
+                        end
+                        logging.info([msg '\n']);
+                    end
                     break;
                 end
             end
