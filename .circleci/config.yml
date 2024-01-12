@@ -128,28 +128,28 @@ jobs:
     executor: ubuntu    
     steps:
       - testubuntuoctave:
-          parameter_xml: parameters_circleci_minimal_ubuntu.xml
+          parameter_xml: parameters_circleci_minimal_ubuntu_octave.xml
           command: testRun('test_MoAEpilot_fmri','SPM_CH30','whereToProcess','batch')
 
   usecase_MATLAB_SPMdemo:
     executor: ubuntu    
     steps:
       - testubuntumatlab:
-          parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_MoAEpilot_fmri','SPM_CH30','whereToProcess','localsingle')
+          parameter_xml: parameters_circleci_minimal_ubuntu_matlab.xml
+          command: testRun('test_MoAEpilot_fmri','SPM_CH30','whereToProcess','batch')
 
   usecase_octave_anat:
     executor: ubuntu    
     steps:
       - testubuntuoctave:
-          parameter_xml: parameters_circleci_minimal_ubuntu.xml
+          parameter_xml: parameters_circleci_minimal_ubuntu_octave.xml
           command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
 
   usecase_MATLAB_anat:
     executor: ubuntu    
     steps:
       - testubuntumatlab:
-          parameter_xml: parameters_circleci_minimal_ubuntu.xml
+          parameter_xml: parameters_circleci_minimal_ubuntu_matlab.xml
           command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
 
 workflows:
