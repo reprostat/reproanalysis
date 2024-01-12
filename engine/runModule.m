@@ -5,7 +5,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
     argParse = inputParser;
     argParse.addParameter('reproacache',reproacache,@(x) isa(x,'cacheClass') || isstruct(x));
-    argParse.addParameter('reproaworker',reproaworker,@(x) isa(x,'workerClass') || isstruct(x));
+    argParse.addParameter('reproaworker',reproaworker,@(x) isa(x,'workerClass') || isstruct(x) || ischar(x));
     argParse.parse(varargin{:});
 
     reproaworker = argParse.Results.reproaworker;
@@ -14,6 +14,19 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     % if delpoyed -> load from struct
     if isstruct(reproacache), reproacache = cacheClass(reproacache); end
     if isstruct(reproaworker), reproaworker = workerClass(reproaworker); end
+    
+    % if deployed and MATLAB -> create worker based on ENV
+    if ischar(reproaworker)
+        txt = getenv('PARALLEL_SERVER_STORAGE_LOCATION');
+        indASCII = regexp(txt,'(?<=\%)[0-9A-F]{2}');
+        chASCII = char(hex2dec(regexp(txt,'(?<=\%)[0-9A-F]{2}','match')));
+        for i = numel(indASCII):-1:1
+            txt(indASCII(i)-1:indASCII(i)+1) = chASCII(i);
+            txt(indASCII(i):indASCII(i)+1) = '';
+        end
+        logFile = [fullfile(regexp(txt,'(?<=:[A-Z]*{)[a-zA-Z0-9\./_-]*','match','once'),getenv('PARALLEL_SERVER_TASK_LOCATION')) '_log.txt'];
+        reproaworker = workerClass(logFile);
+    end
 
     if ~isa(reproacache,'cacheClass'), logging.error('Cannot find reproacache. When deployed, reproacache MUST be provided'); end
     if ~isa(reproaworker,'workerClass'), logging.error('Cannot find reproaworker. When deployed, reproaworker MUST be provided'); end

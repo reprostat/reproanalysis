@@ -7,7 +7,7 @@ classdef batchClass < queueClass
         waitBeforeNext = 60 % s to wait when no task or worker is available
     end
 
-    properties (Depend)
+    properties (Dependent)
         numWorkers
     end
 
@@ -16,31 +16,48 @@ classdef batchClass < queueClass
             this = this@queueClass(rap);
 
             poolProfile = strsplit(rap.directoryconventions.poolprofile,':');
-            if isOctave()
-                if ispc()
-                    if numel(poolProfile{1}) == 1 % pool profile is a full path
-                        poolProfile{1} = strjoin(poolProfile(1:2),':');
-                        poolProfile(2) = [];
-                    end
-                    this.pool = poolClass('local_PS'); % only local_PS is supported
-                elseif isunix()
-                    this.pool = poolClass(poolProfile{1});
-                elseif ismac()
-                    logging.error('NYI');
+            if ispc()
+                if numel(poolProfile{1}) == 1 % pool profile is a full path
+                    poolProfile{1} = strjoin(poolProfile(1:2),':');
+                    poolProfile(2) = [];
                 end
-                if numel(poolProfile) > 1, pool.submitArguments = poolProfile{2}; end
-            else
+                if isOctave()
+                    poolProfile{1} = 'local_PS';
+                else
+                    poolProfile{1} = 'local';
+                end
+            elseif ismac()
                 logging.error('NYI');
             end
+            
+            if isOctave()
+                this.pool = poolClass(poolProfile{1});
+                logging.info('pool %s is detected',this.pool.type);
+                if numel(poolProfile) > 1, this.pool.submitArguments = poolProfile{2}; end
 
-            this.pool.numWorkers = rap.options.parallelresources.numberofworkers;
-            this.pool.reqMemory = rap.options.parallelresources.memory;
-            this.pool.reqWalltime = rap.options.parallelresources.walltime;
-            this.pool.jobStorageLocation = this.queueFolder;
+                this.pool.numWorkers = rap.options.parallelresources.numberofworkers;
+                this.pool.reqMemory = rap.options.parallelresources.memory;
+                this.pool.reqWalltime = rap.options.parallelresources.walltime;
+                this.pool.jobStorageLocation = this.queueFolder;
+            else
+                this.pool = parcluster(poolProfile{1});
+                logging.info('pool %s is detected',this.pool.Type);
+                this.pool.JobStorageLocation = this.queueFolder;
+                switch class(this.pool)
+                    case 'parallel.cluster.Local'
+                        this.pool.NumWorkers = rap.options.parallelresources.numberofworkers;
+                    otherwise
+                        logging.error('NYI');
+                end
+            end            
         end
 
         function val = get.numWorkers(this)
-            val = this.pool.numWorkers;
+            if isOctave()
+                val = this.pool.numWorkers;
+            else
+                val = this.pool.NumWorkers;
+            end
         end
 
         % Run all tasks on the queue using batch
@@ -64,7 +81,7 @@ classdef batchClass < queueClass
                 if isOctave()
                     nAvailableWorkers = this.pool.numWorkers - this.pool.getJobState('running') - this.pool.getJobState('pending');
                 else
-                    logging.error('NYI');
+                    nAvailableWorkers = this.pool.NumWorkers - sum(arrayfun(@(j) any(strcmp(j.State,{'queued', 'pending', 'running'})), this.pool.Jobs));
                 end
                 if nAvailableWorkers == 0
                     logging.info('There is no available worker -> wait for 60s');
@@ -79,16 +96,16 @@ classdef batchClass < queueClass
                               'name',task.name,...
                               'additionalPaths',this.getAdditionalPaths(),...
                               'additionalPackages',reproacache('octavepackages'));
+                        this.taskFlags(i) = j.id;
                     else
-                        j = batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' reproacache 'reproaworker' '$thisworker'},...
-                              'name',task.name,...
+                        j = batch(this.pool,@runModule,1,{this.rap task.indTask 'doit' task.indices 'reproacache' struct(reproacache) 'reproaworker' '$thisworker'},...                              
                               'AutoAttachFiles', false, ...
                               'AutoAddClientPath', false, ...
                               'AdditionalPaths', this.getAdditionalPaths(),...
                               'CaptureDiary', true);
+                        this.taskFlags(i) = j.ID;
                     end
-                    this.reportTasks('submitted',i);
-                    this.taskFlags(i) = j.id;
+                    this.reportTasks('submitted',i);                    
 
                     pause(this.updateTime);
                 end
@@ -99,10 +116,10 @@ classdef batchClass < queueClass
                 % Monitor jobs
                 if isOctave()
                     jobState = cellfun(@(j) {j.id j.state}, this.pool.jobs(cellfun(@(j) ismember(j.id,this.taskFlags), this.pool.jobs)), 'UniformOutput',false);
-                    jobState = cat(1,jobState{:});
                 else
-                    logging.error('NYI');
+                    jobState = arrayfun(@(j) {j.ID j.State}, this.pool.Jobs(arrayfun(@(j) ismember(j.ID,this.taskFlags), this.pool.Jobs)), 'UniformOutput',false);
                 end
+                jobState = cat(1,jobState{:});
 
                 if ~any(cellfun(@(s) any(strcmp(s,{'finished' 'error'})), jobState(:,2)))
                     logging.info('All tasks are running');
@@ -113,12 +130,12 @@ classdef batchClass < queueClass
                 % done
                 %   - submitted % isDone
                 % failed
-                %   - submitted & error
+                %   - submitted & error/failed
                 %   - submitted & ~isDone & finished
                 doneTask = arrayfun(@(t) this.taskFlags(t)>0 && this.taskQueue{t}.isDone(), 1:numel(this.taskFlags));
                 failedTask = arrayfun(@(t) this.taskFlags(t)>0 && ...
-                                           (strcmp(jobState{[jobState{:,1}] == this.taskFlags(t),2},'error') | ...
-                                            (strcmp(jobState{[jobState{:,1}] == this.taskFlags(t),2},'finished') & ~this.taskQueue{t}.isDone())), ...
+                                           (any(strcmp(jobState{[jobState{:,1}] == this.taskFlags(t),2},{'failed','error'})) || ...
+                                            (strcmp(jobState{[jobState{:,1}] == this.taskFlags(t),2},'finished') && ~this.taskQueue{t}.isDone())), ...
                                       1:numel(this.taskFlags));
 
                 % Report reproa tasks
@@ -128,15 +145,30 @@ classdef batchClass < queueClass
                     this.reportTasks('failed',find(failedTask));
                     % - detailed report
                     for jID = this.taskFlags(failedTask)
-                        safeTaskPath = strrep(fullfile(this.pool.jobStorageLocation, this.pool.jobs{jID}.name,this.pool.jobs{jID}.tasks{1}.name),'\','\\');
-                        msg = sprintf('Job%d on %s had an error: %s\n',jID,safeTaskPath,this.pool.jobs{jID}.tasks{1}.errorMessage);
-                        error = this.pool.jobs{jID}.tasks{1}.error;
-                        if ~isempty(error)
-                            for e = 1:numel(error.stack)
-                                msg = [msg sprintf('in %s (line %d)\n', ...
-                                    strrep(error.stack(e).file,'\','\\'), error.stack(e).line)];
+                        if isOctave()
+                            safeTaskPath = strrep(fullfile(this.pool.jobStorageLocation, this.pool.jobs{jID}.name,this.pool.jobs{jID}.tasks{1}.name),'\','\\');
+                            msg = sprintf('Job%d on %s had an error: %s\n',jID,safeTaskPath,this.pool.jobs{jID}.tasks{1}.errorMessage);
+                            error = this.pool.jobs{jID}.tasks{1}.error;
+                            if ~isempty(error)
+                                for e = 1:numel(error.stack)
+                                    msg = [msg sprintf('in %s (line %d)\n', ...
+                                        strrep(error.stack(e).file,'\','\\'), error.stack(e).line)];
+                                end
                             end
                         else
+                            safeTaskPath = strrep(fullfile(this.pool.JobStorageLocation, this.pool.Jobs(jID).Name),'\','\\');
+                            msg = sprintf('Job%d on %s had an error: %s\n',jID,safeTaskPath,this.pool.Jobs(jID).Tasks(1).ErrorMessage);
+                            error = this.pool.Jobs(jID).Tasks(1).Error;
+                            if ~isempty(error)
+                                for e = 1:numel(error.stack)
+                                    msg = [msg sprintf('<a href="matlab: opentoline(''%s'',%d)">in %s (line %d)</a>\n', ...
+                                        strrep(error.stack(e).file,'\','\\'), error.stack(e).line,...
+                                        strrep(error.stack(e).file,'\','\\'), error.stack(e).line)];
+                                end
+
+                            end
+                        end
+                        if isempty(error)
                             msg = [msg 'No error file has been generated.'];
                         end
                         logging.info([msg '\n']);
@@ -154,7 +186,11 @@ classdef batchClass < queueClass
         function close(this,doCloseJobs)
             if nargin < 2 || doCloseJobs
                 logging.info('Cancelling jobs...');
-                cellfun(@(j) j.cancel(), this.pool.jobs);
+                if isOctave()
+                    cellfun(@(j) j.cancel(), this.pool.jobs);
+                else
+                    arrayfun(@(j) j.cancel(), this.pool.Jobs);
+                end
             end
             close@queueClass(this);
         end
@@ -177,6 +213,9 @@ classdef batchClass < queueClass
                     end
                 end
             end
+            
+            % clean
+            p(cellfun(@isempty, p)) = [];
         end
 
     end
