@@ -46,8 +46,8 @@ commands:
             sudo apt install python2 -y
             sudo ln -s /usr/bin/python2 /usr/bin/python
             python trigger_install.py
-            docker run --rm --network=host --env="HOME" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --workdir="$HOME/tools/spm12/src" docker.io/gnuoctave/octave:8.4.0 make PLATFORM=octave
-            docker run --rm --network=host --env="HOME" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --workdir="$HOME/tools/spm12/src" docker.io/gnuoctave/octave:8.4.0 make PLATFORM=octave install
+            docker run --rm --network=host --env="HOME" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --workdir="$HOME/tools/spm12/src" docker.io/reprostat/octave:8.4.0 make PLATFORM=octave
+            docker run --rm --network=host --env="HOME" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --workdir="$HOME/tools/spm12/src" docker.io/reprostat/octave:8.4.0 make PLATFORM=octave install
           environment:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
@@ -56,8 +56,8 @@ commands:
       - run:
           name: Run test
           command: |
-            echo "setenv('DEBIAN_FRONTEND','noninteractive'); system('apt update; apt install libopencv-dev libavformat-dev libavcodec-dev libswscale-dev -y'); graphics_toolkit('qt'); addpath('$GITHUB_WORKSPACE'); reproaSetup(); << parameters.command >>" > ~/test_run.m
-            docker run --privileged --rm --network=host --env="DISPLAY" --env="HOME" --env="XDG_RUNTIME_DIR" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --volume="/run/user:/run/user:rw" --workdir="$HOME" docker.io/gnuoctave/octave:8.4.0 octave ~/test_run.m
+            echo "setenv('DEBIAN_FRONTEND','noninteractive'); graphics_toolkit('qt'); addpath('$GITHUB_WORKSPACE'); reproaSetup(); << parameters.command >>" > ~/test_run.m
+            docker run --rm --user $(id -u):$(id -g) --network=host --env="DISPLAY" --env="HOME" --env="XDG_RUNTIME_DIR" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --volume="/run/user:/run/user:rw" --workdir="$HOME" docker.io/reprostat/octave:8.4.0 octave ~/test_run.m
           no_output_timeout: 1h
 
       - run:
