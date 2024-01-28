@@ -161,52 +161,42 @@ classdef reproaProv < handle
             end
         end
 
-        function id = addTask(this,taskInd)
-
+        function idInd = addTask(this,varargin)
             % Activity
-            if isstruct(taskInd) % Remote
-                logging.error('NYI');
-%                [tag, ind] = strtok_ptrn(taskInd.stagetag,'_0');
-%                name = ['Remote ' taskInd.host '_' tag];
-%                index = sscanf(ind,'_%d');
-%                loaded = load(taskInd.aapfilename); raap = loaded.rap;
-%
-%                if raap.internal.aapversion(1) ~= '5' % older reproa
-%                    raap = aa_convert_subjects(raap);
-%                end
-%
-%                iname = cell_index({raap.tasklist.main.module.name},tag);
-%                iindex = cell2mat({raap.tasklist.main.module(iname).index}) == index;
-%                rtaskInd = iname(iindex);
-%
-%                rsubj = find(strcmp({raap.acqdetails.subjects.subjname},aas_getsubjname(this.rap,this.indices(1))));
-%                currrap = aas_setcurrenttask(raap,rtaskInd,'subject',rsubj);
-%
-%                idName = ['idRemoteActivity_' tag];
-%                idAttr = {...
-%                    'rap',currrap,...
-%                    'Location',[taskInd.host fullfile(fileparts(taskInd.aapfilename),taskInd.stagetag)],...
-%                    };
-%
-%                checkInput = false; % do not check input
-            else
-                currTask = this.rap.tasklist.main(taskInd);
-                name = currTask.name;
-                index = currTask.index;
+            switch numel(varargin)
+                case 2 % remote
+                    [host currrap] = deal(varargin{:});
+                    modName = regexp(currrap.tasklist.currenttask.name,'.*(?=_0)','match','once');
+                    index = str2double(regexp(currrap.tasklist.currenttask.name,'(?<=_)[0-9]{5}','match','once'));
 
-                idName = ['idActivity_' name];
-                if ~isempty(currTask.extraparameters), sfx = currTask.extraparameters.rap.directoryconventions.analysisidsuffix;
-                else, sfx = '';
-                end
+                    name =  ['Remote ' host '_' regexp(currrap.tasklist.currenttask.name,'.*(?=_0)','match','once')];
+                    idName = ['idRemoteActivity_' modName];
+                    idAttr = {...
+                        'rap',currrap,...
+                        'Location',[host getPathByDomain(currrap,'study',[])],...
+                        };
 
-                currrap = setCurrenttask(this.rap,'task',taskInd,'subject',this.indices(1));
+                    checkInput = false; % do not check input
 
-                idAttr = {...
-                    'rap',currrap,...
-                    'Location',fullfile([this.studyPath sfx],sprintf('%s_%05d',name,index)),...
-                    };
+                case 1 % local
+                    taskInd = varargin{1};
+                    currTask = this.rap.tasklist.main(taskInd);
+                    name = currTask.name;
+                    index = currTask.index;
 
-                checkInput = true;
+                    idName = ['idActivity_' name];
+                    if ~isempty(currTask.extraparameters), sfx = currTask.extraparameters.rap.directoryconventions.analysisidsuffix;
+                    else, sfx = '';
+                    end
+
+                    currrap = setCurrenttask(this.rap,'task',taskInd,'subject',this.indices(1));
+
+                    idAttr = {...
+                        'rap',currrap,...
+                        'Location',fullfile([this.studyPath sfx],sprintf('%s_%05d',name,index)),...
+                        };
+
+                    checkInput = true;
             end
             idAttr = [idAttr,...
                 'TaskName',name,...
@@ -221,15 +211,9 @@ classdef reproaProv < handle
                     if iscell(inp.name), inp.name = inp.name{1}; end % renamed stream
                     istream = strsplit(inp.name,'.'); istream = istream{end};
 
-                    if isstruct(inp.taskindex) % remote src --> add
-                        logging.error('NYI');
-%                        rstage = currTask.remotestream(strcmp({currTask.remotestream.stream},istream));
-%                        if isempty(rstage), rstage = currTask.remotestream(strcmp({currTask.remotestream.stream},inp.name)); end  % try current specified steamname
-%%                         if isempty(rstage) % try any specified steamname
-%%                             [junk,rem] = strtok_ptrn({currTask.remotestream.stream},istream);
-%%                             rstage = currTask.remotestream(strcmp(rem,istream));
-%%                         end
-%                        srcIDInd = this.addTask(rstage);
+                    if isfield(inp,'path') && ~isempty(inp.path) % remote src --> add
+                        dat = load(fullfile(inp.path,'rap.mat'));
+                        srcIDInd = this.addTask(inp.host,setCurrenttask(dat.rap,'task',inp.taskindex));
                     else % local --> already added
                         idAttr = {...
                             'TaskName',currrap.tasklist.main(inp.taskindex).name,...

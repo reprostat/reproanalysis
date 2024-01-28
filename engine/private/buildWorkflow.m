@@ -28,6 +28,7 @@ function rap = buildWorkflow(rap,varargin)
 
         inputToOmit = []; % non-existing non-essential streams
         for indInput = 1:numel(rap.tasklist.main(indTask).inputstreams)
+            isRemote = false;
             inputstream = rap.tasklist.main(indTask).inputstreams(indInput);
             if iscell(inputstream.name), inputstream.name = inputstream.name{1}; end % ingore original name after renaming
             indSource = [];
@@ -46,23 +47,56 @@ function rap = buildWorkflow(rap,varargin)
                 indSource = find(arrayfun(@(i) sourceToCheck(i) && ~isempty(rap.tasklist.main(i).outputstreams) && any(arrayfun(@(s) any(strcmp(s.name,inputstream.name)),rap.tasklist.main(i).outputstreams)), 1:indTask-1),1,'last');
             end
 
-            if isempty(indSource) && ~isempty(rap.acqdetails.input.remotepipeline(1).path) % Check remote
-                logging.error('NYI')
-%                rap.tasklist.main(indTask).inputstreams(indInput).name = ;
-%                rap.tasklist.main(indTask).inputstreams(indInput).taskindex = -1;
-%                rap.tasklist.main(indTask).inputstreams(indInput).domain =
-%                rap.tasklist.main(indTask).inputstreams(indInput).modality =
-%                rap.tasklist.main(indTask).inputstreams(indInput).host =
-%                rap.tasklist.main(indTask).inputstreams(indInput).rapPath =
-%                rap.tasklist.main(indTask).inputstreams(indInput).allowCache =
+            if isempty(indSource) && ~isempty(rap.acqdetails.input.remoteworkflow(1).path) % Check remote
+                global reproacache
+
+                for r = 1:numel(rap.acqdetails.input.remoteworkflow)
+                    remote = reproacache(sprintf('input.remote%d',r));
+                    sourceToCheck = true(1,remote.maxtask);
+                    % branch-specific check - make sure that the local workflow has branch IDs corresponding to that of the remote workflow.
+                    if ~isempty(rap.tasklist.main(indTask).branchid)
+                        sourceToCheck = sourceToCheck & cellfun(@(b) startsWith(rap.tasklist.main(indTask).branchid,b), {remote.rap.tasklist.main(1:remote.maxtask).branchid});
+                    end
+                    % fully specified
+                    if exist('sourceTaskName','var')
+                        sourceToCheck = sourceToCheck & strcmp({remote.rap.tasklist.main(1:remote.maxtask).name},sourceTaskName) &...
+                                                        ([remote.rap.tasklist.main(1:remote.maxtask).index]==sourceTaskIndex);
+                    end
+
+                    if any(sourceToCheck)
+                        indSource = find(arrayfun(@(i) sourceToCheck(i) && ~isempty(remote.rap.tasklist.main(i).outputstreams) && any(arrayfun(@(s) any(strcmp(s.name,inputstream.name)),remote.rap.tasklist.main(i).outputstreams)), 1:remote.maxtask),1,'last');
+                    end
+
+                    if ~isempty(indSource)
+                        rap.tasklist.main(indTask).inputstreams(indInput).host = remote.host;
+                        rap.tasklist.main(indTask).inputstreams(indInput).path = remote.path;
+                        rap.tasklist.main(indTask).inputstreams(indInput).allowCache = remote.allowcache;
+                        isRemote = true; % indicate remote
+                        break;
+                    end
+                end
             end
 
             if ~isempty(indSource)
-                sourceName = rap.tasklist.main(indSource).name;
-                sourceIndex = rap.tasklist.main(indSource).index;
-                logging.info('Task %s input %s comes from %s which is %d step(s) prior',taskName,inputstream.name,sourceName,indTask-indSource);
+                if ~isRemote > 0 % local
+                    inputrap = rap;
+                    sourceName = inputrap.tasklist.main(indSource).name;
+                    logging.info('Task %s input %s comes from %s which is %d step(s) prior',taskName,inputstream.name,sourceName,indTask-indSource);
+                else % remote
+                    inputrap = remote.rap;
+                    sourceName = inputrap.tasklist.main(indSource).name;
+                    remoteName = sprintf('remote%d-%s',r,inputrap.directoryconventions.analysisid);
+                    logging.info('Task %s input %s comes from %s:%s',taskName,inputstream.name,remoteName,sourceName);
+                end
+                sourceIndex = inputrap.tasklist.main(indSource).index;
+
                 % write provenance
                 if argParse.Results.saveProvenance
+                    if isRemote
+                        fprintf(pfid,'"R%s" -> "R%s_%05d" [ label="connect" ];',remoteName,sourceName,sourceIndex);
+                        dotR(end+1) = cellstr(remoteName);
+                        fprintf(cfid,'%s\tconnect\t%s_%05d\n',remoteName,sourceName,sourceIndex);
+                    end
                     fprintf(pfid,'"R%s_%05d" -> "R%s_%05d" [ label="%s" ];',sourceName,sourceIndex,taskName,taskIndex,inputstream.name);
                     dotR(end+1) = cellstr(sprintf('%s_%05d',sourceName,sourceIndex));
                     dotR(end+1) = cellstr(sprintf('%s_%05d',taskName,taskIndex));
@@ -70,24 +104,26 @@ function rap = buildWorkflow(rap,varargin)
                 end
 
                 % Update inputstream
-                selectOutput = arrayfun(@(s) any(strcmp(s.name,inputstream.name)), rap.tasklist.main(indSource).outputstreams);
+                selectOutput = arrayfun(@(s) any(strcmp(s.name,inputstream.name)), inputrap.tasklist.main(indSource).outputstreams);
                 rap.tasklist.main(indTask).inputstreams(indInput).taskindex = indSource;
-                rap.tasklist.main(indTask).inputstreams(indInput).taskdomain = rap.tasklist.main(indSource).header.domain;;
-                rap.tasklist.main(indTask).inputstreams(indInput).streamdomain = rap.tasklist.main(indSource).outputstreams(selectOutput).domain;
-                rap.tasklist.main(indTask).inputstreams(indInput).modality = rap.tasklist.main(indSource).header.modality;
+                rap.tasklist.main(indTask).inputstreams(indInput).taskdomain = inputrap.tasklist.main(indSource).header.domain;
+                rap.tasklist.main(indTask).inputstreams(indInput).streamdomain = inputrap.tasklist.main(indSource).outputstreams(selectOutput).domain;
+                rap.tasklist.main(indTask).inputstreams(indInput).modality = inputrap.tasklist.main(indSource).header.modality;
 
-                % Update outputstream
-                if ~isfield(rap.tasklist.main(indSource).outputstreams(selectOutput),'taskindex') % first update
-                    rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex = indTask;
-                else
-                    if ~any(rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex==indTask)
-                        rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex(end+1) = indTask;
+                % Update local outputstream
+                if ~isRemote
+                    if ~isfield(inputrap.tasklist.main(indSource).outputstreams(selectOutput),'taskindex') % first update
+                        rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex = indTask;
+                    else
+                        if ~any(inputrap.tasklist.main(indSource).outputstreams(selectOutput).taskindex==indTask)
+                            rap.tasklist.main(indSource).outputstreams(selectOutput).taskindex(end+1) = indTask;
+                        end
                     end
                 end
             elseif ~inputstream.isessential
                 inputToOmit(end+1) = indInput;
             else ~argParse.Results.isProbe
-                logging.error('Task %s requires %s which is not an output of any task in the same branch. You might need to add it via the addInitialStream or from a remote pipeline.',taskName,inputstream.name);
+                logging.error('Task %s requires %s which is not an output of any task in the same branch. You might need to add it via the addInitialStream or from a remote workflow.',taskName,inputstream.name);
             end
         end
 

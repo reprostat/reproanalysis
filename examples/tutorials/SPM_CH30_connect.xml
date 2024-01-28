@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <!-- statistics -->
+    <module><name>reproa_firstlevelmodel</name></module>
+    <module><name>reproa_firstlevelcontrasts</name></module>
+    <module><name>reproa_firstlevelthreshold</name></module>
+</rap>

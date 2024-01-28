@@ -14,7 +14,7 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     % if delpoyed -> load from struct
     if isstruct(reproacache), reproacache = cacheClass(reproacache); end
     if isstruct(reproaworker), reproaworker = workerClass(reproaworker); end
-    
+
     % if deployed and MATLAB -> create worker based on ENV
     if ischar(reproaworker)
         txt = getenv('PARALLEL_SERVER_STORAGE_LOCATION');
@@ -80,12 +80,12 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                     content = vertcat(content{:});
                 end
 
-
-                if s.taskindex == -1 % remote
-                    logging.error('NYI');
+                if isfield(s,'path') && ~isempty(s.path) % remote
+                    dat = load(fullfile(s.path,'rap.mat'));
+                    srcrap = setCurrenttask(dat.rap,'task',s.taskindex);
+                else
+                    srcrap = setCurrenttask(rap,'task',s.taskindex);
                 end
-
-                srcrap = setCurrenttask(rap,'task',s.taskindex);
                 deps = getDependencyByDomain(rap,s.streamdomain,rap.tasklist.currenttask.domain,indices);
                 for d = 1:size(deps,1)
                     % Source

@@ -27,9 +27,11 @@ classdef reproaTaskClass
             % get dependency
             waitFor = {};
             for s = rap.tasklist.currenttask.inputstreams
-                deps = getDependencyByDomain(rap,s.taskdomain,rap.tasklist.currenttask.domain,this.indices);
-                for d = 1:size(deps,1)
-                    waitFor{end+1} = fullfile(getPathByDomain(rap,s.taskdomain,deps(d,:),'task',s.taskindex),reproacache('doneflag'));
+                if ~isfield(s,'path') || isempty(s.path) % skip for remote (already done)
+                    deps = getDependencyByDomain(rap,s.taskdomain,rap.tasklist.currenttask.domain,this.indices);
+                    for d = 1:size(deps,1)
+                        waitFor{end+1} = fullfile(getPathByDomain(rap,s.taskdomain,deps(d,:),'task',s.taskindex),reproacache('doneflag'));
+                    end
                 end
             end
 

@@ -50,6 +50,11 @@ function processWorkflow(rap)
         if strcmp(command{1},'doit')
             rap = updateWorkflow(rap,false);
 
+            % Empty remote rap(s) from cache
+            for r = 1:numel(rap.acqdetails.input.remoteworkflow)
+                reproacache.remove(sprintf('input.remote%d',r));
+            end
+
             % Create queue
             if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
                 logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);

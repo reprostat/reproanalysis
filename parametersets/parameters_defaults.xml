@@ -77,13 +77,12 @@
             <combinemultiple desc="Combine multiple visits per subjects (1) or treat them as separate subjects (0)?" ui="yesno">0</combinemultiple>
             <selectedruns desc="Allows subselection of a subset of series from the list" ui="custom"/>
             <correctEVfordummies desc="Automatically correct event onset time according for dummies?" ui="yesno">1</correctEVfordummies>
-            <remotepipeline>
-                <host desc="IP address of the remote machine. '' for local host"/>
-                <path desc="Full path to remote the pipeline. This folder MUST contain the rap.mat file."/>
+            <remoteworkflow>
+                <host desc="address of the remote machine. '' for local host"/>
+                <path desc="Full path to remote the workflow. This folder MUST contain the rap.mat file."/>
                 <allowcache desc="Allow local caching of files from remote server in reproa configurationdirectory (~/.reproa). If not empty, it overrides rap.directoryconventions.allowremotecache"/>
-                <maxtask desc="Last task (using task name and index, e.g., 'realign_00001') in the remote pipeline to be considered for sources. '' for all."/>
-                <checksourceconsistency desc="Check whether remote sources have changed since the last execution. Any change detected triggers the re-execution of the local target task."/>
-            </remotepipeline>
+                <maxtask desc="Last task (using task name and index, e.g., 'realign_00001') in the remote workflow to be considered for sources. '' for all."/>
+            </remoteworkflow>
         </input>
         <selectedruns desc="Allows subselection of a subset of series, usually during branching" ui="intarray"/>
 
