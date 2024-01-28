@@ -1,5 +1,13 @@
-function [visitNum, seriesNum] = getSeriesNumber(rap,subj,run)
-    runs = rap.acqdetails.subjects(subj).(strrep(getRunType(rap),'run','series'));
+function [visitNum, seriesNum] = getSeriesNumber(rap,subj,varargin)
+    switch numel(varargin)
+        case 1
+            runs = rap.acqdetails.subjects(subj).(strrep(getRunType(rap),'run','series'));
+            run = varargin{1}
+        case 2
+            runs = rap.acqdetails.subjects(subj).(varargin{1});
+            run = varargin{2};
+    end
+
 
     outRun = run;
     for visitNum = 1:numel(rap.acqdetails.subjects(subj).mridata)
@@ -11,7 +19,7 @@ function [visitNum, seriesNum] = getSeriesNumber(rap,subj,run)
         end
     end
 
-    if iscell(currRuns), seriesnum = runs{visitNum}{outRun};
-    else, seriesnum = runs{visitNum}(outRun);
+    if iscell(currRuns), seriesNum = runs{visitNum}{outRun};
+    else, seriesNum = runs{visitNum}(outRun);
     end
 end
