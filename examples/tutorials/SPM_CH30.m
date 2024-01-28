@@ -1,7 +1,7 @@
 % FILE: SPM_CH30.m
 %
 % This script runs the Auditory fMRI example from the SPM manual
-% (chapter 30, as of this writing). 
+% (chapter 30, as of this writing).
 %
 % It takes about 15-30 min. depending on your computer.
 %
@@ -32,7 +32,7 @@ reproaSetup();
 % -------------------------------------------------------------------------
 % 1) initializing the Repro Analysis Parameter (rap) structure
 % -------------------------------------------------------------------------
-%
+
 % A reproa script begins with a call to reproaworkflow to create an rap
 % structure. This function takes a tasklist file and (optionally) a parameterset
 % file. If no parameterset file is passed, the default parameterset file will be
@@ -57,7 +57,7 @@ rap = reproaWorkflow('SPM_CH30.xml');
 % ------------------------------------------------------------------------
 % 2) specify the data directory
 % -------------------------------------------------------------------------
-%
+
 % reproa will look for data to be used in a given analysis in
 %
 %   rap.directoryconventions.rawdatadir
@@ -85,7 +85,7 @@ end
 % ------------------------------------------------------------------------
 % 3) specify the results directory
 % -------------------------------------------------------------------------
-%
+
 % reproa will save analysis results to the directory:
 %
 %   rap.acqdetails.root/rap.directoryconventions.analysisid
@@ -156,7 +156,6 @@ rap.tasksettings.reproa_firstlevelthreshold.threshold.extent = 'FWE:0.05';
 % -------------------------------------------------------------------------
 % 5) process BIDS input
 % -------------------------------------------------------------------------
-
 rap = processBIDS(rap);
 
 % -------------------------------------------------------------------------
@@ -168,7 +167,6 @@ rap = processBIDS(rap);
 % that appear in your model using addContrast
 
 % note any calls to addContrast MUST appear *after* processBIDS
-
 rap = addContrast(rap, 'reproa_firstlevelcontrasts', '*', '*', 1, 'L_G_R','T');
 
 % -------------------------------------------------------------------------

@@ -1,38 +1,33 @@
-% FILE: SPM_CH30.m
+% FILE: SPM_CH30_connect.m
 %
-% This script runs the Auditory fMRI example from the SPM manual
-% (chapter 30, as of this writing).
+% This script runs the GLM analysis of the Auditory fMRI example from the SPM
+% manual (chapter 30, as of this writing).
 %
-% It takes about 15-30 min. depending on your computer.
+% It takes about 5-10 min. depending on your computer.
 %
 % Make a copy of this file to edit and put it somewhere in your MATLAB/Octave
-% path along with a copy of the task list SPM_CH30.xml
+% path along with a copy of the task list SPM_CH30_connect.xml
 %
 % Variable names in ALLUPPERCASE are placeholders that you will need to
 % customize before the script can be run.
 
 % Data
 %
-% This script uses the BIDS version of the chapter 30 data, available at:
+% This script connects to the SPM_CH30 workflow to retrieve the preprocessed
+% data. See SPM_CH30.m for further details.
 %
-%  https://www.fil.ion.ucl.ac.uk/spm/download/data/MoAEpilot/MoAEpilot.bids.zip
-%
-% Download & unzip this file and place the folder somewhere convenient
-% on your machine. Alternatively, reproa will attempt to automatically
-% download the data for you when the script runs (see comment at downloaddata
-% below).
-
 % -------------------------------------------------------------------------
 % 0) initialization
 % -------------------------------------------------------------------------
 
-% a call to reproaSetup is required as the first line of a reproa script
-% reproaSetup();
+% A call to reproaSetup is required as the first line of a reproa script.
+% However, if you run it after SPM_CH30.m, the you can leave it out.
+reproaSetup();
 
 % -------------------------------------------------------------------------
 % 1) initializing the Repro Analysis Parameter (rap) structure
 % -------------------------------------------------------------------------
-%
+
 % A reproa script begins with a call to reproaworkflow to create an rap
 % structure. This function takes a tasklist file and (optionally) a parameterset
 % file. If no parameterset file is passed, the default parameterset file will be
@@ -57,9 +52,13 @@ rap = reproaWorkflow('SPM_CH30_connect.xml');
 % ------------------------------------------------------------------------
 % 2) specify and connect the remote workflow(s)
 % -------------------------------------------------------------------------
+
+% This script assumes that the example script SPM_CH30.m has been successfully
+% executed. REMOTEPATH MUST point to the results directory containing rap.mat.
+REMOTEPATH = '/path/to/the finished/SPM_CH30';
 rap.acqdetails.input.remoteworkflow(1) = struct(...
    'host','',...
-   'path','/ceph/users/usq33871/projects/test_MoAEpilot_fmri',...
+   'path',REMOTEPATH,...
    'allowcache',0,...
    'maxtask',''...
    );
@@ -68,7 +67,7 @@ rap = reproaConnect(rap,'subjects','*','runs','*');
 % ------------------------------------------------------------------------
 % 3) specify the results directory
 % -------------------------------------------------------------------------
-%
+
 % reproa will save analysis results to the directory:
 %
 %   rap.acqdetails.root/rap.directoryconventions.analysisid
@@ -87,10 +86,10 @@ rap = reproaConnect(rap,'subjects','*','runs','*');
 
 % (it is generally good practice to keep results separate from the data)
 ROOT_PATH = '/path/to/dir/where/results_directory/will/be/created';
-rap.acqdetails.root = '/ceph/users/usq33871/projects';
+rap.acqdetails.root = ROOT_PATH;
 
 RESULTS_DIR = 'name_of_results_directory';
-rap.directoryconventions.analysisid = 'test_MoAEpilot_fmri_connected';
+rap.directoryconventions.analysisid = RESULTS_DIR;
 
 % -------------------------------------------------------------------------
 % 4) specify analysis options
@@ -118,6 +117,7 @@ rap.tasksettings.reproa_firstlevelthreshold.threshold.extent = 'FWE:0.05';
 % -------------------------------------------------------------------------
 % 5) modeling - contrast specification
 % -------------------------------------------------------------------------
+
 rap = addEvent(rap, 'reproa_firstlevelmodel', '*', '*', 'listening', 42:84:546, 42);
 
 % note any calls to addContrast MUST appear *after* processBIDS
