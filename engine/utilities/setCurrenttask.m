@@ -105,7 +105,7 @@ if argParse.Results.task
     % ..and for remote filesystem if we're using one
     remotefilesystem = rap.directoryconventions.remotefilesystem;
     if ~strcmp(remotefilesystem,'none')
-        rap.acqdetails.(remotefilesystem).root = getPathByDomain(rap,'study',[],'remote',remotefilesystem,'task',indTask);
+        rap.acqdetails.(remotefilesystem).root = getPathByDomain(rap,'study',[],'remoteFilesystem',remotefilesystem,'task',indTask);
     end
 
     % Parse selected_sessions into indices if necessary

@@ -5,11 +5,11 @@ function  localroot = getPathByDomain(rap,domain,indices,varargin)
 
     argParse = inputParser;
     argParse.addParameter('task',0,@isnumeric);
-    argParse.addParameter('remote','none',@ischar);
+    argParse.addParameter('remoteFilesystem','none',@ischar);
     argParse.parse(varargin{:});
 
     indTask = argParse.Results.task;
-    remotefilesystem = argParse.Results.remote;
+    remotefilesystem = argParse.Results.remoteFilesystem;
 
     % Numeric argument on the end corresponds to a specified input source
     if indTask ~= 0
