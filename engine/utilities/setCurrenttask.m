@@ -1,6 +1,6 @@
 % This is used to set up particular components of the rap structure that
 % change from module to module. It implements the ability to provide
-% module-specific parameters (e.g., for branched pipelines) by applying the
+% module-specific parameters (e.g., for branched workflows) by applying the
 % values in extraparameters.rap to the rap structure after setting it up
 %
 % function rap = setCurrenttask(rap,varargin)

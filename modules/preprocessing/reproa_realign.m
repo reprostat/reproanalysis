@@ -51,7 +51,7 @@ switch command
 
 		% Summary in case of more subjects
         if getNByDomain(rap,'subject') == 1
-            addReport(rap,'moco','<h4>No summary is generated: there is only one subject in the pipeline</h4>');
+            addReport(rap,'moco','<h4>No summary is generated: there is only one subject in the workflow</h4>');
         elseif subj == numel(rap.acqdetails.subjects) % last subject
             meas = {'Trans - x','Trans - y','Trans - z','Pitch','Roll','Yaw'};
 

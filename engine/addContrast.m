@@ -163,7 +163,7 @@
 %   rap = addContrast(rap, 'firstlevelcontrasts', '*', 'uniquebyrun', '+1*LC|-1*RC', 'LC_G_RC', 'T');
 %   rap = addContrast(rap, 'firstlevelcontrasts', '*', 'uniquebyrun', '+1*LN|-1*RN', 'LN_G_RN', 'T');
 %
-% Footnote: This is essential when including frame censoring in your pipeline, because (unlike the six motion paramters)
+% Footnote: This is essential when including frame censoring in your workflow, because (unlike the six motion paramters)
 % you don't know a priori how many nuisance events will appear in each run. As such, you would not be able to
 % define a contrast spanning multiple runs using a zero-padded vector.
 %
