@@ -77,7 +77,7 @@ function [s,w] = shell(cmd,varargin)
     % Run
     if ~quiet, logging.info('shell:%s', strrep([prefix argParse.Results.shellprefix cmd],'\','\\')); end
     if isempty(sh), [s, w] = system([prefix argParse.Results.shellprefix cmd]);
-    else, [s, w] = system([sh ' -c "' prefix argParse.Results.shellprefix cmd '"']);
+    else, [s, w] = system([sh ' -c "' strrep([prefix argParse.Results.shellprefix cmd],'"','\"') '"']);
     end
 
     % Special cases
