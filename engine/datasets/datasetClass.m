@@ -24,10 +24,17 @@ classdef datasetClass
 
         function download(this,demodir)
             % Download and unpack the data to a temp dir first
-            if ~strcmp(this.type,'AWS')
+            if ~startsWith(this.type,'AWS')
                 tgz_filename = [tempname this.type];
                 options = weboptions; options.CertificateFilename = ('');
                 tgz_filename = webSave(tgz_filename, this.URL, options);
+            else
+                this.type = strsplit(this.type,':');
+                switch numel(this.type)
+                    case 2, [this.type region] = deal(this.type{:});
+                    case 1, logging.error('AWS-type dataset requires region specified as "AWS:<region>"');
+                    otherwise, logging.error('Unrecognised type - "AWS:<region>" expected');
+                end
             end
             switch this.type
                 case {'.zip'}
@@ -39,14 +46,14 @@ classdef datasetClass
                         logging.error('AWS CLI is not installed. See <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI Installation</a>' );
                     end
                     % Retrieve common files (if exist)
-                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "task-*" --no-sign-request',this.URL,this.tmpdir,this.ID));
-                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "dwi*" --no-sign-request',this.URL,this.tmpdir,this.ID));
+                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "task-*" --region %s --no-sign-request',this.URL,this.tmpdir,this.ID,region));
+                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "dwi*" --region %s --no-sign-request',this.URL,this.tmpdir,this.ID,region));
 
                     if isempty(this.subset) % obtain the whole dataset
-                        shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --no-sign-request',this.URL,this.tmpdir,this.ID));
+                        shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --region %s --no-sign-request',this.URL,this.tmpdir,this.ID,region));
                     else % subset
                         for p = this.subset
-                            shell(sprintf('aws s3 cp %s/%s %s/%s/%s --quiet --recursive --no-sign-request',this.URL,p{1},this.tmpdir,this.ID,p{1}));
+                            shell(sprintf('aws s3 cp %s/%s %s/%s/%s --quiet --recursive --region %s --no-sign-request',this.URL,p{1},this.tmpdir,this.ID,p{1},region));
                         end
                     end
                 otherwise

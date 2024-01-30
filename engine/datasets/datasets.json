@@ -8,25 +8,25 @@
     {
         "ID": "ds000114",
         "URL": "s3://openneuro.org/ds000114",
-        "type": "AWS",
+        "type": "AWS:us-east-1",
         "modality": "MRI"
     },
     {
         "ID": "ds002737",
         "URL": "s3://openneuro.org/ds002737",
-        "type": "AWS",
+        "type": "AWS:us-east-1",
         "modality": "MRI"
     },
     {
-        "ID": "LEMON_EEG",
+        "ID": "LEMON-EEG",
         "URL": "s3://fcp-indi/data/Projects/INDI/MPI-LEMON/EEG_MPILMBB_LEMON/EEG_Raw_BIDS_ID",
-        "type": "AWS",
+        "type": "AWS:us-east-1",
         "modality": "MEEG"
     },
     {
-        "ID": "LEMON_MRI",
+        "ID": "LEMON-MRI",
         "URL": "s3://fcp-indi/data/Projects/INDI/MPI-LEMON/MRI_MPILMBB_LEMON/MRI_Raw",
-        "type": "AWS",
+        "type": "AWS:us-east-1",
         "modality": "MRI"
     }
 ]
