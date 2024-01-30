@@ -143,14 +143,14 @@ jobs:
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'},'whereToProcess','batch')
+          command: testRun('test_LEMON-MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'},'whereToProcess','batch')
 
   usecase_MATLAB_anat:
     executor: ubuntu    
     steps:
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_LEMON_MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
+          command: testRun('test_LEMON-MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
 
 workflows:
   test:

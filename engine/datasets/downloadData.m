@@ -19,9 +19,9 @@
 %     @item
 %     'ds002737'
 %     @item
-%     'LEMON_EEG'
+%     'LEMON-EEG'
 %     @item
-%     'LEMON_MRI'
+%     'LEMON-MRI'
 %     @end itemize
 %   @item
 %   @var{subset}: You may want to specify subset because the whole dataset is large. It is a cell array of path within the dataset.
