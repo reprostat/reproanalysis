@@ -1,6 +1,7 @@
 function testRun(testScript,taskList,varargin)
 
     argParse = inputParser;
+    argParse.addParameter('dataset','',@ischar);
     argParse.addParameter('subset',{},@iscell);
     argParse.addParameter('deletePrevious',false,@(x) islogical(x) || isnumeric(x));
     argParse.addParameter('whereToProcess','localsingle',@(x) ischar(x) && ismember(x, {'localsingle' 'batch'}));
@@ -8,12 +9,10 @@ function testRun(testScript,taskList,varargin)
 
     rap = reproaWorkflow([taskList '.xml']);
 
-    dataName = regexp(testScript,'(?<=_)[^_]*','match','once');
-
-    rap.directoryconventions.rawdatadir = fullfile(rap.directoryconventions.rawdatadir, dataName);
+    rap.directoryconventions.rawdatadir = fullfile(rap.directoryconventions.rawdatadir, argParse.Results.dataset);
     rap.directoryconventions.analysisid = testScript;
 
-    downloadData(rap, dataName, argParse.Results.subset);
+    downloadData(rap, argParse.Results.dataset, argParse.Results.subset);
 
     analysisDir = fullfile(rap.acqdetails.root,rap.directoryconventions.analysisid);
     if argParse.Results.deletePrevious && exist(analysisDir,'dir')

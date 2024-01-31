@@ -1,4 +1,4 @@
-function test_MoAEpilot_fmri(rap)
+function test_fmritask(rap)
     rap.acqdetails.input.correctEVfordummies = 0;
     rap = renameStream(rap,'reproa_realign_00001','input','weighting_image','fmri_sd');
     rap.tasksettings.reproa_realign.invertweighting = 1;

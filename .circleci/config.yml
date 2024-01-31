@@ -17,7 +17,7 @@ commands:
   testubuntuoctave:
     description: "Testing on Ubuntu using OCTAVE (docker)"
     parameters:
-      parameter_xml: 
+      parameter_xml:
         type: string
         default: parameters_circleci.xml
       load_fsl:
@@ -30,13 +30,13 @@ commands:
         type: string
         default: reproaClose()
     steps:
-      - run: 
+      - run:
           name: Checkout with submodules
           command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
       - run:
           name: Install tools and configure reproa
-          command: |          
+          command: |
             export DEBIAN_FRONTEND=noninteractive
             sudo apt remove needrestart
             mkdir ~/.reproa
@@ -51,7 +51,7 @@ commands:
           environment:
             LOAD_FSL: << parameters.load_fsl >>
             LOAD_FREESURFER: << parameters.load_freesurfer >>
-            PARAMETER_XML: << parameters.parameter_xml >>      
+            PARAMETER_XML: << parameters.parameter_xml >>
 
       - run:
           name: Run test
@@ -74,7 +74,7 @@ commands:
   testubuntumatlab:
     description: "Testing on Ubuntu using MATLAB"
     parameters:
-      parameter_xml: 
+      parameter_xml:
         type: string
         default: parameters_circleci.xml
       load_fsl:
@@ -87,7 +87,7 @@ commands:
         type: string
         default: reproaClose()
     steps:
-      - run: 
+      - run:
           name: Checkout with submodules
           command: git clone --recurse-submodule "$CIRCLE_REPOSITORY_URL" "$GITHUB_WORKSPACE"
 
@@ -125,32 +125,32 @@ commands:
 
 jobs:
   usecase_octave_SPMdemo:
-    executor: ubuntu    
+    executor: ubuntu
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_MoAEpilot_fmri','SPM_CH30','whereToProcess','batch')
+          command: testRun('test_fmritask','SPM_CH30','dataset','MoAEpilot','whereToProcess','batch')
 
   usecase_MATLAB_SPMdemo:
-    executor: ubuntu    
+    executor: ubuntu
     steps:
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_MoAEpilot_fmri','SPM_CH30')
+          command: testRun('test_fmritask','SPM_CH30','dataset','MoAEpilot')
 
   usecase_octave_anat:
-    executor: ubuntu    
+    executor: ubuntu
     steps:
       - testubuntuoctave:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_LEMON-MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'},'whereToProcess','batch')
+          command: testRun('test_anat','anat','dataset','LEMON-MRI','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'},'whereToProcess','batch')
 
   usecase_MATLAB_anat:
-    executor: ubuntu    
+    executor: ubuntu
     steps:
       - testubuntumatlab:
           parameter_xml: parameters_circleci_minimal_ubuntu.xml
-          command: testRun('test_LEMON-MRI_anat','anat','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
+          command: testRun('test_anat','anat','dataset','LEMON-MRI','subset',{'sub-032301/ses-01/anat', 'sub-032302/ses-01/anat'})
 
 workflows:
   test:

@@ -15,7 +15,7 @@ downloadData(rap, 'ds002737',  'sub-01/ses-03');
 
 %% LEMON_MRI
 rap.directoryconventions.rawdatadir = fullfile(dataroot, 'LEMON-MRI');
-downloadData(rap, 'LEMON-MRI',  'sub-032301/ses-01/anat');
+downloadData(rap, 'LEMON-MRI',  'sub-032301/ses-01');
 
 %% LEMON_EEG
 rap.directoryconventions.rawdatadir = fullfile(dataroot, 'LEMON-EEG');

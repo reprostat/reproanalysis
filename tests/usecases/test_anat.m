@@ -1,4 +1,4 @@
-function test_LEMON_MRI_anat(rap)
+function test_anat(rap)
     rap.tasksettings.reproa_fromnifti_structural.sfxformodality = 'T1w:T2w';
     rap.tasksettings.reproa_coregextended_t2.reorienttotemplate = 1;
 
