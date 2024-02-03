@@ -1,9 +1,10 @@
 % Determining the number of parts to a given domain - e.g., the number of subjects at the 'subject' level
 %
-% It also returns the indices of those parts. For example, if there are three runs per subject (N=3, I=[1 2 3]),
-% but one subject is missing the middle run (N=2, for that subject), then the indices for that subject should be [1 3]
+% It also returns the indices and the names of those parts. For example, if there are three runs per subject (N=3,
+% I=[1 2 3]) and one subject is missing the middle run (N=2, for that subject), then the indices for that subject is
+% [1 3].
 
-function [N, I] = getNByDomain(rap,domain,indices)
+function [N, I, names] = getNByDomain(rap,domain,indices)
 
 if nargin < 3, indices = []; end
 
@@ -47,9 +48,11 @@ switch domain
         rap = parseSelectedruns(rap,runs,0);
         I = intersect(rap.acqdetails.selectedruns,I);
         N = numel(I);
+        names = {runs(I).name};
 
     case 'subject'
-        N = numel(rap.acqdetails.subjects);
+        names = {rap.acqdetails.subjects.subjname};
+        N = numel(names);
         I = 1:N;
 
     case 'study'

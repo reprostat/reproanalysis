@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This module should not be added manually, but using the addData function -->
+<rap>
+    <header domain='?' desc='Add data to the workflow' modality='MRI'/>
+
+    <hpc>
+        <timeBase>0.2</timeBase>
+        <memoryBase>0.25</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>1</permanenceofoutput>
+
+    <settings>
+        <unzip desc='unzip data with this approach, empty means no unzip' options='[none]|gunzip' ui='optionlist'></unzip>
+
+        <data>
+            <domain/>
+            <indices/>
+            <streamname/>
+            <files/>
+        </data>
+    </settings>
+
+</rap>
+
