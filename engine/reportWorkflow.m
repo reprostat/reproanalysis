@@ -9,17 +9,14 @@ function reportWorkflow(study,tasksToReport)
 
     logging.info('Fetching report started...');
 
-    % Obtain study info
+    % Obtain study info - always reload to ensure we have updated rap
     switch class(study)
-        case 'struct', rap = study;
+        case 'struct', study = getPathByDomain(study,'study',[]);
         case 'char'
-            if exist(fullfile(study,'rap.mat')), load(fullfile(study,'rap.mat'),'rap');
-            else logging.error('No rap.mat found in %s',study);
-            end
         otherwise, logging.error('First input MUST be the rap structure or the study path.');
     end
-    if ~isfield(rap.internal,'matlabversion') % reload processsed rap
-        load(fullfile(getPathByDomain(rap,'study',[]),'rap.mat'),'rap')
+    if exist(fullfile(study,'rap.mat')), load(fullfile(study,'rap.mat'),'rap');
+    else logging.error('No rap.mat found in %s',study);
     end
 
     % Tasks to report
