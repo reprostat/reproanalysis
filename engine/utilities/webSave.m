@@ -1,4 +1,5 @@
 function fname = webSave(fname,url,options)
+    if nargin < 3, options = weboptions(); end
     if isOctave()
         fid = fopen(fname,'w');
         fputs(fid,webread(url,options));
