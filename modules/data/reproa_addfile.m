@@ -2,96 +2,75 @@ function rap = reproa_addfile(rap,command,varargin)
 
 switch command
     case 'doit'
-        streamname=aap.tasklist.currenttask.outputstreams.stream{1};
+        domain = rap.tasklist.currenttask.domain;
+        localPath = getPathByDomain(rap,domain,cell2mat(varargin));
 
-        foundmatch=false;
-        matches=aap.tasklist.currenttask.settings.match;
-        for matchind=1:length(matches)
-            % Find where this module is working
-            fti=matches(matchind).filenames;
-            switch(length(varargin))
-                case 0
-                    foundmatch=true;
-                    currpth=aas_getstudypath(aap);
-                case 1
-                    if (varargin{1}==matches(matchind).subject)
-                        foundmatch=true;
-                        currpth=aas_getsubjpath(aap,varargin{1});
-                        break;
-                    end
-                case 2
-                    if (varargin{1}==matches(matchind).subject && varargin{2}==matches(matchind).session)
-                        foundmatch=true;
-                        currpth=aas_getsesspath(aap,varargin{1},varargin{2});
-                        break;
-                    end
-            end
+        %% Select data
+        data = getSetting(rap,'data');
+        for iInd = 1:numel(varargin)
+            data = data(cellfun(@(ind) ind(iInd) == varargin{iInd},{data.indices}));
         end
 
-        if (~foundmatch)
-            aas_log(aap,false,'Warning: No match for import - do you have right number of aas_addinitialstream commands?');
-            return;
-        else
-            aas_log(aap,false,sprintf('Importing %d files',length(fti)));
-        end
-        % Copy the files to import into the current module's directory
-        allnames={};
-        localnames={};
-        for fileind=1:length(fti)
-            ext = spm_file(fti{fileind}, 'ext');
-            nme = spm_file(fti{fileind}, 'basename');
-            if ~isempty(ext), ext = ['.' ext]; end
-            while ~isempty(spm_file(nme, 'ext'))
-                newext = spm_file(nme, 'ext');
-                nme = spm_file(nme, 'basename');
-                ext = ['.' newext ext];
-            end
-            timesalready=sum([strcmp([nme ext],allnames)]);
-            allnames{end+1}=[nme ext];
-            localnames{fileind}=fullfile(currpth,sprintf('%s-%d%s',nme,timesalready,ext));
-            if aas_getsetting(aap,'unzip')
-                switch aas_getsetting(aap,'unzip')
-                    case 'gunzip'
-                        localnames{fileind} = strrep(localnames{fileind},'.gz','');
-                        aas_shell(sprintf('gunzip -dc %s > %s',fti{fileind},localnames{fileind}));
+        %% Process data
+        allFn = {};
+        for d = reshape(data,1,[])
+            % Add the files to the current task directory
+            localFn = {};
+            for iFn = 1:numel(d.files)
+                % - split filename
+                nme = spm_file(d.files{iFn}, 'basename');
+                allExt = {};
+                allExt{end+1} = spm_file(d.files{iFn}, 'ext');
+                while ~isempty(allExt{end})
+                    allExt{end+1} = spm_file(nme, 'ext');
+                    nme = spm_file(nme, 'basename');
                 end
-            else
-                copyfile(fti{fileind},localnames{fileind});
-            end
-        end
+                ext = strjoin(fliplr(allExt),'.');
 
-        % Describe the output stream
-        switch(length(varargin))
-            case 0
-                aap=aas_desc_outputs(aap,streamname,localnames);
-            case 1
-                aap=aas_desc_outputs(aap,varargin{1},streamname,localnames);
-            case 2
-                aap=aas_desc_outputs(aap,varargin{1},varargin{2},streamname,localnames);
+                % - check if any file with the name aleady has been added
+                nExist = sum(strcmp([nme ext],allFn));
+                allFn{end+1} = [nme ext];
+                localFn{end+1,1} = fullfile(localPath, sprintf('%s_%01d%s',nme,nExist,ext)); % assume <10 copies
+
+                % - copy file
+                webSave(localFn{end},d.files{iFn});
+                if getSetting(rap,'uncompress')
+                    switch allExt{1}
+                        case 'gz'
+                            fn = gunzip(localFn{end},localPath);
+                        case 'zip'
+                            fn = spm_file(unzip(localFn{end},localPath),'path',localPath);
+                        otherwise
+                            logging.warning(['Archive extension ' allExt{1} ' not supported.']);
+                    end
+                    delete(localFn{end});
+                    localFn(end) = [];
+                    localFn = [localFn; fn];
+                end
+            end
+
+            % Put data into stream
+            putFileByStream(rap,domain,cell2mat(varargin),d.streamname,localFn);
         end
 
     case 'checkrequirements'
-        streamname=aap.tasklist.currenttask.outputstreams.stream{1};
-        matches=aap.tasklist.currenttask.settings.match;
-        for matchind=1:length(matches)
+        %% Select data
+        data = getSetting(rap,'data');
+        for iInd = 1:numel(varargin)
+            data = data(cellfun(@(ind) ind(iInd) == varargin{iInd},{data.indices}));
+        end
+        if isempty(data), logging.error(['No data has been specified for ' ...
+            getTaskDescription(rap,cell2mat(varargin),'indices') ...
+            '.\n\tPlease check your user script!']); end
+        end
 
-            fti=matches(matchind).filenames;
-            if (iscell(fti))
-                for fileind=1:length(fti)
-                    if (~exist(fti{fileind},'file'))
-                        aas_log(aap,true,sprintf('File marked as initial import for stream %s not found: %s',streamname,fti{fileind}));
-                    end
-                end
-            else
-                for fileind=1:size(fti,1)
-                    if (~exist(fti(fileind,:),'file'))
-                        aas_log(aap,true,sprintf('File marked as initial import for stream %s not found: %s',streamname,fti(fileind,:)));
-                    end
-                end
+        %% Check data
+        for d = reshape(data,1,[])
+            for fn = reshape(d.files,1,[])
+                [~,s] = urlread(fn{1});
+                if ~s, logging.error(['Data ' fn{1} ' not found.']); end
             end
         end
-    otherwise
-        aas_log(aap,1,sprintf('Unknown task %s',task));
 end
 
 

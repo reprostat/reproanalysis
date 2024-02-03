@@ -11,10 +11,9 @@
     <permanenceofoutput>1</permanenceofoutput>
 
     <settings>
-        <unzip desc='unzip data with this approach, empty means no unzip' options='[none]|gunzip' ui='optionlist'></unzip>
+        <uncompress desc='unpack data based on its extension' ui='yesno'>0</uncompress>
 
         <data>
-            <domain/>
             <indices/>
             <streamname/>
             <files/>
