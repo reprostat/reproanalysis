@@ -24,13 +24,13 @@ function  localroot = getPathByDomain(rap,domain,indices,varargin)
         % Get the basic root directory for the current filesystem
         switch remotefilesystem
             case 'none'
-                if isfield(rap, 'internal')
+                if isfield(rap.internal,'rap_initial')
                     localroot = rap.internal.rap_initial.acqdetails.root;
                 else
                     localroot = rap.acqdetails.root;
                 end
             otherwise
-                if isfield(rap, 'internal')
+                if isfield(rap.internal,'rap_initial')
                     localroot = rap.internal.rap_initial.acqdetails.(remotefilesystem).root;
                 else
                     localroot = rap.acqdetails.(remotefilesystem).root;
@@ -38,14 +38,14 @@ function  localroot = getPathByDomain(rap,domain,indices,varargin)
         end
 
         % Get analysis id and analysis id suffix
-        if isfield(rap, 'internal')
+        if isfield(rap.internal,'rap_initial')
             analysisid = rap.internal.rap_initial.directoryconventions.analysisid;
         else
             analysisid = rap.directoryconventions.analysisid;
         end
         if isfield(module.extraparameters,'rap')
             analysisid_suffix = module.extraparameters.rap.directoryconventions.analysisidsuffix;
-        elseif isfield(rap, 'internal')
+        elseif isfield(rap.internal,'rap_initial')
             analysisid_suffix = rap.internal.rap_initial.directoryconventions.analysisidsuffix;
         else
             analysisid_suffix = rap.directoryconventions.analysisidsuffix;
