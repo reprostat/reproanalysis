@@ -1,5 +1,7 @@
 function rap = passStreams(rap,varargin)
-    in = cellfun(@(n) n{1}, arrayfun(@(s) cellstr(s.name),rap.tasklist.currenttask.inputstreams, 'UniformOutput',false),  'UniformOutput',false);
+    in = cellfun(@(n) regexp(n{1},'(?<=\.)?\w*$','match','once'),
+                 arrayfun(@(s) cellstr(s.name),rap.tasklist.currenttask.inputstreams, 'UniformOutput',false),...
+                 'UniformOutput',false);
     if ~isempty(varargin), in = setdiff(in,varargin{1}); end
     out = {rap.tasklist.currenttask.outputstreams.name}; if ~iscell(out), out = {out}; end
     for s = 1:numel(in)
