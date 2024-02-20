@@ -111,9 +111,18 @@ function rap = runModule(rap,indTask,command,indices,varargin)
                         end
                     end
 
-                    % Compare hashes of input at source and destination
                     if exist(destStreamDescriptor,'file')
+                        % Compare hashes of input at source and destination
                         destStream = readStream(destStreamDescriptor,rap.options.maximumretry);
+                        if ~isequal(fieldnames(srcStream),fieldnames(destStream))
+                            if (numel(fieldnames(srcStream)) == numel(fieldnames(destStream))) &&...
+                                size(content,2) == 2 % renamed content -> adjust srcStream
+                                    for s = 1:size(content,1)
+                                        srcStream.(content{s,2}) = srcStream.(content{s,1});
+                                        srcStream = rmfield(srcStream,content{s,1});
+                                    end
+                            end
+                        end
                         destHash = cellfun(@(f) destStream.(f).hash, fieldnames(srcStream),'UniformOutput',false);
                         try fileHash = cellfun(@(f) getHashByFiles(srcStream.(f).files,'localroot',destStreamPath), fieldnames(srcStream),'UniformOutput',false);
                         catch, fileHash = repmat({''},size(destHash));
