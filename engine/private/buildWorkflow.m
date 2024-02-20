@@ -28,6 +28,7 @@ function rap = buildWorkflow(rap,varargin)
 
         inputToOmit = []; % non-existing non-essential streams
         for indInput = 1:numel(rap.tasklist.main(indTask).inputstreams)
+            clear sourceTaskName
             isRemote = false;
             inputstream = rap.tasklist.main(indTask).inputstreams(indInput);
             if iscell(inputstream.name), inputstream.name = inputstream.name{1}; end % ingore original name after renaming
@@ -123,7 +124,7 @@ function rap = buildWorkflow(rap,varargin)
             elseif ~inputstream.isessential
                 inputToOmit(end+1) = indInput;
             else ~argParse.Results.isProbe
-                logging.error('Task %s requires %s which is not an output of any task in the same branch. You might need to add it via the addInitialStream or from a remote workflow.',taskName,inputstream.name);
+                logging.error('Task %s requires %s which is not an output of any task in the same branch. You might need to add it via the addFile or from a remote workflow.',taskName,inputstream.name);
             end
         end
 
