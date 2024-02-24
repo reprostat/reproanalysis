@@ -106,10 +106,14 @@ function rap = buildWorkflow(rap,varargin)
 
                 % Update inputstream
                 selectOutput = arrayfun(@(s) any(strcmp(s.name,inputstream.name)), inputrap.tasklist.main(indSource).outputstreams);
+                if sum(selectOutput) > 1 % multi-level stream -> select based on (expected) domain-specifiction
+                    selectOutput = selectOutput & strcmp({inputrap.tasklist.main(indSource).outputstreams.domain},inputstream.domain);
+                end
+                if sum(selectOutput) > 1, logging.error('%s:Ambiguous stream specification',mfilename); end
                 rap.tasklist.main(indTask).inputstreams(indInput).taskindex = indSource;
                 rap.tasklist.main(indTask).inputstreams(indInput).taskdomain = inputrap.tasklist.main(indSource).header.domain;
-                rap.tasklist.main(indTask).inputstreams(indInput).streamdomain = inputrap.tasklist.main(indSource).outputstreams(selectOutput).domain;
                 rap.tasklist.main(indTask).inputstreams(indInput).modality = inputrap.tasklist.main(indSource).header.modality;
+                rap.tasklist.main(indTask).inputstreams(indInput).streamdomain = inputrap.tasklist.main(indSource).outputstreams(selectOutput).domain;
 
                 % Update local outputstream
                 if ~isRemote

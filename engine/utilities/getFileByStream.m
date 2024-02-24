@@ -38,6 +38,11 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
         selectStream = arrayfun(@(s) any(strcmp(s.name,streamName)), rap.tasklist.currenttask.([io{1} 'streams']));
         if ~any(selectStream), continue;
         else
+            if sum(selectStream) > 1 % multi-level stream -> select based on (expected) domain-specifiction
+                selectStream = selectStream & strcmp({rap.tasklist.currenttask.([io{1} 'streams']).streamdomain},domain);
+            end
+            if sum(selectStream) > 1, logging.error('%s:Ambiguous stream specification',mfilename); end
+
             stream = rap.tasklist.currenttask.([io{1} 'streams'])(selectStream);
             streamName = stream.name; if iscell(streamName), streamName = streamName{1}; end
             switch io{1}
