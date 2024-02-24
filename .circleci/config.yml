@@ -7,7 +7,7 @@ orbs:
 executors:
   ubuntu:
     machine:
-      image: 'ubuntu-2204:2022.04.1' # if you change version you may need to update the command installing OCTAVE dependencies
+      image: 'ubuntu-2204:current' # if you change version you may need to update the command installing OCTAVE dependencies
     resource_class: medium
 
     environment:
