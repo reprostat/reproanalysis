@@ -65,7 +65,8 @@ function rap = reproa_segment(rap, command, subj)
             if ~exist('optimNn', 'file'), logging.error('optimNn is not found'); end
 
             %% Images (multichan)
-            img = arrayfun(@(s) getFileByStream(rap,'subject',subj,s.name), rap.tasklist.currenttask.inputstreams);
+            img = cellfun(@(sn) getFileByStream(rap,'subject',subj,sn{1}),...
+                           arrayfun(@(s) cellstr(s.name),rap.tasklist.currenttask.inputstreams, 'UniformOutput',false));
             % Check orientation
             [s, w] = spm_check_orientations(cell2mat(spm_vol(img)),false);
             if ~s
@@ -126,6 +127,7 @@ function rap = reproa_segment(rap, command, subj)
                     Y = spm_read_vols(V).*mask;
                     V.fname = spm_file(V.fname,'prefix','c');
                     spm_write_vol(V,Y);
+                    img{c} = V.fname;
                 end
             end
 
@@ -177,13 +179,13 @@ function rap = reproa_segment(rap, command, subj)
             end
 
             pfx = '';
-            if ~isempty(getSetting(rap,'writecombined')), pfx = ['c' pfx]; end
             if ~strcmp(cfgWrite.method,'none')
                 pfx = [defaults.normalise.write.prefix pfx];
                 if strcmp(cfgWrite.method,'push') && cfgWrite.preserve, pfx = ['m' pfx]; end
                 if sum(cfgWrite.fwhm.^2)~=0, pfx = ['s' pfx]; end
             end
-            if ~isempty(pfx)
+
+            if ~isempty(getSetting(rap,'writecombined')) || ~strcmp(cfgWrite.method,'none')
                 for c = 1:numel(img)
                     putFileByStream(rap,'subject',subj,...
                         rap.tasklist.currenttask.inputstreams(c).name,...
@@ -210,6 +212,15 @@ function rap = reproa_segment(rap, command, subj)
             end
             if ~exist(tpm, 'file'), logging.error('Specified TPM %s not found.', tpm); end
             rap.tasksettings.(regexp(rap.tasklist.currenttask.name,'.*(?=_[0-9]{5})','match','once'))(rap.tasklist.currenttask.index).segmentation.tpm = tpm;
+
+            % Match output to inputs
+            xml = readModule([regexp(rap.tasklist.currenttask.name,'.*(?=_0)','match','once') '.xml']);
+            for input = {xml.inputstreams.name}
+                if ~hasStream(rap,input{1})
+                    rap = renameStream(rap,rap.tasklist.currenttask.name,'output',input{1},[]);
+                    logging.info('REMOVED: %s output stream due to no matching input: %s', rap.tasklist.currenttask.name,input{1});
+                end
+            end
 
             % Remove "input as output" stream not to be created
             if strcmp(getSetting(rap,'writenormalised.method'),'none') && isempty(getSetting(rap,'writecombined'))
