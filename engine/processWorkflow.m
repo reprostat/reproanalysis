@@ -46,28 +46,33 @@ function processWorkflow(rap)
     spaceAvailable = jvFile.getUsableSpace/1024/1024/1024; % in GB
     if spaceAvailable < MINIMUMREQUIREDDISKSPACE, logging.error('Only %f GB of disk space free on analysis drive',spaceAvailable); end
 
-    for command = {'checkrequirements' 'doit'}
-        if strcmp(command{1},'doit')
-            rap = updateWorkflow(rap,false);
+    for command = {'checkrequirements_1' 'checkrequirements_2' 'doit'}
+        % Prolog
+        switch command{1}
+            case 'checkrequirements_2' % second check after updating dependencies
+                rap = updateWorkflow(rap,false);
 
-            % Empty remote rap(s) from cache
-            for r = 1:numel(rap.acqdetails.input.remoteworkflow)
-                reproacache.remove(sprintf('input.remote%d',r));
-            end
+            case 'doit'
+                rap = updateWorkflow(rap,false);
 
-            % Create queue
-            if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
-                logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
-            end
-            queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
+                % Empty remote rap(s) from cache
+                for r = 1:numel(rap.acqdetails.input.remoteworkflow)
+                    reproacache.remove(sprintf('input.remote%d',r));
+                end
+
+                % Create queue
+                if ~exist(sprintf('%sClass', rap.options.wheretoprocess),'file')
+                    logging.error('Unknown rap.options.wheretoprocess: %s\n',rap.options.wheretoprocess);
+                end
+                queue = feval(sprintf('%sClass', rap.options.wheretoprocess),rap);
         end
 
         for indTask = 1:numel(rap.tasklist.main)
             deps = getDependencyByDomain(rap,rap.tasklist.main(indTask).header.domain); % get all instances required by the study (destination domain)
             switch command{1}
-                case 'checkrequirements'
+                case {'checkrequirements_1' 'checkrequirements_2'}
                     % run each module once locally
-                    rap = runModule(rap,indTask,command{1},deps(1,:)); % we ran checkrequirements only once
+                    rap = runModule(rap,indTask,'checkrequirements',deps(1,:)); % we ran checkrequirements only once
                 case 'doit'
                     for depInd = 1:size(deps,1) % iterate through all instances
                         toDo = queue.addTask(indTask,deps(depInd,:));
