@@ -155,6 +155,6 @@ function rap = reproa_denorm(rap,command,varargin)
             % Ensure that output matches with input
             rap = passStreams(rap,{'inverse_deformationfield'...
                                    'darteltemplate' 'darteltemplatetomni' 'dartelflowfield'...
-                                   'meanfmri', 'meanfmri_nativ'});
+                                   'meanfmri', 'meanfmri_native'});
     end
 end

@@ -61,7 +61,7 @@ switch command
         end
         if isempty(data), logging.error(['No data has been specified for ' ...
             getTaskDescription(rap,cell2mat(varargin),'indices') ...
-            '.\n\tPlease check your user script!']); end
+            '.\n\tPlease check your user script!']);
         end
 
         %% Check data
