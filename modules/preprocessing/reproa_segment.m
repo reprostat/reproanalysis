@@ -65,8 +65,7 @@ function rap = reproa_segment(rap, command, subj)
             if ~exist('optimNn', 'file'), logging.error('optimNn is not found'); end
 
             %% Images (multichan)
-            img = cellfun(@(sn) getFileByStream(rap,'subject',subj,sn{1}),...
-                           arrayfun(@(s) cellstr(s.name),rap.tasklist.currenttask.inputstreams, 'UniformOutput',false));
+            img = cellfun(@(sn) getFileByStream(rap,'subject',subj,sn{1}),getStreamByName(rap,'streamList'));
             % Check orientation
             [s, w] = spm_check_orientations(cell2mat(spm_vol(img)),false);
             if ~s

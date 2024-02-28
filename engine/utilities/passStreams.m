@@ -1,10 +1,5 @@
 function rap = passStreams(rap,varargin)
-    if isOctave(), rePattern= '(?<=\.)?\w*$';
-    else, rePattern = '(?<=\.?)\w*$';
-    end
-    in = cellfun(@(n) regexp(n{1},rePattern,'match','once'),...
-                 arrayfun(@(s) cellstr(s.name),rap.tasklist.currenttask.inputstreams, 'UniformOutput',false),...
-                 'UniformOutput',false);
+    in = getStreamByName(rap,'streamList');
 
     if ~isempty(varargin), in = setdiff(in,varargin{1}); end
     out = {rap.tasklist.currenttask.outputstreams.name}; if ~iscell(out), out = {out}; end
