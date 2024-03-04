@@ -76,7 +76,7 @@ end
 for mInd = moduleindex
 
     % clear empty model (first call)
-    if isempty(rap.tasksettings.(modulename)(mInd).model.subject), rap.tasksettings.(modulename)(mInd).model(1) = []; end
+    if isempty(rap.tasksettings.(modulename)(mInd).model(1).subject), rap.tasksettings.(modulename)(mInd).model(1) = []; end
 
     whichmodel=[strcmp({rap.tasksettings.(modulename)(mInd).model.subject},subject)] & [strcmp({rap.tasksettings.(modulename)(mInd).model.fmrirun},run)];
     if ~any(whichmodel)

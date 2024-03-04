@@ -234,7 +234,7 @@ function rap = addContrast(rap, modulename, subjname, runspec, conspec, conname,
         % find model that corresponds and add contrast to this if it exists
         for mInd = moduleindex
             % clear empty model (first call)
-            if isempty(rap.tasksettings.(modulename)(mInd).contrast.subject), rap.tasksettings.(modulename)(mInd).contrast(1) = []; end
+            if isempty(rap.tasksettings.(modulename)(mInd).contrast(1).subject), rap.tasksettings.(modulename)(mInd).contrast(1) = []; end
 
             whichcontrast = strcmp({rap.tasksettings.(modulename)(mInd).contrast.subject},subj{1});
             if ~any(whichcontrast)
