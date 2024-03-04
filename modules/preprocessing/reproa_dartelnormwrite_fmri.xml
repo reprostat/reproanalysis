@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header mfile='reproa_normwrite' domain='fmrirun' desc='Applying normalisation estimates on fmri' modality='FMRI'/>
+
+    <hpc>
+        <timeBase>1</timeBase>
+        <memoryBase>0.5</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>2</permanenceofoutput>
+
+    <settings>
+        <write>
+            <vox desc='voxel size of normalised images'>1 1 1</vox>
+            <bb desc='bounding box of normalised images (-X X -Y Y -Z Z)'>-90 90 -126 90 -72 108</bb>
+        </write>
+        <preserve options='density|volume' ui='optionlist'>density</preserve>
+        <fwhm desc='FWHM (in mm) for smoothing DARTEL-normalized images'>1</fwhm>
+    </settings>
+
+    <inputstreams>
+        <stream domain='study' tobemodified='0'>darteltemplate</stream>
+        <stream domain='study' tobemodified='0'>darteltemplatetomni</stream>
+        <stream domain='subject' tobemodified='0'>dartelflowfield</stream>
+        <stream domain='fmrirun' tobemodified='0' isrenameable='1'>fmri</stream>
+    </inputstreams>
+
+    <outputstreams>
+        <stream domain='fmrirun' isrenameable='1'>fmri</stream>
+    </outputstreams>
+</rap>
