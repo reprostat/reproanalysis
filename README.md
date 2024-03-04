@@ -15,7 +15,7 @@ _reproa_ is highly modular and the processing steps can be easily rearranged and
 - Retrieval of supported datasets, including MoAEpilot (demo dataset for SPM manual, chapter 30), [OpenNEURO](https://openneuro.org) (datasets #114 and #2737 already included, and more can be added to the [dataset specification](https://github.com/reprostat/reproanalysis/blob/master/engine/datasets/datasets.json)), [MPI-LEMON](http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html)
 - Preprocessing anatomical images using DARTEL
 - Task-based fMRI, as descibed in SPM manual, chapter 30.
-- Extended analysis of multi-run task-based fMRI using dual-echo fieldmaps and DARTEL-based normalisation
+- Extended analysis of multi-run task-based fMRI using dual-echo fieldmaps, slicetiming, and DARTEL-based normalisation
 - Workflow connection: Analysis of a data already preprocessed using _reproa_
 
 ## Extensions
