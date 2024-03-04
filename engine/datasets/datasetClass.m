@@ -45,10 +45,19 @@ classdef datasetClass
                     if shell('which aws','quiet',true,'ignoreerror',true)
                         logging.error('AWS CLI is not installed. See <a href="https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html">AWS CLI Installation</a>' );
                     end
-                    % Retrieve common files (if exist)
-                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "task-*" --region %s --no-sign-request',this.URL,this.tmpdir,this.ID,region));
-                    shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --exclude "*" --include "dwi*" --region %s --no-sign-request',this.URL,this.tmpdir,this.ID,region));
+                    dirMake(fullfile(this.tmpdir,this.ID));
 
+                    % Retrieve common files
+                    urlParts = strsplit(this.URL,'/');
+                    bucket = urlParts{2};
+                    prefix = strjoin(urlParts(3:end),'/');
+                    [~,w] = shell(sprintf('aws s3api list-objects --bucket %s --prefix %s --region %s --no-sign-request',bucket,prefix,region),'quiet',1); resp = jsondecode(w);
+                    files = {resp.Contents(cellfun(@(k) sum(k=='/')==1, {resp.Contents.Key})).Key};
+                    for f = files
+                        shell(sprintf('aws s3api get-object --bucket %s --key %s --region %s --no-sign-request %s/%s/%s',bucket,f{1},region,this.tmpdir,this.ID,spm_file(f{1},'filename')),'quiet',1);
+                    end
+
+                    % Retrieve dataset
                     if isempty(this.subset) % obtain the whole dataset
                         shell(sprintf('aws s3 cp %s %s/%s --quiet --recursive --region %s --no-sign-request',this.URL,this.tmpdir,this.ID,region));
                     else % subset
