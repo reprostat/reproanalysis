@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <!-- data -->
+    <module><name>reproa_fromnifti_structural</name></module>
+    <module><name>reproa_fromnifti_fmri</name></module>
+    <module><name>reproa_fromnifti_fieldmap</name></module>
+
+    <!-- preprocessing -->
+    <module><name>reproa_fieldmap2VDM</name></module>
+    <module><name>reproa_realignunwarp</name></module>
+    <module><name>reproa_slicetiming</name></module>
+    <module><name>reproa_coregextended</name></module>
+    <module><name>reproa_segment</name></module>
+    <module><name>reproa_dartelcreatetemplate</name></module>
+    <module><name>reproa_dartelnormwrite_fmri</name></module>
+    <module><name>reproa_smooth_fmri</name></module>
+
+    <!-- statistics -->
+    <module><name>reproa_firstlevelmodel</name></module>
+    <module><name>reproa_firstlevelcontrasts</name></module>
+    <module><name>reproa_firstlevelthreshold</name></module>
+</rap>
