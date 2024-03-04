@@ -25,6 +25,8 @@ switch command
                 job.data.precalcfieldmap.magfieldmap = FM.magnitude;
             case 1 % precalcfieldmap
                 job.data.precalcfieldmap.precalcfieldmap = FM.fieldmap;
+            otherwise
+                logging.error('NYI: %d fieldmap files', numel(fieldnames(FM)))
         end
 
         % Load DICOM header
@@ -42,7 +44,10 @@ switch command
         job.sessname = 'session';
         job.anat = [];
 
-        job.defaults.defaultsval.epifm = lookFor(infoFM.SequenceName,'ep'); % works for Siemen, TODO: check for others
+        job.defaults.defaultsval.epifm = 0; % assume non-EPI-based fieldmap as default
+        if isfield(infoFM,'SequenceName') % works for Siemens, TODO: check for others
+            job.defaults.defaultsval.epifm = lookFor(infoFM.SequenceName,'ep');
+        end
         job.defaults.defaultsval.blipdir = (~lookFor(infoFmri.PhaseEncodingDirection,'-'))*2-1;
         job.defaults.defaultsval.maskbrain = getSetting(rap,'maskbrain',run);
         job.matchvdm = getSetting(rap,'matchvdm',run);
@@ -71,11 +76,10 @@ switch command
         end
 
         % Run
-        FieldMap_Run(job);
+        vdm = FieldMap_Run(job);
 
         % Save VDM
-        putFileByStream(rap,domain,[subj run],'fieldmap',...
-                        spm_select('FPList',fullfile(getPathByDomain(rap,domain,[subj run]),rap.directoryconventions.fieldmapsdirname),'^vdm.*nii'));
+        putFileByStream(rap,domain,[subj run],'fieldmap',vdm.vdmfile{1});
 
         % Create diagnostics
         registrationCheck(rap,domain,[subj run],...
@@ -85,8 +89,14 @@ switch command
         delete(spm_file(job.session.epi{1},'prefix','u'));
 
     case 'checkrequirements'
-        if lookFor(rap.tasklist.main(rap.tasklist.currenttask.inputstreams(strcmp({rap.tasklist.currenttask.inputstreams.name},'fieldmap')).taskindex).name,'topup') &&...
-            ~hasStream(rap,'dualpefieldmap_header')
-            rap = renameStream(rap,rap.tasklist.currenttask.name,'input','fieldmap_header','dualpefieldmap_header');
+        strFieldmap = getStreamByName(rap,'orig:fieldmap');
+        if strcmp(strFieldmap.name{1},'dualtefieldmap') % dual echo
+            if ~hasStream(rap,'dualtefieldmap_header')
+                rap = renameStream(rap,rap.tasklist.currenttask.name,'input','fieldmap_header','dualtefieldmap_header');
+            end
+        elseif lookFor(rap.tasklist.main(strFieldmap.taskindex).name,'topup') % dual phase-encoding
+            if ~hasStream(rap,'dualpefieldmap_header')
+                rap = renameStream(rap,rap.tasklist.currenttask.name,'input','fieldmap_header','dualpefieldmap_header');
+            end
         end
 end

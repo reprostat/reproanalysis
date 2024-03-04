@@ -34,32 +34,45 @@ function rap = reproa_fromnifti_fieldmap(rap,command,subj,run)
             end
 
             % Header
-            if isstruct(hdrFile)
-                dcmhdr{1} = hdrFile;
+            if ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'mat') % already processed by reproa
+                load(hdrFile,'dcmhdr');
             else
-                switch spm_file(hdrFile,'Ext')
-                    case 'mat'
-                        load(hdrFile,'dcmhdr');
-                    case 'json'
-                        hdrFile = loadjson(hdrFile);
-                        % convert timings to ms (DICOM default)
-                        for f = fieldnames(hdrFile)'
-                            if strfind(f{1},'Time'), dcmhdr{1}.(f{1}) = hdrFile.(f{1})*1000; end
-                        end
-                        if isfield(dcmhdr{1},'RepetitionTime'), dcmhdr{1}.volumeTR = dcmhdr{1}.RepetitionTime/1000; end
-                        if isfield(dcmhdr{1},'EchoTime1') && isfield(dcmhdr{1},'EchoTime2'), dcmhdr{1}.volumeTE = [dcmhdr{1}.EchoTime1 dcmhdr{1}.EchoTime2]/1000;
-                        elseif isfield(dcmhdr{1},'EchoTime'), dcmhdr{1}.volumeTE = dcmhdr{1}.EchoTime/1000;
-                        end
+                if isstruct(hdrFile)
+                    dcmhdr{1} = hdrFile;
+                elseif ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'json') % BIDS
+                    dcmhdr{1} = jsonread(hdrFile);
                 end
+                % convert timings to ms (consistent with DICOM)
+                for f = fieldnames(dcmhdr{1})'
+                    if strfind(f{1},'Time'), dcmhdr{1}.(f{1}) = dcmhdr{1}.(f{1})*1000; end
+                end
+                if isfield(dcmhdr{1},'RepetitionTime'), dcmhdr{1}.volumeTR = dcmhdr{1}.RepetitionTime/1000; end
+                if isfield(dcmhdr{1},'EchoTime'), dcmhdr{1}.volumeTE = dcmhdr{1}.EchoTime/1000; end
             end
+
             if isfield(dcmhdr{1},'volumeTE') && numel(dcmhdr{1}.volumeTE) == 2 % dual-echo
                 logging.info('Dual-echo fieldmap detected');
                 localPath = fullfile(localPath,'dualecho');
                 streamPrefix = 'dualte';
+                % heuristics based on filename following BIDS
+                switch numel(niftiFile)
+                    case 8 % (shortmag, shortphase, shortreal, shortimag, longmag, longphase, longreal, longimag) (GE)
+                        logging.error('NYI: GE fieldmap with %d files',numel(niftiFile))
+                    case 4 % (shortreal, shortimag, longreal, longimag) (Philips)
+                        logging.error('NYI: Philips fieldmap with %d files',numel(niftiFile))
+                    case 3 % (shortmag, longmag, phasediff) (Siemens)
+                        output.phasediff = niftiFile(lookFor(niftiFile,'phasediff'));
+                        [~,ord] = sort(dcmhdr{1}.volumeTE);
+                        output.shortmag = niftiFile(lookFor(niftiFile,sprintf('magnitude%d',ord(1))));
+                        output.longmag = niftiFile(lookFor(niftiFile,sprintf('magnitude%d',ord(2))));
+                    otherwise
+                        logging.error('NYI: %d fieldmap files',numel(niftiFile))
+                end
             elseif isfield(dcmhdr{1},'PhaseEncodingDirection') && numel(dcmhdr{1}.PhaseEncodingDirection) == 2 % dual phase-encoding
                 logging.info('Dual-phaseencoding fieldmap detected');
                 localPath = fullfile(localPath,'dualphaseencoding');
                 streamPrefix = 'dualpe';
+                output.files = niftiFile;
             else, logging.error('Fieldmap type cannot be detected!');
             end
             dirMake(localPath);
@@ -72,15 +85,18 @@ function rap = reproa_fromnifti_fieldmap(rap,command,subj,run)
             putFileByStream(rap,rap.tasklist.currenttask.domain,[subj run],[streamPrefix 'fieldmap_header'],fn);
 
             % Images
-            for f = 1:numel(niftiFile)
-                if strcmp(spm_file(niftiFile{f},'ext'),'gz')
-                    gunzip(niftiFile{f},localPath);
-                    niftiFile{f} = spm_file(niftiFile{f},'path',localPath,'ext','');
-                else
-                    movefile(niftiFile{f},localPath);
-                    niftiFile{f} = spm_file(niftiFile{f},'path',localPath);
+            for t = fieldnames(output)'
+                for f = 1:numel(output.(t{1}))
+                    if strcmp(spm_file(output.(t{1}){f},'ext'),'gz')
+                        gunzip(output.(t{1}){f},localPath);
+                        output.(t{1}){f} = spm_file(output.(t{1}){f},'path',localPath,'ext','');
+                    else
+                        movefile(output.(t{1}){f},localPath);
+                        output.(t{1}){f} = spm_file(output.(t{1}){f},'path',localPath);
+                    end
                 end
             end
-            putFileByStream(rap,rap.tasklist.currenttask.domain,[subj run],[streamPrefix 'fieldmap'],niftiFile);
+
+            putFileByStream(rap,rap.tasklist.currenttask.domain,[subj run],[streamPrefix 'fieldmap'],output);
     end
 end

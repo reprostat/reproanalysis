@@ -17,7 +17,7 @@
     <inputstreams>
         <stream domain="fmrirun" tobemodified="0" isessential="1">fmri</stream>
         <stream domain="fmrirun" tobemodified="0" isessential="1">fmri_header</stream>
-        <stream domain="fmrirun" tobemodified="0" isessential="1">fieldmap</stream>
+        <stream domain="fmrirun" tobemodified="0" isessential="1" isrenameable="1">fieldmap</stream>
         <stream domain="fmrirun" tobemodified="0" isessential="0" isrenameable="1">fieldmap_header</stream>
     </inputstreams>
 
