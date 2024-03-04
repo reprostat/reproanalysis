@@ -51,7 +51,9 @@ function [fileList hashList streamDescriptor] = getFileByStream(rap,domain,indic
             stream = rap.tasklist.currenttask.([io{1} 'streams'])(selectStream);
             streamName = stream.name; if iscell(streamName), streamName = streamName{1}; end
             switch io{1}
-                case 'input', streamDomain = stream.streamdomain;
+                case 'input'
+                    streamDomain = stream.streamdomain;
+                    if isempty(streamDomain), streamDomain = stream.domain; end
                 case 'output', streamDomain = stream.domain;
             end
         end
