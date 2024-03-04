@@ -12,6 +12,12 @@
         "modality": "MRI"
     },
     {
+        "ID": "ds000249",
+        "URL": "s3://openneuro.org/ds000249",
+        "type": "AWS:us-east-1",
+        "modality": "MRI"
+    },
+    {
         "ID": "ds002737",
         "URL": "s3://openneuro.org/ds002737",
         "type": "AWS:us-east-1",
