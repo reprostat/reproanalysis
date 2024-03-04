@@ -12,7 +12,7 @@ executors:
 
     environment:
       GITHUB_WORKSPACE: /home/circleci/tools/reproanalysis
-      OCTAVE_VERSION: "8.4.2"
+      OCTAVE_VERSION: "8.4.4"
 
 commands:
   testubuntuoctave:
