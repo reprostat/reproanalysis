@@ -150,7 +150,23 @@ switch command
 
             % combine if more than 1
             if numel(wImgFile) > 1
-                logging.error('NYI');
+                % - coreg all images to the first
+                global defaults; flags = defaults.coreg.estimate;
+                flags.cost_fun = 'ncc'; % within-modality
+                x = spm_coreg(wImgFile{1}, wImgFile(2:end), flags);
+                for f = 2:numel(wImgFile)
+                    spm_get_space(wImgFile{f}, inv(spm_matrix(x(f-1,:)))*spm_get_space(wImgFile{f}));
+                end
+
+                % - average (coregistered) images
+                for f = 1:numel(wImgFile)
+                    wY(:,:,:,f) = spm_read_vols(spm_vol(wImgFile{f}));
+                end
+                wY = mean(wY,4);
+                v = spm_vol(wImgFile{1});
+                v.fname = fullfile(getPathByDomain(rap,'subject',subj),'meanWeight.nii');
+                spm_write_vol(v, wY);
+                wImgFile{1} = v.fname;
             end
 
             estFlags.weight = wImgFile{1};

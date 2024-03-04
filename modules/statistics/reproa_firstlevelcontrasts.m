@@ -105,7 +105,7 @@ function rap = reproa_firstlevelcontrasts(rap,command,subj)
                                         convec = [convec runCon(indRun)*contrasts(cInd).vector];
                                     end
                                 elseif ischar(contrasts(cInd).vector) || iscell(contrasts(cInd).vector) % (cell)string
-                                    regInRun = SPM.xX.name(lookFor(SPM.xX.name, sprintf('Sn(%d)',indRunInSPM)));
+                                    regInRun = SPM.xX.name(lookFor(SPM.xX.name, sprintf('Sn(%d)',indRunInSPM)) & ~lookFor(SPM.xX.name, 'constant'));
                                     if numel(regInRun) ~= nRegInRun, logging.error('Mismatch between regressors and number of columns in run %d', indRun); end % this should never been triggered
                                     convec = [convec contrastSpecificationToContrastVector(regInRun,contrasts(cInd).vector,runCon(indRun))];
                                 else
@@ -174,7 +174,7 @@ end
 function convec = contrastSpecificationToContrastVector(regNames,conSpec,conWeigth)
     indFirstRegInRun = [find(diff([0 cellfun(@(r) sscanf(r,'Sn(%d)'), regNames)])) Inf];
 
-    convec = zeros(size(contrasts(cInd).vector,1), numel(regNames));
+    convec = zeros(size(conSpec,1), numel(regNames));
     if ~iscell(conSpec), conSpec = cellstr(conSpec); end
     for indRow = 1:numel(conSpec)
         for regSpec = strsplit(conSpec{indRow},'|')
@@ -259,12 +259,12 @@ function h = diagnostics(rap,subj)
     % Resize slice display for optimal fit
     nMARGIN = 0.1;
     NPLOTPERHEIGHT = 20; % 20 contrasts per screen height
-    fig = figure;
     windowSize = get(0,'ScreenSize');
     pixMARGIN = windowSize(4)*nMARGIN;
-    windowSize(4) = 2*pixMARGIN+(windowSize(4)-2*pixMARGIN)/NPLOTPERHEIGHT*numel(cons);
-    set(fig,'Position', windowSize);
+    windowSize(4) = round(2*pixMARGIN+(windowSize(4)-2*pixMARGIN)/NPLOTPERHEIGHT*numel(cons));
     nHMARGIN = pixMARGIN/windowSize(4);
+
+    fig = figure('Position', windowSize);
 
     % - get Text size
     ht = text(0,0,nameCons,'FontSize',12,'FontWeight','Bold','interpreter','none');
@@ -272,7 +272,7 @@ function h = diagnostics(rap,subj)
     tSize = get(ht,'Extent'); tWidth = tSize(3);
     delete(ht);
 
-    subplot('Position', [tWidth+nMARGIN nHMARGIN 0.6-tWidth-nMARGIN 1-2*nHMARGIN]);
+    subplot('Position', [tWidth+nMARGIN nHMARGIN 0.69-tWidth-nMARGIN 1-2*nHMARGIN]);
     imagesc(columnsCon);
     colormap(vertcat(gradCreate([0 0 1],[1 1 1],32),gradCreate([1 1 1],[1 0 0],32)));
     caxis([-1 1] * max(abs(columnsCon(:))));
@@ -281,21 +281,22 @@ function h = diagnostics(rap,subj)
         'XAxisLocation','top', 'XTickLabelRotation',90);
     set(gca,'FontSize',12,'FontWeight','Bold','TickLabelInterpreter','none');
 
-    subplot('Position', [0.6 nHMARGIN 0.4-nMARGIN 1-2*nHMARGIN]);
+    subplot('Position', [0.7 nHMARGIN 0.3-nMARGIN 1-2*nHMARGIN]);
     set(gca, 'YTick', 1:numel(cons), 'YTickLabel','');
     set(gca,'FontSize',12,'FontWeight','Bold');
     hold on;
     cmap = colorcube(numel(cons));
 
     if getSetting(rap,'diagnostics.estimateefficiency')
+        xOffset = floor(min(log(effic)));
         for cInd = 1:numel(cons)
-            barh(numel(cons) - cInd + 1, log(effic(cInd)), 'FaceColor',cmap(cInd,:));
+            barh(numel(cons) - cInd + 1, log(effic(cInd))-xOffset, 0.5, 'FaceColor',cmap(cInd,:));
         end
         ylim([0.5 numel(cons)+0.5])
         xlabel('Efficiency')
         Xs = xlim;
         efficiencyVals = gradCreate(Xs(1),Xs(2),5);
-        set(gca, 'Xtick', efficiencyVals, 'XtickLabel', sprintf('%1.1f|',exp(efficiencyVals)))
+        set(gca, 'Xtick', efficiencyVals, 'XtickLabel', sprintf('%1.1f|',exp(efficiencyVals+xOffset)))
     end
 
     fname = fullfile(getPathByDomain(rap,'subject',subj),['diagnostic_' rap.tasklist.currenttask.name '_contrasts.jpg']);
