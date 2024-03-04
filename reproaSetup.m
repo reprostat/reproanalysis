@@ -4,7 +4,13 @@ function reproaSetup(varargin)
 % reproaSetup(Name,Value)
 % INPUT
 %   Name - Value
-%       'extensions' - extensionList, a cell array of reproa extensions to add
+%       'extensions' - extensionList, a cell array of reproa extensions to add.
+%
+% Current list of extensions:
+%   - fconn         - functional connectivity
+%   - freesurfer    - integrating FreeSurfer
+%   - fsl           - integrating FSL and other related tools, such as ICA-AROMA
+
 
     % Check Octave depedencies
     REQUIREDOCTAVEPACKAGES = {...

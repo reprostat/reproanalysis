@@ -20,8 +20,11 @@
 % 0) initialization
 % -------------------------------------------------------------------------
 
-% A call to reproaSetup is required as the first line of a reproa script.
-% However, if you run it after SPM_CH30.m, the you can leave it out.
+% a call to reproaSetup is required as the first line of an reproa script if
+%    - you just opened MATLAB/OCTAVE
+%    - reproa has been closed by calling reproaClose()
+%    - you need different extensions; in this case you need to call reproaClose() first
+% If you run this script after SPM_CH30.m, then it is the second case
 reproaSetup();
 
 % -------------------------------------------------------------------------

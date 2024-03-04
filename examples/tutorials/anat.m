@@ -13,22 +13,25 @@
 % Data
 %
 % This script uses a single session of four subjects of the LEMON dataset
-% (sub-032301/ses-01/anat, sub-032302/ses-01/anat, sub-032303/ses-01/anat, 
+% (sub-032301/ses-01/anat, sub-032302/ses-01/anat, sub-032303/ses-01/anat,
 % sub-032304/ses-01/anat) available in BIDS at:
-% 
+%
 % http://fcon_1000.projects.nitrc.org/indi/retro/MPI_LEMON.html.
 %
-% You can download and place the dataset somewhere convenient on your machine. 
+% You can download and place the dataset somewhere convenient on your machine.
 % You do not have to download the whole data for the demo, just the
-% ses-01/anat of the first four partiipants. Alternatively, reproa will attempt 
-% to automatically download the data for you when the script runs (see comment 
+% ses-01/anat of the first four partiipants. Alternatively, reproa will attempt
+% to automatically download the data for you when the script runs (see comment
 % at downloaddata below).
 
 % -------------------------------------------------------------------------
 % 0) initialization
 % -------------------------------------------------------------------------
 
-% a call to reproaSetup is required as the first line of an reproa script
+% a call to reproaSetup is required as the first line of an reproa script if
+%    - you just opened MATLAB/OCTAVE
+%    - reproa has been closed by calling reproaClose()
+%    - you need different extensions; in this case you need to call reproaClose() first
 reproaSetup();
 
 % -------------------------------------------------------------------------
@@ -124,8 +127,8 @@ rap.directoryconventions.analysisid = RESULTS_DIR;
 % in your parameter file or taken from the module header (see any XML file in
 % the "modules" directory of the reproa distribution for examples)
 
-% Since the LEMON dataset has both T1w and T2w images, we MUST indicate it in 
-% the data import module reproa_fromnifti_structural. It will also inform 
+% Since the LEMON dataset has both T1w and T2w images, we MUST indicate it in
+% the data import module reproa_fromnifti_structural. It will also inform
 % processBIDS, so it will also look for (only) these modalities
 rap.tasksettings.reproa_fromnifti_structural.sfxformodality = 'T1w:T2w';
 
@@ -137,7 +140,7 @@ rap.tasksettings.reproa_coregextended_t2.reorienttotemplate = 1;
 % normalised output from SPM' Unified Segment/Normalise
 rap.tasksettings.reproa_segment.writenormalised.method = 'none';
 
-% A minimum smoothing is REQUIRED to mitigate the nonlinear transformation 
+% A minimum smoothing is REQUIRED to mitigate the nonlinear transformation
 % artefacts. One can use this step to set the smoothness of the images to the
 % desired level, in which case the last smoothing task SHOULD be removed.
 % Running the smoothing seperately, however, allows to demonstrate the use of
@@ -150,7 +153,7 @@ rap.tasksettings.reproa_dartelnormwrite_segmentations.fwhm = [1 1 1];
 % by total GM and WM volume, respectively. An alternative solution is to use TIV
 % for both (scaleby = 'TIV').
 rap.tasksettings.reproa_scale_segmentations.scaleby = 'each';
-% Using the SPM estimate rather than directly calculating them from the 
+% Using the SPM estimate rather than directly calculating them from the
 % segmentation volumes is usually more robust.
 rap.tasksettings.reproa_scale_segmentations.estimatefrom = 'spm';
 
