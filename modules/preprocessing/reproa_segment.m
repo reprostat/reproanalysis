@@ -215,7 +215,7 @@ function rap = reproa_segment(rap, command, subj)
             % Match output to inputs
             xml = readModule([regexp(rap.tasklist.currenttask.name,'.*(?=_0)','match','once') '.xml']);
             for input = {xml.inputstreams.name}
-                if ~hasStream(rap,input{1})
+                if ~hasStream(rap,input{1}) && any(strcmp({rap.tasklist.currenttask.outputstreams.name},input{1}))
                     rap = renameStream(rap,rap.tasklist.currenttask.name,'output',input{1},[]);
                     logging.info('REMOVED: %s output stream due to no matching input: %s', rap.tasklist.currenttask.name,input{1});
                 end
