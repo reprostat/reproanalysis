@@ -141,7 +141,7 @@ for subj = SUBJ
     if ismember('func',MODs) && ismember('bold',SFXs)
         for task = bids.query(BIDS, 'tasks')
             for sessInd = 1:numel(SESS)
-                RUNS = bids.query(BIDS, 'runs', 'ses', SESS{sessInd}, 'task', task{1}); if isempty(RUNS), RUNS = {''}; end
+                RUNS = bids.query(BIDS, 'runs', 'ses',SESS{sessInd}, 'task',task{1}); if isempty(RUNS), RUNS = {''}; end
 
                 for run = RUNS
                     if ~isempty(run{1})
@@ -158,13 +158,14 @@ for subj = SUBJ
 
                     rap = addRun(rap, 'fmri', taskname);
 
-                    image = bids.query(BIDS, 'data', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'bold', 'task', task{1});
+                    image = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix', 'bold', 'task',task{1}, 'run',run{1});
                     if isempty(image)
                         logging.warning('subj-%s/ses-%s has no %s',subj{1},SESS{sessInd},task{1});
                         continue;
                     end
-                    hdr = bids.query(BIDS, 'metadata', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'bold', 'task', task{1}); if isempty(fieldnames(hdr)), hdr = []; end
-                    eventfile = bids.query(BIDS, 'data', 'sub', subj{1}, 'ses',SESS{sessInd}, 'suffix', 'events', 'task', task{1});
+                    hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','bold', 'task',task{1}, 'run',run{1}); if isempty(fieldnames(hdr)), hdr = []; end
+                    eventfile = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','events', 'task',task{1}, 'run',run{1});
+                    hdrEvent = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','events', 'task',task{1}, 'run',run{1}); if isempty(fieldnames(hdrEvent)), hdrEvent = []; end
 
                     if BIDSsettings.combinemultiple
                         fmriimages = horzcat(fmriimages,struct('fname',image{1},'hdr',hdr));
@@ -197,6 +198,13 @@ for subj = SUBJ
                             % process events
                             EVENTS = bids.util.tsvread(eventfile{1});
                             allEvents = EVENTS.(BIDSsettings.regcolumn);
+                            if isnumeric(allEvents) % number MUST be converted to string
+                                if isstruct(hdrEvent) && isfield(hdrEvent,BIDSsettings.regcolumn) && isfield(hdrEvent.(BIDSsettings.regcolumn),'Levels') % based on hdrEvent
+                                    allEvents = arrayfun(@(t) safeString(hdrEvent.(BIDSsettings.regcolumn).Levels.(sprintf('x%d',t))), allEvents, 'UniformOutput',false);
+                                else % last resort
+                                    allEvents = arrayfun(@(t) sprintf('trial%04d',t), allEvents, 'UniformOutput',false);
+                                end
+                            end
                             eventNames = unique(allEvents);
                             for n = 1:numel(eventNames)
                                 indEvent = strcmp(allEvents,eventNames{n});
@@ -239,7 +247,7 @@ for subj = SUBJ
                 images{2} = strrep(images{1},'phasediff','magnitude1');
                 images{3} = strrep(images{1},'phasediff','magnitude2');
                 if ~exist(images{3},'file'), images(end) = []; end
-                hdr = jsonread(strrep(images{1},'.nii.gz','.json'));
+                hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'modality','fmap', 'suffix','phasediff');
                 hdr.EchoTime = [hdr.EchoTime1 hdr.EchoTime2];
                 runName = '';
                 if isfield(hdr,'IntendedFor'), runName = regexp(hdr.IntendedFor,'(?<=task-)[^_]*','match','once'); end
@@ -338,3 +346,9 @@ end
 
 %% Clean
 if exist('tbSPM','var'), tbSPM.unload(); end
+end
+
+function str = safeString(str)
+    str = strrep(str,' ','_');
+end
+
