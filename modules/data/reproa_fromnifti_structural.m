@@ -80,7 +80,7 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
                     header{s} = [];
                     if ~isempty(hdrFile)
                         if ischar(hdrFile) && strcmp(spm_file(hdrFile,'ext'),'mat') % already processed by reproa
-                            tmp = load(hdrFile); header{s} = tmp.header;
+                            load(hdrFile,'header');
                         else
                             if isstruct(hdrFile)
                                 header{s} = hdrFile;
