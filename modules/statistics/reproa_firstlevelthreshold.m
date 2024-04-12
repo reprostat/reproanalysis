@@ -183,7 +183,7 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
                     % - draw
                     axis = {'sagittal','coronal','axial'};
                     for a = 1:3
-                        [fig, v] = mapOverlay(getSetting(rap,'overlay.background'),fnThr(c),axis{a},slims(a,1):getSetting(rap,'overlay.distancebetweenslices'):slims(a,2));
+                        [fig, v] = mapOverlay(getSetting(rap,'overlay.background'),{{fnThr{c} [] [1e-6 prctile(Yepi(Yepi>0), 98)]}},axis{a},slims(a,1):getSetting(rap,'overlay.distancebetweenslices'):slims(a,2));
 
                         if ~isempty(getSetting(rap,'overlay.description'))
                             annotation('textbox',[0 0.5 0.5 0.5],'String',getSetting(rap,'overlay.description'),'FitBoxToText','on','fontweight','bold','color','y','fontsize',18,'backgroundcolor','k');
