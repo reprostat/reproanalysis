@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rap>
+    <header mfile="reproa_timeseriesqc" domain="fmrirun" desc="fMRI QC" modality="FMRI"/>
+
+    <hpc>
+        <timeBase>0.5</timeBase>
+        <memoryBase>1</memoryBase>
+    </hpc>
+
+    <permanenceofoutput>1</permanenceofoutput>
+
+    <inputstreams>
+        <stream domain="fmrirun" tobemodified="0">fmri</stream>
+        <stream domain="fmrirun" isessential="0" tobemodified="0">movementparameters</stream>
+    </inputstreams>
+
+    <outputstreams>
+        <stream domain="fmrirun">fmri_qc</stream>
+    </outputstreams>
+</rap>

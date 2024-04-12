@@ -5,11 +5,13 @@
     <module><name>reproa_fromnifti_fmri</name></module>
 
     <!-- preprocessing -->
+    <module><name>reproa_timeseriesqc_fmri</name></module>
     <module><name>reproa_realign</name></module>
     <module><name>reproa_coregextended</name></module>
     <module><name>reproa_segment</name></module>
     <module><name>reproa_normwrite_fmri</name></module>
     <module><name>reproa_smooth_fmri</name></module>
+    <module><name>reproa_timeseriesqc_fmri</name></module>
 
     <!-- statistics -->
     <module><name>reproa_firstlevelmodel</name></module>
