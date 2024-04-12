@@ -49,7 +49,7 @@ function rap = reproa_timeseriesqc(rap,command,varargin)
             run_timeseriesqc('run','timeseriesqc_plot',job);
             for f = [1 2]
                 spm_figure('Close',spm_figure('GetWin', sprintf('Graphics%d',f)));
-                movefile(spm_file(job.fnQC,'suffix',sprintf('_%02d',f),'ext','jpg'),...
+                movefile(spm_file(char(job.fnQC),'suffix',sprintf('_%02d',f),'ext','jpg'),...
                          fullfile(localRoot,sprintf('diagnostic_%s_plot_%02d.jpg',rap.tasklist.currenttask.name,f)));
             end
 
