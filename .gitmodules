@@ -7,3 +7,6 @@
 [submodule "external/bids-matlab"]
 	path = external/bids-matlab
 	url = https://github.com/bids-standard/bids-matlab.git
+[submodule "external/timeseriesqc"]
+	path = external/timeseriesqc
+	url = https://github.com/reprostat/timeseriesqc
