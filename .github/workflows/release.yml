@@ -11,7 +11,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: action/checkout@latest
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Check out the repository under $GITHUB_WORKSPACE
+        uses: actions/checkout@v3
         with:
           submodules: 'recursive'
 
