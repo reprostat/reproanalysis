@@ -2,7 +2,8 @@ name: Create Release
 # Based on https://github.com/pytorch/pytorch/blob/main/.github/workflows/create_release.yml
 
 on:
-  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
   release:
@@ -34,8 +35,8 @@ jobs:
           tag_or_branch="${tag_or_branch#refs/heads/}"
           # replace directory separators with _ in branch name
           tag_or_branch="${tag_or_branch//\//_}"
-          echo "REPO_RELEASE_NAME=pytorch-$tag_or_branch" >> "$GITHUB_ENV"
-          echo "REPO_RELEASE_FILE=pytorch-$tag_or_branch.tar.gz" >> "$GITHUB_ENV"
+          echo "REPO_RELEASE_NAME=reproa-$tag_or_branch" >> "$GITHUB_ENV"
+          echo "REPO_RELEASE_FILE=reproa-$tag_or_branch.tar.gz" >> "$GITHUB_ENV"
 
       - name: Create source distribution
         run: |
