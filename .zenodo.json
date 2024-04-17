@@ -1,7 +1,7 @@
 {
     "name": "Reproducibility Analysis",
     "version": "0.1.0",
-    "date": "Jun 2023",
+    "date": "Apr 2024",
    	"manuscriptRef": "coming. coming. coming",
     "manuscriptURL": "http:\/\/doi.org",
     "url": "http:\/\/reproanalysis.github.io",
@@ -9,7 +9,7 @@
 
     "creators": [
         {
-            "affiliation": "University of Surrey",
+            "affiliation": "ReproImagine",
             "name": "Auer, Tibor",
             "orcid": "0000-0001-5153-1424"
         }
