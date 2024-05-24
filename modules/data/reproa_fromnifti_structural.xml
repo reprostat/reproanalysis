@@ -12,6 +12,7 @@
     <settings>
         <rejectimages></rejectimages>
         <sfxformodality desc='Colon separated substrings to look for in the filename. The order of the substrings corresponds to the order of streams'>T1w:T2w:PDw:FLAIR</sfxformodality>
+        <reorienttotemplate desc="reorient image to the MNI space">1</reorienttotemplate>
     </settings>
 
     <outputstreams>

@@ -1,9 +1,14 @@
-% AA module - structural from NIFTI
-
 function rap = reproa_fromnifti_structural(rap,command,subj)
 
     switch command
         case 'doit'
+            global reproacache;
+            global defaults
+            flagsCoreg = defaults.coreg.estimate;
+            flagsCoreg.cost_fun = 'ecc';
+            flagsReslice = defaults.realign.write;
+            flagsReslice.which = [1 0];
+
             allseries = getSeries(rap.acqdetails.subjects(subj).structural);
             allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(lookFor(allstreams,'header')) = [];
             sfxs = strsplit(getSetting(rap,'sfxformodality'),':');
@@ -56,24 +61,27 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
                     doUncompress = false;
                     if strcmp(spm_file(niftiFile,'ext'),'gz')
                         doUncompress = true;
-                        tmpDir = tempdir;
-                        gunzip(niftiFile,tmpDir);
-                        niftiFile = spm_file(niftiFile,'path',tmpDir,'ext','');
+                        gunzip(niftiFile,rap.internal.tempdir);
+                        niftiFile = spm_file(niftiFile,'path',rap.internal.tempdir,'ext','');
                     end
 
-                    V(s) = spm_vol(niftiFile);
-                    Y = spm_read_vols(V(s));
-
-                    if doUncompress, delete(niftiFile); end
-
-                    fn{s} = spm_file(niftiFile,'path',localPath,'suffix','_0001');
-                    V(s).fname = deblank(fn{s});
-                    V(s).n=[1 1];
-
                     if doAverage
-                        Ys = Ys + Y/numel(series);
+                        % Create copy to avoid overwriting raw data
+                        if ~doUncompress % images are already copied during uncompression
+                            copyfile(niftiFile,rap.internal.tempdir);
+                            niftiFile = spm_file(niftiFile,'path',rap.internal.tempdir);
+                        end
+
+                        sV = spm_vol(niftiFile);
+                        V(s) = sV(1);
+                        if s > 1 % coregister all subsequent images to the first
+                            x = spm_coreg(V(1),V(s),flagsCoreg);
+                            spm_get_space(V(s).fname, spm_matrix(x)\spm_get_space(V(s).fname));
+                            V(s) = spm_vol(V(s).fname); % update
+                        end
                     else
-                        spm_write_vol(V(s),Y);
+                        copyfile(niftiFile,localPath);
+                        fn{s} = spm_file(niftiFile,'path',localPath);
                     end
 
                     %% header
@@ -99,14 +107,22 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
                 end
 
                 if doAverage
-                    fn = fn{1};
-                    V = V(1);
-                    V.fname = fn;
-                    spm_write_vol(V,Ys);
+                    % reslice
+                    spm_reslice(V,flagsReslice);
+                    V(2:end) = cellfun(@spm_vol, spm_file({V(2:end).fname},'prefix',flagsReslice.prefix));
+
+                    % average and mask
+                    Y = spm_read_vols(V);
+                    mY = Y(:,:,:,1) == 0;
+                    Y = mean(Y,4);
+                    Y(mY) = 0;
+
+                    % save
+                    V = V(1); V.fname = spm_file(V.fname,'path',localPath,'prefix','mean'); V.descrip = 'average';
+                    spm_write_vol(V,Y);
+                    fn = V.fname;
                     header = header(1);
                 end
-
-                putFileByStream(rap,'subject',subj,stream,fn);
 
                 if ~all(cellfun(@isempty,header))
                     hdrfn = fullfile(localPath,[stream '_header.mat']);
@@ -117,7 +133,32 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
                     end
                     putFileByStream(rap,'subject',subj,[stream '_header'],hdrfn);
                 end
+
+                if getSetting(rap,'reorienttotemplate')
+                    if lookFor(sfxs{m},'t1','ignoreCase',true), bTimg = 'T1';
+                    elseif lookFor(sfxs{m},'t2','ignoreCase',true), bTimg = 'T2';
+                    elseif lookFor(sfxs{m},'pd','ignoreCase',true), bTimg = 'PD';
+                    elseif lookFor(sfxs{m},'flair','ignoreCase',true), bTimg = 'PD';
+                    else
+                        logging.warning('reorient to template is not implemented for %s images',sfxs{m});
+                    end
+                    sTimg = spm_file(rap.directoryconventions.SPMT1,'basename',bTimg);
+                    if ~exist(sTimg,'file'), sTimg = fullfile(spm('dir'), sTimg); end
+                    if ~exist(sTimg,'file'), logging.error('Couldn''t find template image %s.', sTimg); end
+                    sTimg = which(sTimg);
+
+                    % Coregister
+                    x = spm_coreg(sTimg, fn, flagsCoreg);
+                    M = spm_matrix(x);
+
+                    % Set the new space for the structural
+                    spm_get_space(fn, M\spm_get_space(fn));
+                end
+
+                putFileByStream(rap,'subject',subj,stream,fn);
+
             end
+
         case 'checkrequirements'
             allseries = getSeries(rap.acqdetails.subjects(subj).structural);
             allstreams = {rap.tasklist.currenttask.outputstreams.name}; allstreams(lookFor(allstreams,'header')) = [];
