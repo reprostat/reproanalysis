@@ -20,7 +20,7 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
                         rap = addReport(rap,sprintf('con%d',conInd),['HEAD=Contrast: ' conNames{conInd}]);
                     end
                     if ~isempty(rap.tasklist.currenttask.extraparameters)
-                        aadReport(rap,sprintf('con%d',conInd),sprintf('<h2>Branch: %s</h2>',...
+                        addReport(rap,sprintf('con%d',conInd),sprintf('<h2>Branch: %s</h2>',...
                             rap.tasklist.currenttask.extraparameters.rap.directoryconventions.analysisidsuffix(2:end)...
                             ));
                     end
@@ -52,6 +52,7 @@ function rap = reproa_firstlevelthreshold(rap,command,subj)
             fnCl = cell(1,numel(SPM.xCon));
             for c = 1:numel(SPM.xCon)
                 conName = strreps(SPM.xCon(c).name,{' ' ':' '>'},{'' '_' '-'});
+                logging.info(['Running - ' conName ' ...']);
                 STAT = SPM.xCon(c).STAT;
                 df = [SPM.xCon(c).eidf SPM.xX.erdf];
                 XYZ  = SPM.xVol.XYZ;
