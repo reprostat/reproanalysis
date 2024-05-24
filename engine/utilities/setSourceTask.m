@@ -1,4 +1,4 @@
-function k = getSourceTaskInd(rap,sourceMod,streamName)
+function rap = setSourceTask(rap,sourceMod,streamName)
 
 currTask = '';
 currTaskNum = rap.tasklist.currenttask.tasknumber;
@@ -36,5 +36,5 @@ else % based on stream name
     end
 end
 
-k = currTaskNum;
+rap = setCurrentTask(rap,'task',currTaskNum);
 
