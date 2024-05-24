@@ -85,7 +85,7 @@ switch command
 
         % - normalisation XFM
         stages = fieldnames(rap.tasksettings);
-        tpm = getSetting(setCurrenttask(rap,'task',getSourceTaskInd(rap,'reproa_segment')),'segmentation.tpm');
+        tpm = getSetting(setSourceTask(rap,'reproa_segment'),'segmentation.tpm');
         affine = spm_get_space(tpm)/spm_klaff(nifti(templateToStream),tpm);
         xfm = affine/spm_get_space(templateToStream);
         fnXFM = fullfile(getPathByDomain(rap,'study',[]),'dartel_templatetomni_xfm.mat');

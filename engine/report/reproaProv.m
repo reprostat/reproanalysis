@@ -189,7 +189,7 @@ classdef reproaProv < handle
                     else, sfx = '';
                     end
 
-                    currrap = setCurrenttask(this.rap,'task',taskInd,'subject',this.indices(1));
+                    currrap = setCurrentTask(this.rap,'task',taskInd,'subject',this.indices(1));
 
                     idAttr = {...
                         'rap',currrap,...
@@ -213,7 +213,7 @@ classdef reproaProv < handle
 
                     if isfield(inp,'path') && ~isempty(inp.path) % remote src --> add
                         dat = load(fullfile(inp.path,'rap.mat'));
-                        srcIDInd = this.addTask(inp.host,setCurrenttask(dat.rap,'task',inp.taskindex));
+                        srcIDInd = this.addTask(inp.host,setCurrentTask(dat.rap,'task',inp.taskindex));
                     else % local --> already added
                         idAttr = {...
                             'TaskName',currrap.tasklist.main(inp.taskindex).name,...

@@ -30,7 +30,7 @@ function rap = addFile(rap,domain,indices,streamName,files)
     end
 
     % Ensure stream
-    currrap = setCurrenttask(rap,'task',indTask);
+    currrap = setCurrentTask(rap,'task',indTask);
     if ~hasStream(currrap,streamName)
         rap = renameStream(rap,getTaskDescription(currrap,[],'taskname'),'output','append',streamName);
     end

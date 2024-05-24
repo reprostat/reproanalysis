@@ -38,7 +38,7 @@ function reportWorkflow(study,tasksToReport)
     rap.prov.doNotCheckInput = doNotCheckInput;
 
     % Main HTMLs and summaries
-    rap.report.main.fname=fullfile(rap.prov.studyPath,'report.html'); rap.report.fbase = spm_file(rap.report.main.fname,'basename');
+    rap.report.main.fname = fullfile(rap.prov.studyPath,'report.html'); rap.report.fbase = spm_file(rap.report.main.fname,'basename');
     rap.report.sub0.fname = spm_file(rap.report.main.fname,'suffix','_subjects');
     rap.report.subjDir = fullfile(fileparts(rap.report.main.fname),'report_subjects'); dirMake(rap.report.subjDir);
     rap.report.summaries = {};
@@ -99,7 +99,7 @@ function reportWorkflow(study,tasksToReport)
             if inRun
                 if depInd == 1, addReport(rap,reportStore,'<table><tr>'); end % Open session
                 addReport(rap,reportStore,'<td valign="top">');
-                addReport(rap,reportStore,['<h3>Run: ' getRunName(setCurrenttask(rap,'task',indTask),deps(depInd,2)) '</h3>']);
+                addReport(rap,reportStore,['<h3>Run: ' getRunName(setCurrentTask(rap,'task',indTask),deps(depInd,2)) '</h3>']);
                 if size(deps,2) >= 3 % Sub-run level
                     logging.error('NYI');
 %                    descSubSession = strrep(domaintree{3},'_',' '); descSubSession(1) = upper(descSubSession(1));

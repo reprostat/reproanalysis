@@ -31,7 +31,7 @@ function rap = reproa_scale_segmentations(rap, command, subj)
             % check for stream renaming at source
             streamSpec = rap.tasklist.currenttask.inputstreams(arrayfun(@(s) any(strcmp(s.name,'normalised_segmentations')),rap.tasklist.currenttask.inputstreams));
             streamName = cellstr(streamSpec.name);
-            srcrap = setCurrenttask(rap,'task',streamSpec.taskindex);
+            srcrap = setCurrentTask(rap,'task',streamSpec.taskindex);
             srcStreamName = cellstr(srcrap.tasklist.currenttask.outputstreams(arrayfun(@(s) any(strcmp(s.name,'normalised_segmentations')),srcrap.tasklist.currenttask.outputstreams)).name);
             if ~strcmp(streamName{1},srcStreamName{1})
                 logging.warning('Stream %s has been renamed at %s (source) to %s',streamName{1},srcrap.tasklist.currenttask.name,srcStreamName{1});
@@ -39,7 +39,7 @@ function rap = reproa_scale_segmentations(rap, command, subj)
                 logging.info([rap.tasklist.currenttask.name ' input stream: ''' srcStreamName{1} '''']);
             end
             % - update currenttask
-            rap = setCurrenttask(rap,'task',rap.tasklist.currenttask.tasknumber);
+            rap = setCurrentTask(rap,'task',rap.tasklist.currenttask.tasknumber);
 
             rap = passStreams(rap,{'segmentation_stats'});
     end

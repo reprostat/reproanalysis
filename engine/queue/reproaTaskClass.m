@@ -22,7 +22,7 @@ classdef reproaTaskClass
             this.indTask = indTask;
             this.indices = indices;
 
-            rap = setCurrenttask(rap,'task',this.indTask);
+            rap = setCurrentTask(rap,'task',this.indTask);
 
             % get dependency
             waitFor = {};

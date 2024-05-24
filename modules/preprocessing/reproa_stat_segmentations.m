@@ -9,7 +9,7 @@ function rap = reproa_stat_segmentations(rap, command, subj)
             segEst = char(getFileByStream(rap, 'subject',subj, 'segmentation_estimates'));
             res = load(segEst);
             % - update res
-            srcrap = setCurrenttask(rap,'task',getSourceTaskInd(rap,'reproa_segment'));
+            srcrap = setSourceTask(rap,'reproa_segment');
             for s = 1:numel(srcrap.tasklist.currenttask.inputstreams)
                 res.image(s) = spm_vol(char(getFileByStream(rap, 'subject',subj, srcrap.tasklist.currenttask.inputstreams(s).name)));
             end

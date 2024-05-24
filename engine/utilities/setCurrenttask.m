@@ -3,13 +3,13 @@
 % module-specific parameters (e.g., for branched workflows) by applying the
 % values in extraparameters.rap to the rap structure after setting it up
 %
-% function rap = setCurrenttask(rap,varargin)
-%  1. rap=setCurrenttask(rap) - resets rap to initial state as created by user script
-%  2. rap=setCurrenttask(...,'task',indTask) - sets rap structure (e.g., root path) to correspond to kth task in the tasklist
-%  3. rap=setCurrenttask(...,'updatedefaults',{'spm'}) - update tool defaults
-%  4. rap=setCurrenttask(...,'subject',subj) - sets subject specific selected session
+% function rap = setCurrentTask(rap,varargin)
+%  1. rap=setCurrentTask(rap) - resets rap to initial state as created by user script
+%  2. rap=setCurrentTask(...,'task',indTask) - sets rap structure (e.g., root path) to correspond to kth task in the tasklist
+%  3. rap=setCurrentTask(...,'updatedefaults',{'spm'}) - update tool defaults
+%  4. rap=setCurrentTask(...,'subject',subj) - sets subject specific selected session
 
-function [rap]=setCurrenttask(rap,varargin)
+function [rap]=setCurrentTask(rap,varargin)
 
 global reproacache;
 
