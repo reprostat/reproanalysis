@@ -36,6 +36,14 @@ function rap = reproa_firstlevelcontrasts(rap,command,subj)
             [nRuns, selectedRuns] = getNByDomain(rap, 'fmrirun', subj);
             runNames = {rap.acqdetails.fmriruns(selectedRuns).name};
 
+            % Check runs consitency between modelling and contrasting
+            modelrap = setSourceTask(rap,'reproa_firstlevelmodel');
+            [nModelRuns, selectedModelRuns] = getNByDomain(modelrap, 'fmrirun', subj);
+            if (nRuns ~= nModelRuns) || ~isequal(selectedRuns,selectedModelRuns)
+                logging.error(['Inconsistent run selection between ' getTaskDescription(rap,[],'taskname') ' and '
+                               getTaskDescription(modelrap,[],'taskname') '.' ]);
+            end
+
             % Load up contrasts from task settings
             contrasts = getSetting(rap,'contrast','subject',subj);
             if ~isempty(contrasts), contrasts = contrasts.con; end
@@ -84,7 +92,7 @@ function rap = reproa_firstlevelcontrasts(rap,command,subj)
                     case {'*','runs'}
                         runCon = zeros(1,nRuns);
                         if strcmp(contrasts(cInd).format,'*')
-                            runCon(selectedRuns) = 1;
+                            runCon(nRuns) = 1;
                         else
                             [~,indRun] = intersect(runNames,contrasts(cInd).fmrirun.names);
                             if numel(indRun) ~= numel(contrasts(cInd).fmrirun.names), logging.error('Run names in the contrast specification do not match with those of the workflow'); end
@@ -92,9 +100,8 @@ function rap = reproa_firstlevelcontrasts(rap,command,subj)
                         end
 
                         convec=[];
-                        for indRunInSPM = 1:numel(selectedRuns)
-                            indRun = selectedRuns(indRunInSPM);
-                            nRegInRun = numel(SPM.Sess(indRunInSPM).col);
+                        for indRun = 1:nRuns
+                            nRegInRun = numel(SPM.Sess(indRun).col);
                             if runCon(indRun)
                                 if isnumeric(contrasts(cInd).vector) % contrast vector
                                     if size(contrasts(cInd).vector,2) > nRegInRun
@@ -105,7 +112,7 @@ function rap = reproa_firstlevelcontrasts(rap,command,subj)
                                         convec = [convec runCon(indRun)*contrasts(cInd).vector];
                                     end
                                 elseif ischar(contrasts(cInd).vector) || iscell(contrasts(cInd).vector) % (cell)string
-                                    regInRun = SPM.xX.name(lookFor(SPM.xX.name, sprintf('Sn(%d)',indRunInSPM)) & ~lookFor(SPM.xX.name, 'constant'));
+                                    regInRun = SPM.xX.name(lookFor(SPM.xX.name, sprintf('Sn(%d)',indRun)) & ~lookFor(SPM.xX.name, 'constant'));
                                     if numel(regInRun) ~= nRegInRun, logging.error('Mismatch between regressors and number of columns in run %d', indRun); end % this should never been triggered
                                     convec = [convec contrastSpecificationToContrastVector(regInRun,contrasts(cInd).vector,runCon(indRun))];
                                 else

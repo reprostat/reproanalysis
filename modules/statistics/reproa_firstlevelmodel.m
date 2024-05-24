@@ -4,7 +4,7 @@ switch command
     case 'report'
         reportStore = sprintf('sub%d',subj);
         addReport(rap,reportStore,'<h4>Masking</h4>');
-        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_mask_' spm_file(char(getFileByStream(rap,'fmrirun',[subj 1],'fmri','checkHash',false)),'basename') '.*\.jpg$']),'displayFileName',false);
+        rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*_mask_.*[^(mask)]\.jpg$']),'displayFileName',false);
 
         addReport(rap,reportStore,'<h4>Model</h4>');
         rap = addReportMedia(rap,reportStore,spm_select('FPList',getPathByDomain(rap,'subject',subj),['^diagnostic_' mfilename '.*design\.jpg$']),'displayFileName',false);
@@ -38,7 +38,7 @@ switch command
             % Images and timings
             fns = getFileByStream(rap,'fmrirun',[subj runInds(run)],'fmri');
             V = spm_vol(fns{1});
-            files{run} = arrayfun(@(n) spm_file(fns,'number',[',' num2str(V(n).n(1))]), 1:numel(V));
+            files{run} = reshape(arrayfun(@(n) spm_file(fns,'number',[',' num2str(V(n).n(1))]), 1:numel(V)),[],1);
             headerFn = getFileByStream(rap,'fmrirun',[subj runInds(run)],'fmri_header');
             load(headerFn{1},'header');
             if run == 1, TR = header{1}.volumeTR;
@@ -57,9 +57,9 @@ switch command
             end
 
             % Models
-            model{run} = getSetting(rap,'model','fmrirun',[subj run]);
+            model{run} = getSetting(rap,'model','fmrirun',[subj runInds(run)]);
             if ~isempty(model{run}), model{run} = model{run}.event; end
-            modelC{run} = getSetting(rap,'modelC','fmrirun',[subj run]);
+            modelC{run} = getSetting(rap,'modelC','fmrirun',[subj runInds(run)]);
             if ~isempty(modelC{run}), modelC{run} = modelC{run}.covariate; end
 
             % Nuisance regressors
