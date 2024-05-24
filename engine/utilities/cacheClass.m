@@ -62,6 +62,7 @@ classdef cacheClass < containers.Map
         function resp = subsref(this,idx)
             switch idx(1).type
                 case '()'
+                    if ~this.isKey(idx.subs{1}), error('cache has no item ''%s''',idx.subs{1}); end
                     idx.subs{1} = doHash(this.hashFunc,idx.subs{1});
                     resp = subsref@containers.Map(this,idx);
                     resp = resp.data;
