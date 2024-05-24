@@ -48,7 +48,13 @@ function rap = reproaWorkflow(varargin)
     rap.internal.tasklistFile = tasklistFile;
 
     % Read tasklist
-    tasks = readParameterset(tasklistFile);
+    if ischar(tasklistFile)
+        tasks = readParameterset(tasklistFile);
+    elseif iscell(tasklistFile)
+        tasks.module = readModuleList(tasklistFile);
+    else
+        logging.error('Unknown tasklist format');
+    end
     if ~isfield(tasks.module,'branch') % no branches
         modules = tasks.module';
     else % process branches
