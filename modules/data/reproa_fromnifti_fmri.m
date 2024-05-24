@@ -71,12 +71,12 @@ switch command
                 header{1}.volumeTE = header{1}.EchoTime/1000;
                 header{1}.slicetimes = header{1}.SliceTiming/1000;
                 % - calculate slice order based on slice times (also considering multiband)
-                sltimes_sorted = sort(header{1}.slicetimes); [~, slorder] = ismember(header{1}.slicetimes,sltimes_sorted); 
+                sltimes_sorted = sort(header{1}.slicetimes); [~, slorder] = ismember(header{1}.slicetimes,sltimes_sorted);
                 slorder = slorder-(min(slorder))+1; % hack for octave
                 i = min(slorder);
                 while i ~= max(slorder)
                     if ismember(i,slorder), i = i + 1;
-                    else, slorder(slorder>i) = slorder(slorder>i) - 1; 
+                    else, slorder(slorder>i) = slorder(slorder>i) - 1;
                     end
                 end
                 header{1}.sliceorder = slorder;
@@ -91,9 +91,8 @@ switch command
         doUncompress = false;
         if strcmp(spm_file(niftiFile,'ext'),'gz')
             doUncompress = true;
-            tmpDir = tempdir;
-            gunzip(niftiFile,tmpDir);
-            niftiFile = spm_file(niftiFile,'path',tmpDir,'ext','');
+            gunzip(niftiFile,rap.internal.tempdir);
+            niftiFile = spm_file(niftiFile,'path',rap.internal.tempdir,'ext','');
         end
 
         V = spm_vol(niftiFile);
@@ -137,7 +136,7 @@ switch command
             for d = 1:numdummies
                 movefile(finalepis{d},dummypath);
             end
-            dummylist = finalepis(1:d);
+            dummylist = spm_file(finalepis(1:d),'path',dummypath);
         else
             d = 0;
         end
