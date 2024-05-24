@@ -163,9 +163,9 @@ for subj = SUBJ
                         logging.warning('subj-%s/ses-%s has no %s',subj{1},SESS{sessInd},task{1});
                         continue;
                     end
-                    hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','bold', 'task',task{1}, 'run',run{1}); if isempty(fieldnames(hdr)), hdr = []; end
+                    hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','bold', 'task',task{1}, 'run',run{1}); if isempty(hdr), hdr = []; end
                     eventfile = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','events', 'task',task{1}, 'run',run{1});
-                    hdrEvent = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','events', 'task',task{1}, 'run',run{1}); if isempty(fieldnames(hdrEvent)), hdrEvent = []; end
+                    hdrEvent = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','events', 'task',task{1}, 'run',run{1}); if isempty(hdrEvent), hdrEvent = []; end
 
                     if BIDSsettings.combinemultiple
                         fmriimages = horzcat(fmriimages,struct('fname',image{1},'hdr',hdr));
