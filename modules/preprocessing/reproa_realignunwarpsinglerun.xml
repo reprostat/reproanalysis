@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rap>
-    <header mfile="reproa_realign" domain="subject" desc="SPM motion and distortion correction" modality="FMRI"/>
+    <header mfile="reproa_realign" domain="fmrirun" desc="SPM motion and distortion correction of a single run" modality="FMRI"/>
 
     <hpc>
         <timeBase>1</timeBase>
@@ -58,6 +58,7 @@
     </settings>
 
     <inputstreams>
+        <stream domain="fmrirun" isessential="0" isrenameable="1" tobemodified="1">weighting_image</stream>
         <stream domain="fmrirun" tobemodified="0">fieldmap</stream>
         <stream domain="fmrirun" tobemodified="1">fmri</stream>
     </inputstreams>

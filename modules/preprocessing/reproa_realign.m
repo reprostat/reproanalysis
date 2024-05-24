@@ -1,24 +1,35 @@
 % realignment
 
-function rap = reproa_realign(rap,command,subj)
+function rap = reproa_realign(rap,command,varargin)
+
+indices = cell2mat(varargin);
+subj = indices(1);
+if numel(indices) < 2 % subject-level
+    runs = rap.acqdetails.selectedruns;
+else % run-level
+    runs = indices(2);
+end
 
 switch command
     case 'report'
         reportStore = sprintf('sub%d',subj);
+        doInitSubject = (numel(indices) < 2 || indices(2) == rap.acqdetails.selectedruns(1));
+        doCloseSubject = (numel(indices) < 2 || indices(2) == rap.acqdetails.selectedruns(end));
 
-        if subj == 1 % init summary
+        if subj == 1 && doInitSubject % init summary
             rap.report.(mfilename).selectedruns = zeros(1,0);
             rap.report.(mfilename).mvmax = nan(getNByDomain(rap,'subject'),getNByDomain(rap,'fmrirun'),6);
         end
         rap.report.(mfilename).selectedruns = union(rap.report.(mfilename).selectedruns,rap.acqdetails.selectedruns);
 
-        mvmean=[];
-        mvmax=[];
-        mvstd=[];
-        mvall=[];
+        if doInitSubject
+            rap.report.(mfilename).mvall = [];
+            rap.report.(mfilename).mvstd = [];
+            addReport(rap,reportStore,'<table><tr>');
+        end
 
-        addReport(rap,reportStore,'<table><tr>');
-        for run=rap.acqdetails.selectedruns
+        for run = runs
+            indRun = find(rap.acqdetails.selectedruns==run);
             runName = rap.acqdetails.fmriruns(run).name;
             addReport(rap,reportStore,'<td>');
             addReport(rap,reportStore,['<h3>Run: ' runName '</h3>']);
@@ -28,9 +39,9 @@ switch command
             parFn = getFileByStream(rap,'fmrirun',[subj run],'movementparameters');
             mv = load(parFn{1});
 
-            rap.report.(mfilename).mvmax(subj,run,:) = max(mv);
-            mvstd(end+1,:) = std(mv);
-            mvall = [mvall; mv];
+            rap.report.(mfilename).mvmax(subj,indRun,:) = max(mv);
+            rap.report.(mfilename).mvstd(indRun,:) = std(mv);
+            rap.report.(mfilename).mvall = [rap.report.(mfilename).mvall; mv];
 
             addReport(rap,reportStore,'<h3>Movement maximums</h3>');
             addReport(rap,reportStore,'<table cellspacing="10">');
@@ -42,26 +53,34 @@ switch command
 
             addReport(rap,reportStore,'</td>');
         end
-        addReport(rap,reportStore,'</tr></table>');
 
-        varcomp = mean((std(mvall).^2)./(mean(mvstd.^2)));
-        addReport(rap,reportStore,'<h3>All variance vs. within run variance</h3><table><tr>');
-        addReport(rap,reportStore,sprintf('<td>%8.3f</td>',varcomp));
-        addReport(rap,reportStore,'</tr></table>');
+        if doCloseSubject
+            addReport(rap,reportStore,'</tr></table>');
+            varcomp = mean((std(rap.report.(mfilename).mvall).^2)./...
+                           (mean(rap.report.(mfilename).mvstd.^2)));
+            addReport(rap,reportStore,'<h3>All variance vs. within run variance</h3><table><tr>');
+            addReport(rap,reportStore,sprintf('<td>%8.3f</td>',varcomp));
+            addReport(rap,reportStore,'</tr></table>');
+        end
+
 
 		% Summary in case of more subjects
         if getNByDomain(rap,'subject') == 1
             addReport(rap,'moco','<h4>No summary is generated: there is only one subject in the workflow</h4>');
         elseif subj == numel(rap.acqdetails.subjects) % last subject
-            meas = {'Trans - x','Trans - y','Trans - z','Pitch','Roll','Yaw'};
 
-            addReport(rap,'moco',['<h2>Task: ' getTaskDescription(rap,subj,'taskname') '</h2>']);
-            addReport(rap,'moco','<table><tr>');
+            if doInitSubject
+                meas = {'Trans - x','Trans - y','Trans - z','Pitch','Roll','Yaw'};
 
-            for run = rap.report.(mfilename).selectedruns
+                addReport(rap,'moco',['<h2>Task: ' getTaskDescription(rap,1,'taskname') '</h2>']);
+                addReport(rap,'moco','<table><tr>');
+            end
+
+            for run = runs
+                indRun = find(rap.acqdetails.selectedruns==run);
 				fn = fullfile(getPathByDomain(rap,'study',[]),['diagnostic_' mfilename '_' rap.acqdetails.fmriruns(run).name '.jpg']);
 
-                mvmax = squeeze(rap.report.(mfilename).mvmax(:,run,:));
+                mvmax = squeeze(rap.report.(mfilename).mvmax(:,indRun,:));
 
                 % Boxplot implementation is different in MATLAB and OCATVE -> manual approach
                 whisker = 1.5; % Q3+1.5*IQR (we care only for extra large outliers)
@@ -109,7 +128,7 @@ switch command
 
                 addReport(rap,'moco','</td>');
             end
-            addReport(rap,'moco','</tr></table>');
+            if doCloseSubject, addReport(rap,'moco','</tr></table>'); end
         end
     case 'doit'
         estFlags = getSetting(rap,'eoptions');
@@ -117,59 +136,49 @@ switch command
         resFlags = getSetting(rap,'roptions');
         resFlags.which = [getSetting(rap,'reslicewhich') getSetting(rap,'writemean')];
 
-        imgs = arrayfun(@(r) getFileByStream(rap,'fmrirun',[subj,r],'fmri'), rap.acqdetails.selectedruns);
+        imgs = getFileByStream(rap,rap.tasklist.currenttask.domain,indices,'fmri');
 
-        % Check if we are using a weighting image
+        % Check if we are using a weighting image (only for domain == 'fmrirun')
         if hasStream(rap,'weighting_image')
+            if ~strcmp(rap.tasklist.currenttask.domain,'fmrirun')
+                logging.error('Using weighting image is supported only in ''fmrirun'' domain!');
+            end
 
-            wImgFile = getFileByStream(rap,'subject',subj,'weighting_image');
-            wVol = cell2mat(spm_vol(wImgFile));
+            wImgFile = getFileByStream(rap,rap.tasklist.currenttask.domain,indices,'weighting_image');
+            if numel(wImgFile) > 1, logging.error('Single weighing image is expected but %d found.',numel(wImgFile)); end
+            wImgFile = wImgFile{1};
+            wVol = spm_vol(wImgFile);
+            logging.info('Realignment is going to be weighted with:%s', wImgFile);
 
-            logging.info('Realignment is going to be weighted with:%s', sprintf('\n\t%s',wImgFile{:}));
-
+            global defaults
             % Use the first EPI as a space reference
-            rVol = spm_vol([imgs{1},',1']);
+            epiVol = spm_vol([imgs{1},',1']);
 
-            % Check if the dimensions and the orientation of the weighting
-            % image match that of the first EPI in the data set.  If not,
-            % we reslice the weighting image.
-            if ~isequal(wVol.mat, rVol.mat) || ~isequal(wVol.dim, rVol.dim)
-                spm_reslice([{rVol.fname}, wImgFile], struct('which',1, 'mean',0, 'interp',0, 'prefix','r'));
-                wImgFile = spm_file(wImgFile,'prefix','r');
-                wVol = cell2mat(spm_vol(wImgFile));
+            % Check if the weighting image(s) is/are aligned with the reference (first) EPI. If not, we coregister the
+            % weighting image(s).
+            if ~isequal(wVol.mat, epiVol.mat)
+                x = spm_coreg(rVol, wVol, defaults.coreg.estimate);
+                spm_get_space(wVol.fname, spm_matrix(x)\spm_get_space(wVol.fname));
+                wVol = spm_vol(wVol.fname);
+            end
+
+            % Check if the weighting image(s) has/have the same dimensions as the reference (first) EPI. If not, we
+            % reslice the weighting image(s).
+            flagsReslice = defaults.coreg.write;
+            flagsReslice.which = [1 0];
+            if ~isequal(wVol.dim, epiVol.dim)
+                spm_reslice([epiVol wVol],flagsReslice);
+                wVol = spm_vol(spm_file(wVol.fname,'prefix',flagsReslice.prefix));
             end
 
             % invert if needed
             if rap.tasklist.currenttask.settings.invertweighting
-                for v = reshape(wVol,1,[])
-                    wY = spm_read_vols(v);
-                    wY = 1./wY;
-                    spm_write_vol(v, wY);
-                end
+                wY = spm_read_vols(wVol);
+                wY = 1./wY;
+                spm_write_vol(wVol, wY);
             end
 
-            % combine if more than 1
-            if numel(wImgFile) > 1
-                % - coreg all images to the first
-                global defaults; flags = defaults.coreg.estimate;
-                flags.cost_fun = 'ncc'; % within-modality
-                x = spm_coreg(wImgFile{1}, wImgFile(2:end), flags);
-                for f = 2:numel(wImgFile)
-                    spm_get_space(wImgFile{f}, inv(spm_matrix(x(f-1,:)))*spm_get_space(wImgFile{f}));
-                end
-
-                % - average (coregistered) images
-                for f = 1:numel(wImgFile)
-                    wY(:,:,:,f) = spm_read_vols(spm_vol(wImgFile{f}));
-                end
-                wY = mean(wY,4);
-                v = spm_vol(wImgFile{1});
-                v.fname = fullfile(getPathByDomain(rap,'subject',subj),'meanWeight.nii');
-                spm_write_vol(v, wY);
-                wImgFile{1} = v.fname;
-            end
-
-            estFlags.weight = wImgFile{1};
+            estFlags.weight = wVol.fname;
         else
             estFlags.weight = '';
         end
@@ -179,7 +188,7 @@ switch command
         % Check if we are unwarping
         if isstruct(uwestFlags)
             job.data = [];
-            for r = rap.acqdetails.selectedruns
+            for r = runs
                 job.data(end+1).scans = getFileByStream(rap,'fmrirun',[subj,r],'fmri');
                 job.data(end).pmscan = getFileByStream(rap,'fmrirun',[subj,r],'fieldmap');
             end
@@ -195,19 +204,19 @@ switch command
         end
 
         %% Describe outputs
-        putFileByStream(rap,'subject',subj,'meanfmri',...
-                        spm_select('FPList',getPathByDomain(rap,'fmrirun',[subj,min(rap.acqdetails.selectedruns)]),'^mean.*.nii$'));
+        putFileByStream(rap,rap.tasklist.currenttask.domain,indices,'meanfmri',...
+                        spm_select('FPList',getPathByDomain(rap,'fmrirun',[subj,min(runs)]),'^mean.*.nii$'));
 
-        for run = rap.acqdetails.selectedruns
+        for run = runs
             logging.info('Working with run %d: %s', run, rap.acqdetails.fmriruns(run).name)
 
-            rimgs = imgs{rap.acqdetails.selectedruns==run};
+            rimgs = imgs{runs==run};
             if rap.tasklist.currenttask.settings.reslicewhich ~= 0, rimgs = spm_file(rimgs,'prefix',resFlags.prefix); end
             putFileByStream(rap,'fmrirun',[subj run],'fmri',rimgs);
 
             outpars = spm_select('FPList',getPathByDomain(rap,'fmrirun',[subj,run]),'^rp_.*.txt$');
 
-            % Sessionwise custom plot or MFP
+            % Runwise custom plot or MFP
             if isfield(rap.tasklist.currenttask.settings,'mfp') && rap.tasklist.currenttask.settings.mfp.run
                 logging.error('NYI');
 %                mw_mfp(outpars);
@@ -222,7 +231,7 @@ switch command
 %                end
             else
                 % Get the realignment transformations (it also includes between-run movement, unlike the rp-files)...
-                load(spm_file(imgs{rap.acqdetails.selectedruns==run},'ext','.mat'),'mat');
+                load(spm_file(imgs{runs==run},'ext','.mat'),'mat');
                 mocomat = [];
                 V1 = spm_vol(spm_file(imgs{1},'number',',1'));
                 for v = 2:size(mat,3), mocomat(v,:) = spm_imatrix(mat(:,:,v)/V1.mat); end
@@ -240,14 +249,11 @@ switch command
 
 			% FD
 			FD = [0;sum(abs(diff(load(outpars) * diag([1 1 1 50 50 50]))),2)];
-			fname = spm_file(imgs{rap.acqdetails.selectedruns==run},'prefix','fd_','ext','.txt');
+			fname = spm_file(imgs{runs==run},'prefix','fd_','ext','.txt');
 			save(fname,'FD','-ascii');
             putFileByStream(rap,'fmrirun',[subj run],'fd', fname);
 
         end
-
-    case 'checkrequirements'
-
 end
 end
 
