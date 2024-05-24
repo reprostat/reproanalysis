@@ -62,9 +62,6 @@ function rap = reproa_coregextended(rap,command,varargin)
                 doCoregOther = true;
                 runCoreg(mfMRIimg,Simg,getSetting(rap,'costfunction'),'Input to structural');
 
-                % Cleanup
-                % - remove (not-to-be-outputted) structural
-                delete(Simg);
                 % - revert initial structural-to-template tranformation
                 spm_get_space(mfMRIimg, inv(preMstruct)\spm_get_space(mfMRIimg));
 
@@ -72,9 +69,6 @@ function rap = reproa_coregextended(rap,command,varargin)
             else
                 runCoreg(Simg,mfMRIimg,getSetting(rap,'costfunction'),'Structural to Input');
 
-                % Cleanup
-                % - remove (not-to-be-outputted) coreg sample
-                delete(mfMRIimg);
                 % - revert initial example-to-template tranformation
                 spm_get_space(Simg, inv(preMfmri)\spm_get_space(Simg));
 
