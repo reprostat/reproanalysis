@@ -29,7 +29,8 @@ function rap = addReportMedia(rap,reportStore,fnAll,varargin)
             case {'.png', '.jpg', '.jpeg'}
                 reportStr = sprintf('<cite>%s</cite><img src',baseFn);
                 repClose = '><br>';
-                mediumSize = size(imread(fnMedium{1}));
+                mediumHdr = imfinfo(fnMedium{1});
+                mediumSize = [mediumHdr.Height mediumHdr.Width];
                 if scaling == 1 && (mediumSize(2) <= defWIDTH), scaling = 0; end
             case {'.avi' '.mp4'}
                 reportStr = '<a href';

@@ -37,6 +37,7 @@ function rap = registrationReport(rap,varargin)
         end
         img = getFileByStream(rap,domain,indices,s{1},'content',content,'checkHash',false);
         if isstruct(img), img = img.(content{1}); end
+        if numel(img) > 1, img = img(1); end % assume all aligned -> first only
         imgToReport = [ imgToReport ;...
             {['structural to ' s{1}]} ['^diagnostic_.*' spm_file(char(img),'basename') '.*\.jpg$'] ...
             ];
@@ -65,8 +66,10 @@ function rap = registrationReport(rap,varargin)
     if lookFor(varargin(selFlag),'addToSummary')
         % Initialise task report
         taskReportName = rap.tasklist.currenttask.name;
-        if ~isempty(rap.tasklist.currenttask.extraparameters)
-            taskReportName = [taskReportName rap.tasklist.main(indTask).extraparameters.rap.directoryconventions.analysisidsuffix];
+        if isstruct(rap.tasklist.currenttask.extraparameters) &&...
+            ~isempty(rap.tasklist.currenttask.extraparameters.rap.directoryconventions.analysisidsuffix)
+            taskReportName = [taskReportName
+                              rap.tasklist.currenttask.extraparameters.rap.directoryconventions.analysisidsuffix];
         end
         if ~any(strcmp(rap.report.norm.tasks,taskReportName))
             rap.report.norm.tasks{end+1} = taskReportName;
