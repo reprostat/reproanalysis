@@ -11,7 +11,7 @@
 
     <settings>
       <target desc="name of the registration target stream" options='structural|flair' ui='optionlist'>structural</target>
-      <reorienttotemplate desc="reorient all images to the MNI space">1</reorienttotemplate>
+      <costfunction desc="label of the cost function; for details see spm_coreg.m" options='mi|nmi|ecc|ncc' ui='optionlist'>nmi</costfunction>
     </settings>
 
     <inputstreams>

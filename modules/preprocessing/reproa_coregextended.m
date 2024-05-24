@@ -21,6 +21,7 @@ function rap = reproa_coregextended(rap,command,varargin)
             rap = registrationReport(rap,varargin{:});
 
         case 'doit'
+            % SPM config
             global reproacache
             SPM = reproacache('toolbox.spm');
             SPM.reload(true); % update defaults
@@ -42,41 +43,40 @@ function rap = reproa_coregextended(rap,command,varargin)
             Simg = getFileByStream(rap,'subject',subj,'structural');
             if numel(Simg) > 1, logging.error('Found more than 1 structural images. Make sure you set rap.options.autoidentifystructural correctly.'); end
             Simg = Simg{1};
-            if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),'structural') % preserve original image
-                copyfile(Simg,spm_file(Simg,'path',localPath,'basename','tmpStruct'));
-                Simg = spm_file(Simg,'path',localPath,'basename','tmpStruct');
+            if ~strcmp(rap.tasklist.currenttask.domain,'subject') % preserve original image
+                copyfile(Simg,rap.internal.tempdir);
+                Simg = spm_file(Simg,'path',rap.internal.tempdir);
             end
 
             % - coreg data
             mfMRIimg = getFileByStream(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),coregStream); mfMRIimg = mfMRIimg{1}; % use only the first
-            if ~getSetting(rap,'reorienttotemplate') && strcmp(getSetting(rap,'target'),coregStream) % preserve original image
-                copyfile(mfMRIimg,spm_file(mfMRIimg,'path',localPath,'basename','tmpCoreg'));
-                mfMRIimg = spm_file(mfMRIimg,'path',localPath,'basename','tmpCoreg');
+            if strcmp(getSetting(rap,'target'),coregStream) % preserve original image
+                copyfile(mfMRIimg,rap.internal.tempdir);
+                mfMRIimg = spm_file(mfMRIimg,'path',rap.internal.tempdir);
             end
 
-            preMstruct = runCoreg(Simg,sTimg,'Structural to template');
-            preMfmri = runCoreg(mfMRIimg,eTimg,'Input to template');
+            preMstruct = runCoreg(Simg,sTimg,'ecc','Structural to template');
+            preMfmri = runCoreg(mfMRIimg,eTimg,'ecc','Example to template');
             doCoregOther = false;
             if strcmp(getSetting(rap,'target'),'structural')
                 doCoregOther = true;
-                runCoreg(mfMRIimg,Simg,'Input to structural');
-                if getSetting(rap,'reorienttotemplate')
-                    putFileByStream(rap,'subject',subj,'structural',Simg);
-                else
-                    delete(Simg);
-                    spm_get_space(mfMRIimg, inv(preMstruct)*spm_get_space(mfMRIimg));
-                end
+                runCoreg(mfMRIimg,Simg,getSetting(rap,'costfunction'),'Input to structural');
+
+                % Cleanup
+                % - remove (not-to-be-outputted) structural
+                delete(Simg);
+                % - revert initial structural-to-template tranformation
+                spm_get_space(mfMRIimg, inv(preMstruct)\spm_get_space(mfMRIimg));
 
                 putFileByStream(rap,rap.tasklist.currenttask.domain,cell2mat(varargin),coregStream,mfMRIimg);
             else
-                runCoreg(Simg,mfMRIimg,'Structural to Input');
-                if getSetting(rap,'reorienttotemplate')
-                    putFileByStream(rap,'subject',subj,coregStream,mfMRIimg);
-                    doCoregOther = true;
-                else
-                    spm_get_space(Simg, inv(preMfmri)*spm_get_space(Simg));
-                    delete(mfMRIimg);
-                end
+                runCoreg(Simg,mfMRIimg,getSetting(rap,'costfunction'),'Structural to Input');
+
+                % Cleanup
+                % - remove (not-to-be-outputted) coreg sample
+                delete(mfMRIimg);
+                % - revert initial example-to-template tranformation
+                spm_get_space(Simg, inv(preMfmri)\spm_get_space(Simg));
 
                 putFileByStream(rap,'subject',subj,'structural',Simg);
             end
@@ -116,6 +116,13 @@ function rap = reproa_coregextended(rap,command,varargin)
             end
 
         case 'checkrequirements'
+            targetStream = getSetting(rap,'target');
+
+            % Sanity
+            if ~strcmp(rap.tasklist.currenttask.domain,'subject') && ~strcmp(targetStream,'structural')
+                logging.error('Coregistering (subject-level) structural to multiple (not subject-level) targets may lead to unpredictable outcome.');
+            end
+
             % Ensure that all (new) others are outputs
             for s = otherStream
                 if ~ismember(s{1},{rap.tasklist.currenttask.outputstreams.name})
@@ -125,40 +132,38 @@ function rap = reproa_coregextended(rap,command,varargin)
                 end
             end
 
-            % Remove target from outputs and others in the space space from inputs and outputs, if not to be reoriented.
-            if ~getSetting(rap,'reorienttotemplate')
-                targetStream = getSetting(rap,'target');
-                if ismember(targetStream,{rap.tasklist.currenttask.outputstreams.name})
-                    rap = renameStream(rap,rap.tasklist.currenttask.name,'output',targetStream,[]);
-                    logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,targetStream);
-                end
-                if ~strcmp(targetStream,'structural')
-                    for s = otherStream
-                        if ismember(s{1},{rap.tasklist.currenttask.inputstreams.name})
-                            rap = renameStream(rap,rap.tasklist.currenttask.name,'input',s{1},[]);
-                            logging.info('REMOVED: %s input stream: %s', rap.tasklist.currenttask.name,s{1});
-                        end
-                        if ismember(s{1},{rap.tasklist.currenttask.outputstreams.name})
-                            rap = renameStream(rap,rap.tasklist.currenttask.name,'output',s{1},[]);
-                            logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,s{1});
-                        end
+            % Remove target from outputs and others in the space space from inputs and outputs
+            if ismember(targetStream,{rap.tasklist.currenttask.outputstreams.name})
+                rap = renameStream(rap,rap.tasklist.currenttask.name,'output',targetStream,[]);
+                logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,targetStream);
+            end
+            if ~strcmp(targetStream,'structural')
+                for s = otherStream
+                    if ismember(s{1},{rap.tasklist.currenttask.inputstreams.name})
+                        rap = renameStream(rap,rap.tasklist.currenttask.name,'input',s{1},[]);
+                        logging.info('REMOVED: %s input stream: %s', rap.tasklist.currenttask.name,s{1});
+                    end
+                    if ismember(s{1},{rap.tasklist.currenttask.outputstreams.name})
+                        rap = renameStream(rap,rap.tasklist.currenttask.name,'output',s{1},[]);
+                        logging.info('REMOVED: %s output stream: %s', rap.tasklist.currenttask.name,s{1});
                     end
                 end
             end
     end
 end
 
-function M = runCoreg(inputImg,targetImg,desc)
+function M = runCoreg(inputImg,targetImg,costFunc,desc)
     global defaults
     flags = defaults.coreg.estimate;
+    flags.cost_fun = costFunc;
 
     % Coregister
     x = spm_coreg(targetImg, inputImg, flags);
-    M = inv(spm_matrix(x));
+    M = spm_matrix(x);
 
     % Set the new space for the structural
-    spm_get_space(inputImg, M*spm_get_space(inputImg));
+    spm_get_space(inputImg, M\spm_get_space(inputImg));
 
     % Report
-    logging.info('%s realignment parameters:\n\tx: %1.3f | y: %1.3f | z: %1.3f | p: %1.3f | r: %1.3f | j: %1.3f', desc, x(1:6))
+    logging.info('%s transformation estimates after using cost function ''%s'':\n\tx: %1.3f | y: %1.3f | z: %1.3f | p: %1.3f | r: %1.3f | j: %1.3f', desc, costFunc, x(1:6))
 end
