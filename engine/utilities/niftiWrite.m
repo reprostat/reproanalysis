@@ -4,7 +4,7 @@ function niftiWrite(V,Y)
     N           = nifti;
     N.dat       = file_array(V.fname,dim,V.dt);
     N.mat       = V.private.mat;
-    N.mat0      = V.private.mat;
+    N.mat0      = V.private.mat0;
     N.descrip   = V.descrip;
     create(N);
 
