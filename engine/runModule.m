@@ -1,5 +1,7 @@
 function rap = runModule(rap,indTask,command,indices,varargin)
 
+    TEMPBASE = fullfile(tempdir,'reproa-');
+
     global reproaworker
     global reproacache
 
@@ -32,10 +34,19 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     if ~isa(reproaworker,'workerClass'), logging.error('Cannot find reproaworker. When deployed, reproaworker MUST be provided'); end
 
     % load task
-    if ~isfield(rap.tasklist,'currenttask'), rap = setCurrenttask(rap,'task',indTask); end
+    if ~isfield(rap.tasklist,'currenttask'), rap = setCurrentTask(rap,'task',indTask); end
     taskDescription = getTaskDescription(rap,indices);
 
     % prepare task
+    % - temp directory
+    if isfield(rap.internal,'tempdir') && exist(rap.internal.tempdir,'dir')
+        logging.warning('Temp directory ''%s'' found -> Deleting...',rap.internal.tempdir);
+        dirRemove(rap.internal.tempdir);
+    else
+        rap.internal.tempdir = [TEMPBASE char(randi(int8('az'),1,8))];
+    end
+    dirMake(rap.internal.tempdir);
+
     if indTask < 0 % initialisation
         logging.info('INITIALISATION - %s',taskDescription);
     else
@@ -82,9 +93,9 @@ function rap = runModule(rap,indTask,command,indices,varargin)
 
                 if isfield(s,'path') && ~isempty(s.path) % remote
                     dat = load(fullfile(s.path,'rap.mat'));
-                    srcrap = setCurrenttask(dat.rap,'task',s.taskindex);
+                    srcrap = setCurrentTask(dat.rap,'task',s.taskindex);
                 else
-                    srcrap = setCurrenttask(rap,'task',s.taskindex);
+                    srcrap = setCurrentTask(rap,'task',s.taskindex);
                 end
                 deps = getDependencyByDomain(rap,s.streamdomain,rap.tasklist.currenttask.domain,indices);
                 for d = 1:size(deps,1)
@@ -184,6 +195,9 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     rap = feval(rap.tasklist.currenttask.mfile,rap,command,ci{:});
     eTime = char(datetime-t0);
 
+    % cleanup
+    dirRemove(rap.internal.tempdir);
+
     % flag done (not for initialisation)
     if (indTask > 0) && strcmp(command,'doit')
         fid = fopen(fullfile(taskRoot,reproacache('doneflag')),'w');
@@ -192,5 +206,5 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     end
 
     % reset rap
-    rap = setCurrenttask(rap);
+    rap = setCurrentTask(rap);
 end
