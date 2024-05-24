@@ -40,9 +40,6 @@ rap.tasksettings.reproa_fromnifti_fmri.numdummies = 0;
 
 rap = renameStream(rap,'reproa_fieldmap2VDM_00001','input','fieldmap','dualtefieldmap');
 
-rap = renameStream(rap,'reproa_realignunwarp_00001','input','weighting_image','fmri_sd');
-rap.tasksettings.reproa_realignunwarp.invertweighting = 1;
-
 rap.tasksettings.reproa_slicetiming.useheader = 1;
 rap.tasksettings.reproa_slicetiming.refslice = 1;
 

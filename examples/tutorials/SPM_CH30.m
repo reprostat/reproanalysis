@@ -130,11 +130,6 @@ rap.directoryconventions.analysisid = RESULTS_DIR;
 rap.tasksettings.reproa_fromnifti_fmri.numdummies = 0;
 rap.acqdetails.input.correctEVfordummies = 0;
 
-% OPTIONAL - Although the SPM manual does not contain, we can use the temopral
-% SD of the run to weight realignment. SD images MUST be inverted
-rap = renameStream(rap,'reproa_realign_00001','input','weighting_image','fmri_sd');
-rap.tasksettings.reproa_realign.invertweighting = 1;
-
 % Since the workflow includes initial registration of the structural image, we
 % can leave it out during normalisation
 rap.tasksettings.reproa_segment.normalisation.affreg = '';

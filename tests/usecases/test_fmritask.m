@@ -1,8 +1,6 @@
 function test_fmritask(rap)
     rap.acqdetails.input.correctEVfordummies = 0;
-    rap = renameStream(rap,'reproa_realign_00001','input','weighting_image','fmri_sd');
-    rap.tasksettings.reproa_realign.invertweighting = 1;
-
+    
     rap.tasksettings.reproa_segment.normalisation.affreg = '';
 
     rap.tasksettings.reproa_smooth_fmri.FWHM = 6;
