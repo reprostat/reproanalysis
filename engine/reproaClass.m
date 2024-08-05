@@ -300,6 +300,11 @@ classdef reproaClass < toolboxClass
             global reproacache
             if ~isa(reproacache,'cacheClass'), logging.error('Cannot find reproacache. reproa is not initialised'); end
 
+            if reproacache.isKey(['toolbox.' tbx.name])
+                logging.warning('Toolbox %s already added', tbx.name);
+                return
+            end
+
             if ~exist([tbx.name 'Class'],'class'), logging.error('no interface class found for toolbox %s', tbx.name); end
             constr = str2func([tbx.name 'Class']);
 

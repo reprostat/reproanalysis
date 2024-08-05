@@ -36,7 +36,25 @@ function rap = reproaWorkflow(varargin)
             % - add toolboxes (if any)
             if isfield(rapExt.directoryconventions,'toolbox')
                 for tbx = reshape(rapExt.directoryconventions.toolbox,1,[])
-                    if isempty(tbx.dir), continue; end % unspecified
+                    if isempty(tbx.dir) % unspecified or uncustomised
+                        extXML = strsplit(fileread(paramExt),'\n');
+                        indName = find(lookFor(extXML, '>conn<'));
+                        indTbxStart = find(lookFor(extXML, '<toolbox'));
+                        indTbxEnd = find(lookFor(extXML, '</toolbox'));
+                        indLines = indTbxStart(find(indTbxStart<indName,1,'last')): ...
+                            indTbxEnd(find(indTbxEnd>indName,1,'first'));
+                        logging.warning(['Toolbox %s for extension %s is not configured\n' ...
+                            '\tYou need to add the corresponding toolbox entry in %s if you want to use it:\n\n' ...
+                            strjoin(strrep(extXML(indLines),'></dir','>add path here</dir'),'\n') ...
+                            '\n\n'], ...
+                            tbx.name, extName{1}, parametersetFile);
+                        continue;
+                    end
+                    if ~isfolder(tbx.dir), logging.error(['Toolbox %s for extension %s not found in %s\n' ...
+                        '\tYou may need to correct the corresponding toolbox entry in %s'], ...
+                        tbx.name, extName{1}, tbx.dir, parametersetFile); end
+                    end
+                    logging.info('Adding toolbox %s for extension %s', tbx.name, extName{1})
                     reproa.addReproaToolbox(tbx);
                 end
             end
