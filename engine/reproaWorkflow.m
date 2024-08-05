@@ -52,7 +52,7 @@ function rap = reproaWorkflow(varargin)
                     end
                     if ~isfolder(tbx.dir), logging.error(['Toolbox %s for extension %s not found in %s\n' ...
                         '\tYou may need to correct the corresponding toolbox entry in %s'], ...
-                        tbx.name, extName{1}, tbx.dir, parametersetFile); end
+                        tbx.name, extName{1}, tbx.dir, parametersetFile);
                     end
                     logging.info('Adding toolbox %s for extension %s', tbx.name, extName{1})
                     reproa.addReproaToolbox(tbx);
