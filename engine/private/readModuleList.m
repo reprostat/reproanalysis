@@ -1,5 +1,21 @@
 function modules = readModuleList(moduleList)
 
+% moduleList = {'reproa_fromnifti_structural';
+%               'reproa_fromnifti_fmri';
+%               'reproa_timeseriesqc_fmri';
+%               'reproa_realign';
+%               'reproa_coregextended';
+%               'reproa_segment';
+%               'reproa_normwrite_fmri';
+%               'reproa_smooth_fmri';
+%               'reproa_timeseriesqc_fmri'};
+% moduleList{end+1,2} = {'_fingerfootlips' 'fingerfootlips' {'reproa_firstlevelmodel';
+%                                                            'reproa_firstlevelcontrasts';
+%                                                            'reproa_firstlevelthreshold'};
+%                        '_linebisection' 'linebisection' {'reproa_firstlevelmodel';
+%                                                          'reproa_firstlevelcontrasts';
+%                                                          'reproa_firstlevelthreshold'}};
+
 switch size(moduleList,2)
     case 1 % simple
         modules = cell2struct(moduleList,'name',2)';
