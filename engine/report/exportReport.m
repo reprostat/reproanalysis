@@ -8,9 +8,9 @@ function exportReport(studyPath, target)
     load(fullfile(studyPath,'rap_reported.mat'),'rap');
     oldRoot = fullfile(rap.acqdetails.root,rap.directoryconventions.analysisid);
 
-    copyfile(fullfile(oldRoot,'rap_*'),target);
+    copyfile(fullfile(studyPath,'rap_*'),target);
     for fn = reshape(rap.report.attachment,1,[])
-        copyfile(fn{1},mediaDir);
+        copyfile(strrep(fn{1},oldRoot,studyPath),mediaDir);
     end
 
     reportFields = fieldnames(rap.report);
@@ -36,7 +36,7 @@ function exportReport(studyPath, target)
                 relMedia = '../media/';
         end
 
-        content = strrep(fileread(rap.report.(html{1}).fname),'\','/');
+        content = strrep(fileread(strrep(rap.report.(html{1}).fname,oldRoot,studyPath)),'\','/');
         content = regexprep(content,['(?<=href=")' strrep(oldRoot,'\','/')],relTarget);
         content = regexprep(content,'(?<=src=")[a-zA-Z0-9-_:\\/]*(?=diagnostic)',relMedia);
 
