@@ -104,38 +104,41 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
                         end
                     end
                     if isempty(header{s}), logging.warning('No header found!'); end
-                
-                    if doAverage
-                        % reslice
-                        spm_reslice(V,flagsReslice);
-                        V(2:end) = cellfun(@spm_vol, spm_file({V(2:end).fname},'prefix',flagsReslice.prefix));
+                end
 
-                        % average and mask
-                        Y = spm_read_vols(V);
-                        mY = Y(:,:,:,1) == 0;
-                        Y = mean(Y,4);
-                        Y(mY) = 0;
+                if doAverage
+                    % reslice
+                    spm_reslice(V,flagsReslice);
+                    V(2:end) = cellfun(@spm_vol, spm_file({V(2:end).fname},'prefix',flagsReslice.prefix));
 
-                        % save
-                        V = V(1); V.fname = spm_file(V.fname,'path',localPath,'prefix','mean'); V.descrip = 'average';
-                        spm_write_vol(V,Y);
-                        fn{s} = V.fname;
-                        header = header(1);
+                    % average and mask
+                    Y = spm_read_vols(V);
+                    mY = Y(:,:,:,1) == 0;
+                    Y = mean(Y,4);
+                    Y(mY) = 0;
+
+                    % save
+                    V = V(1); V.fname = spm_file(V.fname,'path',localPath,'prefix','mean'); V.descrip = 'average';
+                    spm_write_vol(V,Y);
+                    fn{1} = V.fname; fn(2:end) = [];
+                    header = header(1);
+                end
+
+                if getSetting(rap,'reorienttotemplate')
+                    if lookFor(sfxs{m},'t1','ignoreCase',true), bTimg = 'T1';
+                    elseif lookFor(sfxs{m},'t2','ignoreCase',true), bTimg = 'T2';
+                    elseif lookFor(sfxs{m},'pd','ignoreCase',true), bTimg = 'PD';
+                    elseif lookFor(sfxs{m},'flair','ignoreCase',true), bTimg = 'PD';
+                    else
+                        logging.warning('reorient to template is not implemented for %s images',sfxs{m});
+                        continue
                     end
+                    sTimg = spm_file(rap.directoryconventions.SPMT1,'basename',bTimg);
+                    if ~exist(sTimg,'file'), sTimg = fullfile(spm('dir'), sTimg); end
+                    if ~exist(sTimg,'file'), logging.error('Couldn''t find template image %s.', sTimg); end
+                    sTimg = which(sTimg);
 
-                    if getSetting(rap,'reorienttotemplate')
-                        if lookFor(sfxs{m},'t1','ignoreCase',true), bTimg = 'T1';
-                        elseif lookFor(sfxs{m},'t2','ignoreCase',true), bTimg = 'T2';
-                        elseif lookFor(sfxs{m},'pd','ignoreCase',true), bTimg = 'PD';
-                        elseif lookFor(sfxs{m},'flair','ignoreCase',true), bTimg = 'PD';
-                        else
-                            logging.warning('reorient to template is not implemented for %s images',sfxs{m});
-                        end
-                        sTimg = spm_file(rap.directoryconventions.SPMT1,'basename',bTimg);
-                        if ~exist(sTimg,'file'), sTimg = fullfile(spm('dir'), sTimg); end
-                        if ~exist(sTimg,'file'), logging.error('Couldn''t find template image %s.', sTimg); end
-                        sTimg = which(sTimg);
-
+                    for s = 1:numel(fn)
                         % Coregister
                         x = spm_coreg(sTimg, fn{s}, flagsCoreg);
                         M = spm_matrix(x);
@@ -153,7 +156,7 @@ function rap = reproa_fromnifti_structural(rap,command,subj)
                         save(hdrfn,'header');
                     end
                     putFileByStream(rap,'subject',subj,[stream '_header'],hdrfn);
-                end                
+                end
 
                 putFileByStream(rap,'subject',subj,stream,fn);
             end
