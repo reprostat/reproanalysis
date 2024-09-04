@@ -15,6 +15,13 @@ if argParse.Results.ignoreEmpty
     sUpd = rmfield(sUpd,fields(isEmpty));
 end
 
+% Struct array -> no exact solution
+if numel(sIn) + numel(sUpd) > 2
+    warning('No exact solution implemented for struct arrays -> skipped');
+    sOut = sIn;
+    return
+end
+
 % Nested structs
 fields = fieldnames(sIn);
 isStructField = cellfun(@(f) isstruct(sIn.(f)) & isfield(sUpd, f), fields);
