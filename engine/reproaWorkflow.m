@@ -36,7 +36,12 @@ function rap = reproaWorkflow(varargin)
             % - add toolboxes (if any)
             if isfield(rapExt.directoryconventions,'toolbox')
                 for tbx = reshape(rapExt.directoryconventions.toolbox,1,[])
-                    if isempty(tbx.dir) % unspecified or uncustomised
+                    if isempty(tbx.dir) % unspecified or uncustomised -> check main config
+                        if ismember(tbx.name,{rap.directoryconventions.toolbox.name})
+                            tbx = rap.directoryconventions.toolbox(strcmp({rap.directoryconventions.toolbox.name},tbx.name));
+                        end
+                    end
+                    if isempty(tbx.dir) % still unspecified or uncustomised
                         extXML = strsplit(fileread(paramExt),'\n');
                         indName = find(lookFor(extXML, '>conn<'));
                         indTbxStart = find(lookFor(extXML, '<toolbox'));
