@@ -83,7 +83,7 @@ rap.directoryconventions.subjectdirectoryformat = 3;
 rap.directoryconventions.subjectoutputformat = 'sub-%s';
 
 % - ensure that models (if any) use seconds
-if isfield(rap.tasksettings,'reproa_firstlevelmodel') && ~BIDSsettings.omitModeling
+if isfield(rap,'tasksettings') && isfield(rap.tasksettings,'reproa_firstlevelmodel') && ~BIDSsettings.omitModeling
     for m = 1:numel(rap.tasksettings.reproa_firstlevelmodel)
         rap.tasksettings.reproa_firstlevelmodel(m).xBF.UNITS  ='secs';
     end
@@ -113,13 +113,14 @@ for subj = SUBJ
     else
         structuralimages = repmat({{}},1,numel(SESS));
         fmriimages = repmat({{}},1,numel(SESS));
+        meegimages = repmat({{}},1,numel(SESS));
         fieldmapimages = repmat({{}},1,numel(SESS));
         diffusionimages = repmat({{}},1,numel(SESS));
         specialimages = repmat({{}},1,numel(SESS));
     end
 
     % anat
-    if ismember('anat',MODs)
+    if ismember('anat',MODs) && ismember('reproa_fromnifti_structural',{rap.tasklist.main.name})
         for sfx = intersect(strsplit(rap.tasksettings.reproa_fromnifti_structural.sfxformodality,':'), bids.query(BIDS, 'suffixes', 'modality', 'anat'),'stable')
             for sessInd = 1:numel(SESS)
                 image = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix',sfx{1});
@@ -138,7 +139,7 @@ for subj = SUBJ
     end
 
     % fmri
-    if ismember('func',MODs) && ismember('bold',SFXs)
+    if ismember('func',MODs) && ismember('bold',SFXs) && ismember('reproa_fromnifti_fmri',{rap.tasklist.main.name})
         for task = bids.query(BIDS, 'tasks')
             for sessInd = 1:numel(SESS)
                 RUNS = bids.query(BIDS, 'runs', 'ses',SESS{sessInd}, 'task',task{1}); if isempty(RUNS), RUNS = {''}; end
@@ -238,7 +239,7 @@ for subj = SUBJ
     end
 
     % fieldmaps
-    if ismember('fmap',MODs)
+    if ismember('fmap',MODs) && ismember('reproa_fromnifti_fieldmap',{rap.tasklist.main.name})
         for sessInd = 1:numel(SESS)
             % dual-echo
             for fmap = reshape(bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'modality','fmap', 'suffix','phasediff'),1,[])
@@ -320,13 +321,63 @@ for subj = SUBJ
         end
     end
 
+    % eeg
+    if ismember('eeg',MODs) && ismember('eeg',SFXs) && ismember('reproa_getfile_meeg',{rap.tasklist.main.name})
+        for task = bids.query(BIDS, 'tasks')
+            for sessInd = 1:numel(SESS)
+                RUNS = bids.query(BIDS, 'runs', 'ses',SESS{sessInd}, 'task',task{1}); if isempty(RUNS), RUNS = {''}; end
+
+                for run = RUNS
+                    if ~isempty(run{1})
+                        taskname = [task{1} '-' run{1}];
+                    else
+                        taskname = task{1};
+                    end
+                    if BIDSsettings.combinemultiple && ~isempty(SESS{sessInd})
+                        taskname = [taskname '_' SESS{sessInd}];
+                    end
+
+                    % Skip?
+                    if ~isempty(rap.acqdetails.selectedruns) && ~any(strcmp({rap.acqdetails.meegrun(rap.acqdetails.selectedruns).name},taskname)), continue; end
+
+                    rap = addRun(rap, 'meeg', taskname);
+
+                    image = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix', 'eeg', 'task',task{1}, 'run',run{1});
+                    if isempty(image)
+                        logging.warning('subj-%s/ses-%s has no %s',subj{1},SESS{sessInd},task{1});
+                        continue;
+                    end
+                    hdr = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','eeg', 'task',task{1}, 'run',run{1}); if isempty(hdr), hdr = []; end;
+                    % - one hdr is returned for each file, and EEG may have more than one.
+                    if iscell(hdr), hdr = hdr{1}; end
+                    eventfile = bids.query(BIDS, 'data', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','events', 'task',task{1}, 'run',run{1});
+                    hdrEvent = bids.query(BIDS, 'metadata', 'sub',subj{1}, 'ses',SESS{sessInd}, 'suffix','events', 'task',task{1}, 'run',run{1}); if isempty(hdrEvent), hdrEvent = []; end
+
+                    if BIDSsettings.combinemultiple
+                        meegimages = horzcat(meegimages,struct('fname',image{1},'hdr',hdr));
+                    else
+                        meegimages{sessInd} = horzcat(meegimages{sessInd},struct('fname',image{1},'hdr',hdr));
+                    end
+
+                    if ~BIDSsettings.omitModeling
+                        subjname = subj{1};
+                        if ~BIDSsettings.combinemultiple && ~isempty(SESS{sessInd}), subjname = [subjname '_' SESS{sessInd}]; end
+
+                        % TODO: modelling
+                    end
+                end
+            end
+        end
+    end
+
     if BIDSsettings.combinemultiple
         rap = addSubject(rap,subj{1},...
             'name',subj{1},...
             'structural',structuralimages,...
             'fmri',fmriimages,...
-            'fieldmaps',fieldmapimages,...
+            'meeg',meegimages,...
             'diffusion',diffusionimages,...
+            'fieldmaps',fieldmapimages,...
             'specialseries',specialimages);
     else
         for sessInd = 1:numel(SESS)
@@ -337,8 +388,9 @@ for subj = SUBJ
                 'name',subjname,...
                 'structural',structuralimages{sessInd},...
                 'fmri',fmriimages{sessInd},...
-                'fieldmaps',fieldmapimages{sessInd},...
+                'meeg',meegimages{sessInd},...
                 'diffusion',diffusionimages{sessInd},...
+                'fieldmaps',fieldmapimages{sessInd},...
                 'specialseries',specialimages{sessInd});
         end
     end
