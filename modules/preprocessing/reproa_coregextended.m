@@ -28,7 +28,7 @@ function rap = reproa_coregextended(rap,command,varargin)
 
             % Check the template
             % - T1 template
-            sTimg = rap.directoryconventions.SPMT1;
+            sTimg = rap.directoryconventions.T1template;
             if ~exist(sTimg,'file'), sTimg = fullfile(spm('dir'), sTimg); end
             if ~exist(sTimg,'file'), logging.error('Couldn''t find template T1 image %s.', sTimg); end
             sTimg = which(sTimg);

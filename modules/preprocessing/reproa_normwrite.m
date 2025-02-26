@@ -138,7 +138,7 @@ function rap = reproa_normwrite(rap,command,varargin)
                     if isstruct(img), img = img.(content{s}{1}); end
                     fnImg{s} = spm_file(img{1},'number',',1');
                 end
-                Timg = rap.directoryconventions.SPMT1;
+                Timg = rap.directoryconventions.T1template;
                 if ~exist(Timg,'file'), Timg = fullfile(spm('dir'), Timg); end
                 if ~exist(Timg,'file'), logging.error('Couldn''t find template T1 image %s.', Timg); end
                 Timg = which(Timg);

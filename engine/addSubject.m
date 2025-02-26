@@ -143,7 +143,7 @@ if ~isempty(name) && ~isempty(rap.acqdetails.subjects(1).subjname)
     if subjserach
         subjind = subjserach;
         thissubj = rap.acqdetails.subjects(subjind);
-        iMRIData = numel(thissubj.mridata)+1;
+        iMRIData = numel(thissubj.subjid)+1;
         if isfield(thissubj,'meegdata'), iMEEGData = numel(thissubj.meegdata)+1; end
         for field=fields'
             thissubj.(field{1}){end+1}=[];
@@ -155,14 +155,14 @@ end
 try
     if iscell(data) && numel(data) == 2 % MEEG
         thissubj.meegdata{iMEEGData}=data{1};
-        thissubj.mridata{iMRIData}=data{2};
+        thissubj.subjid{iMRIData}=data{2};
         if isempty(name), name = getData(rap.directoryconventions.meegsubjectoutputformat,thissubj.meegdata{1}); end
     else % MRI
-        thissubj.mridata{iMRIData}=data;
-        if isempty(name), name = getData(rap.directoryconventions.subjectoutputformat,thissubj.mridata{1}); end
+        thissubj.subjid{iMRIData}=data;
+        if isempty(name), name = getData(rap.directoryconventions.subjectoutputformat,thissubj.subjid{1}); end
     end
 catch
-    logging.error('In addSubject, data is expected to be either single item, according to rap.directoryconventions.subjectoutputformat for MRI,\n\tor a cell of two items, according to rap.directoryconventions.subjectoutputformat and according to rap.directoryconventions.meegsubjectoutputformat for MEEG, written like this {''meegdata'',''mridata''}.');
+    logging.error('In addSubject, data is expected to be either single item, according to rap.directoryconventions.subjectoutputformat for MRI,\n\tor a cell of two items, according to rap.directoryconventions.subjectoutputformat and according to rap.directoryconventions.meegsubjectoutputformat for MEEG, written like this {''meegdata'',''subjid''}.');
 end
 thissubj.subjname = name;
 
@@ -191,8 +191,8 @@ if ~isempty(args.fmri)
                     fname = args.fmri{s};
                 end
 
-                % - try in rawdatadir/mridata
-                if ~exist(fname,'file'), fname = fullfile(findData(rap,'mri',thissubj.mridata{iMRIData}),fname); end
+                % - try in rawdatadir/subjid
+                if ~exist(fname,'file'), fname = fullfile(findData(rap,'mri',thissubj.subjid{iMRIData}),fname); end
                 if ~exist(fname,'file'), logging.error('File %s does not exist!',fname); end
 
                 V = spm_vol(fname);
@@ -240,7 +240,7 @@ if ~isempty(args.meeg)
         end
     end
     if ~isempty(MEEG) && any(cellfun(@(x) ~isempty(x), MEEG))
-        thissubj.meegseriesnumbers{iMEEGData}=MEEG;
+        thissubj.meegseries{iMEEGData}=MEEG;
     end
 end
 

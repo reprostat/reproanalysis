@@ -35,7 +35,7 @@ switch command
         niftiFile = imageFn;
         if ~iscell(niftiFile), niftiFile = {niftiFile}; end % 4D-NIFTI
         if ~exist(niftiFile{1},'file') % try path realtive to the subject's dir
-            niftisearchpth = findvol(rap,'mri',rap.acqdetails.subjects(subj).mridata);
+            niftisearchpth = findvol(rap,'mri',rap.acqdetails.subjects(subj).subjid);
             if ~isempty(niftisearchpth)
                 niftiFile = fullfile(niftisearchpth,niftiFile);
                 if ~exist(niftiFile{1},'file'), logging.error(['Image ' niftiFile{1} ' not found']); end

@@ -25,7 +25,7 @@ function rap = reproa_fromnifti_fieldmap(rap,command,subj,run)
             hdrFile = niftistruct.hdr;
             if ~exist(niftiFile{1},'file')
                 niftiFile = '';
-                for niftisearchpth = cellfun(@(d) findData(rap,'mri',d), rap.acqdetails.subjects(subj).mridata,'UniformOutput',false);
+                for niftisearchpth = cellfun(@(d) findData(rap,'mri',d), rap.acqdetails.subjects(subj).subjid,'UniformOutput',false);
                     niftiFile = fullfile(niftisearchpth{1},niftiFile);
                     if exist(niftiFile,'file'), break; end
                 end

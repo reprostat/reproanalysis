@@ -72,7 +72,7 @@ for r = numel(rap.acqdetails.input.remoteworkflow):-1:1 % ensure earlier connect
             end
         end
         rap.acqdetails.subjects(localSub).subjname = subj{1};
-        rap.acqdetails.subjects(localSub).mridata = subj; % emulate single visit
+        rap.acqdetails.subjects(localSub).subjid = subj; % emulate single visit
         remoteSub = find(strcmp(allRemoteSubjects,subj{1}));
 
         for t = runtypes

@@ -10,7 +10,7 @@ function [visitNum, seriesNum] = getSeriesNumber(rap,subj,varargin)
 
 
     outRun = run;
-    for visitNum = 1:numel(rap.acqdetails.subjects(subj).mridata)
+    for visitNum = 1:numel(rap.acqdetails.subjects(subj).subjid)
         currRuns = runs{visitNum};
         outRun = outRun - numel(currRuns);
         if outRun < 1

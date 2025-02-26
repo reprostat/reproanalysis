@@ -30,7 +30,7 @@
             <overlay>
                 <transparency>0</transparency>
                 <distancebetweenslices desc='in mm'>6</distancebetweenslices>
-                <background options='structural|FSLT1|SPMT1' ui='optionlist'>SPMT1</background>
+                <background options='structural|FSLT1|T1template' ui='optionlist'>T1template</background>
                 <description desc='Text description to be included on the images'></description>
             </overlay>
 	</settings>		

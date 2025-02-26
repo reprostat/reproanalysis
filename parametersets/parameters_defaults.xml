@@ -4,14 +4,14 @@
     <directoryconventions>
         <rawdatadir desc="Directory to find raw MRI data" ui="dir_list"></rawdatadir>
         <dicomfolderstructure desc="Dicom folder structure, 'flat' if all files in one directory (e.g., Robarts), 'series' if series in separate directory (e.g., CBU)" ui="text">flat</dicomfolderstructure>
-        <subjectoutputformat desc="sprintf formatting string to get subject data directory from number" ui="text">%s</subjectoutputformat>
-        <seriesoutputformat desc="sprintf formatting string to get series data directory from number" ui="text">Series_%03d*</seriesoutputformat>
+        <subjectoutputformat desc="sprintf formatting string to get subject data directory from subjid" ui="text">%s</subjectoutputformat>
+        <seriesoutputformat desc="sprintf formatting string to get series data directory from series number" ui="text">Series_%03d*</seriesoutputformat>
         <fieldmapprotocol ui="text">FieldMapping</fieldmapprotocol>
         <structuralprotocol ui="text">MPRAGE</structuralprotocol>
         <t2protocol ui="text">t2_spc</t2protocol>
         <dicomfilter ui="text">*.dcm</dicomfilter>
         <dicomconverter desc="Path to custom dicom converter MATLAB function and optional arguments (all separated with commas)" ui="text"></dicomconverter>
-        <SPMT1 desc="Location of SPM T1 template relative to SPM path" ui="dir">toolbox/OldNorm/T1.nii</SPMT1>
+        <T1template desc="Location of SPM T1 template relative to SPM path" ui="dir">toolbox/OldNorm/T1.nii</T1template>
         <render desc="Location of Single subject render mash" ui="dir">rend/render_single_subj.mat</render>
         <subjectdirectoryformat desc="Format of subject directory" ui="optionlist" options="from subjectdirectorynames|from data|S#|manual">3</subjectdirectoryformat>
         <subjectdirectorynames desc="List of predefined subject names" ui="custom"></subjectdirectorynames>
@@ -87,8 +87,8 @@
         <selectedruns desc="Allows subselection of a subset of series, usually during branching" ui="intarray"/>
 
         <subjects>
-            <subjname desc="Subject foldername" ui="dir"/>
-            <mridata desc="Subject MRI filename" ui="dir_part_allowwildcards"/>
+            <subjname desc="Subject foldername during the analysis" ui="dir"/>
+            <subjid desc="Subject foldername in the raw dataset" ui="dir_part_allowwildcards"/>
             <structural desc="Series number or filename for structural" ui="int"/>
             <wholebrainepi desc="Series number or filename for wholebrain EPI (for partial volume EPI)" ui="int"/>
             <fieldmaps desc="Series numbers or filename for fieldmaps" ui="intarray"/>
