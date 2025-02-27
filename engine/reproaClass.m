@@ -213,11 +213,15 @@ classdef reproaClass < toolboxClass
 
         function ignoreWarnings(this)
             noWarnings = {};
-            if isOctave(), noWarnings{end+1} = 'Octave:shadowed-function';
+            if isOctave()
+                noWarnings{end+1} = 'Octave:shadowed-function';
+                noWarnings{end+1} = 'backtrace';
             else, noWarnings{end+1} = 'MATLAB:dispatcher:nameConflict';
             end
             for w = noWarnings
-                this.warnings(end+1) = warning('query',w{1});
+                if ~ismember(w{1}, {this.warnings.identifier})
+                    this.warnings(end+1) = warning('query',w{1});
+                end
                 warning('off',w{1})
             end
         end
@@ -319,7 +323,7 @@ classdef reproaClass < toolboxClass
                 end
             end
             T = constr(tbx.dir,'name',tbx.name,params{:});
-            if strcmp(tbx.name,'spm'), T.setAutoLoad(); end % SPM is auto-loaded with ReproA
+            if strcmp(tbx.name,'spm'), T.setAutoLoad(); end % SPM is auto-loaded with reproa
             this.addToolbox(T);
             reproacache(['toolbox.' tbx.name]) = T;
         end
@@ -402,6 +406,10 @@ function create_minimalXML(seedparam,destination,analysisroot, rawdataroot, spmr
             spmdir = DOMnode.createElement('dir');
             spmdir.setAttribute('ui','dir_list');
             spmdir.appendChild(DOMnode.createTextNode(strrep(spmroot,filesep,'/')));
+            toolbox.appendChild(spmdir);
+
+            spmdir = DOMnode.createElement('extraparameters');
+            spmdir.setAttribute('ignorecheck','1');
             toolbox.appendChild(spmdir);
         end
     end

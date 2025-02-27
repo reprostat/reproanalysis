@@ -17,6 +17,10 @@ function rap = runModule(rap,indTask,command,indices,varargin)
     if isstruct(reproacache), reproacache = cacheClass(reproacache); end
     if isstruct(reproaworker), reproaworker = workerClass(reproaworker); end
 
+    % suppress warnings
+    reproa = reproacache('reproa');
+    reproa.ignoreWarnings;
+
     % if deployed and MATLAB -> create worker based on ENV
     if ischar(reproaworker)
         txt = getenv('PARALLEL_SERVER_STORAGE_LOCATION');
