@@ -18,7 +18,7 @@ jobs:
           git config --global core.eol lf
 
       - name: Check out the repository under $GITHUB_WORKSPACE
-        uses: actions/checkout@v3
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           submodules: 'recursive'
 
@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload source distribution
         if: ${{ github.event_name == 'release' }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           files: ${{env.REPO_RELEASE_FILE}}
 
