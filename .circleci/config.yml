@@ -44,8 +44,7 @@ commands:
             cd $GITHUB_WORKSPACE/.circleci
             cp << parameters.parameter_xml >> ~/.reproa/reproa_parameters_user.xml
             sudo apt update
-            sudo apt install python2 -y
-            sudo ln -s /usr/bin/python2 /usr/bin/python
+            sudo apt install python-is-python3 -y
             python trigger_install.py
             docker run --rm --network=host --env="HOME" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --workdir="$HOME/tools/spm12/src" docker.io/reprostat/octave:${OCTAVE_VERSION} make PLATFORM=octave
             docker run --rm --network=host --env="HOME" --volume="$HOME:$HOME:rw" --volume="/dev:/dev:rw" --workdir="$HOME/tools/spm12/src" docker.io/reprostat/octave:${OCTAVE_VERSION} make PLATFORM=octave install

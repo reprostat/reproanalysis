@@ -4,9 +4,7 @@ mkdir $TOOLDIR/config
 TEMPLATEDIR=$TOOLDIR/templates
 
 sudo apt update
-sudo apt install libtinfo5 libtinfo6 dc libxml2-utils graphviz -y
-curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o $TOOLDIR/get-pip.py
-python $TOOLDIR/get-pip.py --force-reinstall
+sudo apt install libtinfo6 dc libxml2-utils graphviz -y
 
 # All MATLAB tools MUST be installed referred by the parameterset
 source $GITHUB_WORKSPACE/.circleci/tools_urls.sh
