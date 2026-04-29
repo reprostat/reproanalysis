@@ -33,7 +33,7 @@ switch command
                 localFn{end+1,1} = fullfile(localPath, sprintf('%s_%01d%s',nme,nExist,ext)); % assume <10 copies
 
                 % - copy file
-                webSave(localFn{end},d.files{iFn});
+                urlwrite(d.files{iFn},localFn{end});
                 if getSetting(rap,'uncompress')
                     switch allExt{1}
                         case 'gz'

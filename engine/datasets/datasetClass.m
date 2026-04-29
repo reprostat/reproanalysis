@@ -26,8 +26,7 @@ classdef datasetClass
             % Download and unpack the data to a temp dir first
             if ~startsWith(this.type,'AWS')
                 tgz_filename = [tempname this.type];
-                options = weboptions; options.CertificateFilename = ('');
-                tgz_filename = webSave(tgz_filename, this.URL, options);
+                tgz_filename = urlwrite(this.URL, tgz_filename);
             else
                 this.type = strsplit(this.type,':');
                 switch numel(this.type)
